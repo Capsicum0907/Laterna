@@ -158,12 +158,12 @@ public enum Shape {
      * single box that gives both. So the size is asked for per face, and the model
      * generator and the outline both ask the same question.
      *
-     * <p>⚠ <b>This is the whole of the fitting, plate included, and not the lit part.</b>
-     * The lit part is two pixels smaller across, because the plate it is bolted to sticks
-     * out around it - so a fitting eight by four of light is ten by six of block. Sizing
-     * this to the light instead is what made the first version dark: the rim was taken out
-     * of the lamp rather than added around it, and at eight by four there was not enough
-     * lamp to take it out of.
+     * <p>⚠ <b>This is the whole of the form, and for a fitting it is the whole of the
+     * light too.</b> The fitting has no plate: the mod this follows builds it as one box
+     * eight by four by three, and there is no way to keep that outline and add a plate -
+     * inside it there is not enough lamp left to take a rim out of, and outside it the
+     * outline stops being eight by four. What makes theirs read as a fitting is drawn in
+     * the texture, not built out of boxes.
      *
      * <p>Everything else answers the same whichever face it is on, out of its depth and
      * its inset, and says so once here rather than in each of them.
@@ -171,7 +171,7 @@ public enum Shape {
     public Fit fit(Direction facing) {
         boolean flat = facing.getAxis() == Direction.Axis.Y;
         return switch (this) {
-            case FIXTURE -> flat ? new Fit(6.0, 6.0, 2.0) : new Fit(10.0, 6.0, 3.0);
+            case FIXTURE -> flat ? new Fit(4.0, 4.0, 2.0) : new Fit(8.0, 4.0, 3.0);
             case LAMP, SPOTLIGHT, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL, BULB ->
                     new Fit(16.0 - 2 * inset, 16.0 - 2 * inset, depth);
         };

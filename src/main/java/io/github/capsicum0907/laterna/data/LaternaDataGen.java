@@ -261,19 +261,23 @@ public final class LaternaDataGen {
             float wide = (float) fit.wide();
             float tall = (float) fit.tall();
             float deep = (float) fit.deep();
-            // The plate is the whole of the fitting against the surface; what glows stands
-            // out of the middle of it, a pixel in on every side - so the plate sticks out
-            // around the light rather than being taken out of it.
-            float[] base = box(wide, tall, 0, 1);
-            float[] lit = box(wide - 2, tall - 2, 1, deep);
+            // ⚠ A bulb is a base with a stem standing out of it - two boxes, and small
+            // enough that the base reads as a base. A fitting is one box that is all lamp:
+            // its outline is only eight by four, and a plate either eats the light from
+            // the inside or spoils the outline from the outside. Theirs is one box too.
+            boolean stemmed = shape == Shape.BULB;
+            float[] base = stemmed ? box(wide, tall, 0, 1) : null;
+            float[] lit = stemmed ? box(wide - 2, tall - 2, 1, deep) : box(wide, tall, 0, deep);
             BlockModelBuilder builder = models().getBuilder(skin
                     + (facing.getAxis() == Direction.Axis.Y ? "_flat" : ""))
                     .parent(new ModelFile.UncheckedModelFile("block/block"))
                     .texture("face", modLoc("block/" + skin))
                     .texture("edge", modLoc("block/" + skin + Masters.Layer.EDGE.suffix()))
                     .texture("particle", modLoc("block/" + skin));
-            part(builder, base, "#edge", true);
-            part(builder, lit, "#face", false);
+            if (base != null) {
+                part(builder, base, "#edge", true);
+            }
+            part(builder, lit, "#face", base == null);
             return builder;
         }
 

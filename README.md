@@ -73,7 +73,7 @@ and mixing the two kinds is what makes a scaffold stall.
 | **Vertical lamp panel** | **16** | **Done.** 4px, standing |
 | **Recessed spotlight** | 16 | **Done.** Zero thickness, a round lens in a grey ring |
 | **Bulb** | **16** | **Done.** A base and a narrow bulb standing out of it |
-| **Fixture** | **16** | **Done.** A bar on a wall, a disc on a floor, lit face raised |
+| **Fixture** | **16** | **Done.** A bar on a wall, a disc on a floor |
 | Rod | 16 | Strip light — needs a second state for which way it runs |
 | *Edge strip* | — | Deferred: shaping it to its neighbours needs a UI |
 | *Lamp post* | — | Deferred: three blocks that must stay consistent |
@@ -92,16 +92,17 @@ lamp cannot end up with a full-face hit box. ⚠ The spotlight was exactly that 
 looked at: drawn eight pixels across, outlined at the full sixteen, and catching the
 pointer anywhere near it.
 
-**A fitting is two parts: a plate against the surface, and the lit part raised out of it.**
-One box with a lit face on it is a tile stuck to a wall; a plate flush with the surface
-with something standing out of it is a lamp bolted to one.
+**A bulb is two parts: a base against the surface and a stem standing out of it.** One box
+with a lit face on it is a tile stuck to a wall; a plate flush with the surface with
+something standing out of it is a lamp bolted to one. At four by four there is room for
+both, because the base and the stem are different sizes rather than one inset in the other.
 
-⚠ **The plate goes around the light, not inside it.** The first version took the rim out of
-the lamp — a pixel in on every side — and at eight by four there was not enough lamp to
-take it out of: the light dropped to a third of the face and the whole thing read as small
-and dark. Sizing the *whole fitting* instead, with the light the size it should be and the
-plate two pixels larger around it, keeps both. It was not a choice between a housing and a
-bright light; it was the rim being on the wrong side of the edge.
+⚠ **The fitting is one box, and that took three tries to accept.** A rim inside it left
+too little lamp — eight by four minus a pixel each way is six by two, a third of the face.
+A plate outside it kept the light but made the outline ten by six, which is not the shape
+being matched. There is no third place to put a rim. Simply Light's is one box as well;
+what makes theirs read as a fitting is drawn into the texture — an atlas that every model
+crops its own piece out of by its own coordinates — rather than built out of boxes.
 
 **And a form may be a different size on a wall than on a floor.** The fitting is a wide
 bar where it is bolted to a wall and a small disc where it is set into a ceiling. ⚠ No
