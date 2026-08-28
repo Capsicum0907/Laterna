@@ -43,16 +43,16 @@ public final class Masters {
      *
      * <p>⚠ <b>Smaller than it was.</b> The first pass filled almost the whole face, which
      * read as a coloured block with a grey border rather than as a fitting set into a
-     * surface. Ten pixels across leaves the surface visibly around it, which is what makes
-     * it look recessed.
+     * surface. Eight pixels across - half the face - leaves the surface plainly around it,
+     * which is what makes it look recessed.
      *
-     * <p>⚠ <b>The rim is 5.2 and not 5.6 for a reason that is pure rasterisation.</b> At
-     * 5.6 the circle grows a two-pixel nub at each of the four compass points and reads as
-     * a cog; 5.2 is the nearest radius whose outline is a clean circle. Radii were compared
-     * by drawing them, not chosen.
+     * <p>⚠ <b>Not every radius rasterises to a circle.</b> At 4.5 and at 5.6 the outline
+     * grows a two-pixel nub at each of the four compass points and reads as a cog. The
+     * radii here were picked by drawing every candidate and looking at the outline, not
+     * by choosing round numbers.
      */
-    private static final float LENS = 3.6F;
-    private static final float RIM = 5.2F;
+    private static final float LENS = 2.8F;
+    private static final float RIM = 4.2F;
 
     private static final float LENS_CENTRE = 0.72F;
     private static final float LENS_EDGE = 0.30F;
