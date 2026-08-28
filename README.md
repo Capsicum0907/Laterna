@@ -316,7 +316,13 @@ takes the same approach.
 
 ## License
 
-Not decided yet. Until it is, the metadata says All Rights Reserved.
+MIT. Decided on 2026-08-29.
+
+⚠ **Reading Simply Light did not oblige this.** What was taken from it is measurements and
+an understanding of how it is put together — no code and no assets — so its GPL does not
+reach here, and the choice was free. MIT is the choice that puts the fewest obstacles in
+front of a modpack: All Rights Reserved would have meant pack authors quietly leaving it
+out.
 
 ## Sources
 
