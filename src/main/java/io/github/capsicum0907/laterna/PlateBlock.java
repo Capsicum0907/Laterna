@@ -80,14 +80,62 @@ public abstract class PlateBlock extends Block implements SimpleWaterloggedBlock
     }
 
     /**
-     * Whether a click landed in the upper half of the cell it is building in.
+     * The same state with two of the plate laid together, for anything building states
+     * rather than reading them.
      *
-     * <p>Vanilla's expression, shared so that the rule for which half a slab lands in and
-     * the rule for when a second slab stacks cannot drift apart - they are the same
-     * question asked twice.
+     * <p>Refused rather than ignored by a form that does not stack: quietly handing back
+     * a half slab would let a test of stacking pass without stacking anything.
      */
+    public BlockState asWhole(BlockState state) {
+        throw new UnsupportedOperationException(this + " does not stack");
+    }
+
+    /**
+     * Whether a click landed past the middle of the cell it is building in, along one axis.
+     *
+     * <p>Vanilla's expression with the axis left open, shared so that the rule for which
+     * half a slab lands in and the rule for when a second slab stacks cannot drift apart -
+     * they are the same question asked twice.
+     */
+    protected static boolean beyondHalf(BlockPlaceContext context, Direction.Axis axis) {
+        BlockPos pos = context.getClickedPos();
+        return axis.choose(context.getClickLocation().x - pos.getX(),
+                context.getClickLocation().y - pos.getY(),
+                context.getClickLocation().z - pos.getZ()) > 0.5;
+    }
+
+    /** The same question for the one axis a lying slab knows about. */
     protected static boolean upperHalf(BlockPlaceContext context) {
-        return context.getClickLocation().y - context.getClickedPos().getY() > 0.5;
+        return beyondHalf(context, Direction.Axis.Y);
+    }
+
+    /**
+     * Whether a second plate lands in the cell that is already half full, rather than in
+     * the next one along.
+     *
+     * <p><b>Vanilla's rule for a slab, with the axis left open.</b> Theirs reads: a bottom
+     * slab takes another from above, or from a side click that landed high; a top one from
+     * below, or from a side click that landed low. Written out for the vertical forms as
+     * well it becomes this - the open side is whichever end of the axis is still empty,
+     * and a click on a face across the axis goes by which half it landed in.
+     *
+     * ⚠ <b>Not paraphrased.</b> Getting this subtly wrong gives "sometimes the second
+     * one replaces instead of stacking", which is the same kind of wrongness under the
+     * hand that splitting the forms was meant to fix.
+     *
+     * @param low whether what is already there occupies the low end of the axis
+     */
+    protected static boolean stacksInto(BlockPlaceContext context, Direction.Axis axis,
+            boolean low) {
+        if (!context.replacingClickedOnBlock()) {
+            return true;
+        }
+        Direction open = Direction.fromAxisAndDirection(axis, low
+                ? Direction.AxisDirection.POSITIVE
+                : Direction.AxisDirection.NEGATIVE);
+        Direction clicked = context.getClickedFace();
+        return clicked == open
+                || (clicked.getAxis() != axis && beyondHalf(context, axis) == low);
     }
 
     /**

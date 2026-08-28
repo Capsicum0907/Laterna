@@ -63,6 +63,11 @@ public class StackingPlateBlock extends PlateBlock {
         return state.getValue(TYPE) == SlabType.DOUBLE;
     }
 
+    @Override
+    public BlockState asWhole(BlockState state) {
+        return state.setValue(TYPE, SlabType.DOUBLE);
+    }
+
     /** Lying at the bottom of its cell it shines up, at the top down; doubled, both ways. */
     @Override
     public Direction facing(BlockState state) {
@@ -114,9 +119,10 @@ public class StackingPlateBlock extends PlateBlock {
     /**
      * Whether a second one lands in the same cell rather than the next.
      *
-     * <p>Vanilla's, line for line: a bottom slab takes another from above or from a side
-     * click that landed high, a top one from below or a side click that landed low, and a
-     * doubled one takes nothing.
+     * <p>Vanilla's, by way of {@link PlateBlock#stacksInto}, which the standing form asks
+     * as well: a bottom slab takes another from above or from a side click that landed
+     * high, a top one from below or a side click that landed low, and a doubled one takes
+     * nothing.
      */
     @Override
     protected boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
@@ -125,14 +131,7 @@ public class StackingPlateBlock extends PlateBlock {
         if (type == SlabType.DOUBLE || !held.is(asItem())) {
             return false;
         }
-        if (!context.replacingClickedOnBlock()) {
-            return true;
-        }
-        boolean high = upperHalf(context);
-        Direction clicked = context.getClickedFace();
-        return type == SlabType.BOTTOM
-                ? clicked == Direction.UP || high && clicked.getAxis().isHorizontal()
-                : clicked == Direction.DOWN || !high && clicked.getAxis().isHorizontal();
+        return stacksInto(context, Direction.Axis.Y, type == SlabType.BOTTOM);
     }
 
     /** Turning the world does not turn something that only knows up from down. */

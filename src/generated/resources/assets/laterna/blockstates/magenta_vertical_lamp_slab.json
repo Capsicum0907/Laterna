@@ -1,18 +1,32 @@
 {
   "variants": {
-    "facing=east": {
+    "double=false,facing=east": {
       "model": "laterna:block/magenta_vertical_lamp_slab",
       "y": 270
     },
-    "facing=north": {
+    "double=false,facing=north": {
       "model": "laterna:block/magenta_vertical_lamp_slab",
       "y": 180
     },
-    "facing=south": {
+    "double=false,facing=south": {
       "model": "laterna:block/magenta_vertical_lamp_slab"
     },
-    "facing=west": {
+    "double=false,facing=west": {
       "model": "laterna:block/magenta_vertical_lamp_slab",
+      "y": 90
+    },
+    "double=true,facing=east": {
+      "model": "laterna:block/magenta_vertical_lamp_slab_double",
+      "y": 90
+    },
+    "double=true,facing=north": {
+      "model": "laterna:block/magenta_vertical_lamp_slab_double"
+    },
+    "double=true,facing=south": {
+      "model": "laterna:block/magenta_vertical_lamp_slab_double"
+    },
+    "double=true,facing=west": {
+      "model": "laterna:block/magenta_vertical_lamp_slab_double",
       "y": 90
     }
   }

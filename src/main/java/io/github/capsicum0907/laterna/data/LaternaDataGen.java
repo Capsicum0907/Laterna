@@ -35,6 +35,16 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
+import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import io.github.capsicum0907.laterna.StackingPlateBlock;
+import io.github.capsicum0907.laterna.UprightStackingPlateBlock;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
@@ -173,12 +183,22 @@ public final class LaternaDataGen {
                     // mounting would arrive here needing nothing.
                     case ANY, FLAT, UPRIGHT -> {
                         PlateBlock plate = (PlateBlock) block;
+                        // ⚠ A pair of lying slabs is the same cube whichever way it
+                        // was built; a standing pair is not - its lit faces are north and
+                        // south, or east and west. So the whole block is drawn flat
+                        // against the axis the pair was stacked along, and turned onto the
+                        // other one the same way a single plate is.
+                        boolean upright = lamp.shape().mount() == Mount.UPRIGHT;
                         ModelFile whole = lamp.shape().stacks()
-                                ? doubled(lamp.skin(true))
+                                ? doubled(lamp.skin(true),
+                                        upright ? Direction.Axis.Z : Direction.Axis.Y)
                                 : null;
                         getVariantBuilder(block).forAllStatesExcept(state -> {
                             if (plate.whole(state)) {
-                                return ConfiguredModel.builder().modelFile(whole).build();
+                                boolean across = upright && plate.facing(state).getAxis()
+                                        == Direction.Axis.X;
+                                return ConfiguredModel.builder().modelFile(whole)
+                                        .rotationY(across ? 90 : 0).build();
                             }
                             int[] turn = ROTATION.get(PlateBlock.against(plate.facing(state)));
                             return ConfiguredModel.builder()
@@ -267,8 +287,8 @@ public final class LaternaDataGen {
          * the four cut sides, and a course of them beside a single slab has to match.
          * It is the same builder, asked for a depth of sixteen.
          */
-        private ModelFile doubled(String skin) {
-            return cut(models().getBuilder(skin + "_double"), 16.0, skin, Direction.Axis.Y);
+        private ModelFile doubled(String skin, Direction.Axis flat) {
+            return cut(models().getBuilder(skin + "_double"), 16.0, skin, flat);
         }
 
         /**
@@ -380,13 +400,32 @@ public final class LaternaDataGen {
             protected void generate() {
                 for (Lamp lamp : Lamp.all()) {
                     Block block = LaternaRegistry.block(lamp).get();
-                    // ⚠ A stacked pair has to give both back. The game keeps a table
-                    // for exactly this, and writing dropSelf for it would quietly halve
-                    // what a doubled slab is worth.
-                    add(block, lamp.shape().stacks()
-                            ? createSlabItemTable(block)
-                            : createSingleItemTable(block));
+                    // ⚠ A stacked pair has to give both back, or a doubled slab is
+                    // quietly worth half what went into it. The game keeps a table for
+                    // exactly this, but it asks the block for vanilla's own slab property
+                    // - which the standing form does not have - so the standing one is
+                    // written out with the property it does keep.
+                    add(block, switch (lamp.shape()) {
+                        case SLAB -> pair(block, StatePropertiesPredicate.Builder.properties()
+                                .hasProperty(StackingPlateBlock.TYPE, SlabType.DOUBLE.getSerializedName()));
+                        case VERTICAL_SLAB -> pair(block,
+                                StatePropertiesPredicate.Builder.properties()
+                                        .hasProperty(UprightStackingPlateBlock.DOUBLE, true));
+                        case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL ->
+                                createSingleItemTable(block);
+                    });
                 }
+            }
+
+            /** Vanilla's slab table, with which state counts as stacked left open. */
+            private LootTable.Builder pair(Block block, StatePropertiesPredicate.Builder whole) {
+                return LootTable.lootTable().withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .add(applyExplosionDecay(block, LootItem.lootTableItem(block)
+                                .apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))
+                                        .when(LootItemBlockStatePropertyCondition
+                                                .hasBlockStateProperties(block)
+                                                .setProperties(whole))))));
             }
 
             /**

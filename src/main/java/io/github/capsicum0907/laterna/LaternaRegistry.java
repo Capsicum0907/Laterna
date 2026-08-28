@@ -56,7 +56,9 @@ public final class LaternaRegistry {
             case FLAT -> lamp.shape().stacks()
                     ? properties -> new StackingPlateBlock(depth, properties)
                     : properties -> new FlatPlateBlock(depth, properties);
-            case UPRIGHT -> properties -> new UprightPlateBlock(depth, properties);
+            case UPRIGHT -> lamp.shape().stacks()
+                    ? properties -> new UprightStackingPlateBlock(depth, properties)
+                    : properties -> new UprightPlateBlock(depth, properties);
         };
     }
 
@@ -86,8 +88,8 @@ public final class LaternaRegistry {
             // but two of these laid together are a whole block and have to stop light -
             // so it is left alone and answers with its shape instead. See
             // StackingPlateBlock.
-            case FLAT -> lamp.shape().stacks() ? properties : properties.noOcclusion();
-            case UPRIGHT -> properties.noOcclusion();
+            case FLAT, UPRIGHT ->
+                    lamp.shape().stacks() ? properties : properties.noOcclusion();
         };
     }
 
