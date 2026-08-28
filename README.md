@@ -92,9 +92,16 @@ lamp cannot end up with a full-face hit box. ⚠ The spotlight was exactly that 
 looked at: drawn eight pixels across, outlined at the full sixteen, and catching the
 pointer anywhere near it.
 
-**A fitting is two parts: a base against the surface, and the lit part raised out of it.**
+**A fitting is two parts: a plate against the surface, and the lit part raised out of it.**
 One box with a lit face on it is a tile stuck to a wall; a plate flush with the surface
 with something standing out of it is a lamp bolted to one.
+
+⚠ **The plate goes around the light, not inside it.** The first version took the rim out of
+the lamp — a pixel in on every side — and at eight by four there was not enough lamp to
+take it out of: the light dropped to a third of the face and the whole thing read as small
+and dark. Sizing the *whole fitting* instead, with the light the size it should be and the
+plate two pixels larger around it, keeps both. It was not a choice between a housing and a
+bright light; it was the rim being on the wrong side of the edge.
 
 **And a form may be a different size on a wall than on a floor.** The fitting is a wide
 bar where it is bolted to a wall and a small disc where it is set into a ceiling. ⚠ No

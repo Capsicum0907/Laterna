@@ -261,13 +261,11 @@ public final class LaternaDataGen {
             float wide = (float) fit.wide();
             float tall = (float) fit.tall();
             float deep = (float) fit.deep();
-            // The base is the whole of the fitting against the surface; what glows stands
-            // out of the middle of it, a pixel in on every side.
+            // The plate is the whole of the fitting against the surface; what glows stands
+            // out of the middle of it, a pixel in on every side - so the plate sticks out
+            // around the light rather than being taken out of it.
             float[] base = box(wide, tall, 0, 1);
-            float[] lit = switch (shape) {
-                case BULB -> box(2, 2, 1, deep);
-                default -> box(wide - 2, tall - 2, 1, deep);
-            };
+            float[] lit = box(wide - 2, tall - 2, 1, deep);
             BlockModelBuilder builder = models().getBuilder(skin
                     + (facing.getAxis() == Direction.Axis.Y ? "_flat" : ""))
                     .parent(new ModelFile.UncheckedModelFile("block/block"))
