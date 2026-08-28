@@ -36,7 +36,7 @@ public final class LaternaTests {
     private static final Lamp INVERTED = new Lamp(Shape.LAMP, Wiring.INVERTED, DyeColor.WHITE);
     /** Every form that clings to a face, which is every form the plate tests are about. */
     private static final Shape[] PLATES = { Shape.SPOTLIGHT, Shape.SLAB, Shape.VERTICAL_SLAB,
-            Shape.PANEL, Shape.VERTICAL_PANEL };
+            Shape.PANEL, Shape.VERTICAL_PANEL, Shape.BULB, Shape.FIXTURE };
 
     private LaternaTests() {
     }
@@ -135,35 +135,42 @@ public final class LaternaTests {
     }
 
     /**
-     * Every plate, in every direction its own form can be mounted in, lit and pointing
-     * the way it was put.
+     * Every plate, in every direction its own form can be mounted in, giving off light and
+     * pointing the way it was put.
      *
      * <p>⚠ <b>What this cannot check is where the plate is drawn.</b> The rotation
      * table lives in the model generator, and a test can only see the state - so if the
      * rotations were inverted, this would pass with every light on the wrong surface.
      * That one is checked by looking.
+     *
+     * <p>The light asked for here is what the block gives off, not what has reached the
+     * air around it: one is true the moment the block exists and the other takes a tick to
+     * spread. That it spreads at all is {@link #aPlateLightsTheRoom}.
      */
     @GameTest(template = TestStructures.FLOOR)
     public static void platesLightInEveryDirectionTheyHave(GameTestHelper helper) {
         for (Shape shape : PLATES) {
             PlateBlock plate = plate(shape);
             for (Direction facing : plate.facings()) {
-                helper.setBlock(at(shape, facing),
-                        plate.withFacing(plate.defaultBlockState(), facing));
+                BlockState state = put(helper, plate, facing);
+                if (plate.facing(state) != facing) {
+                    throw new GameTestAssertException(shape + " facing " + facing + " turned");
+                }
+                if (state.getLightEmission() != 15) {
+                    throw new GameTestAssertException(shape + " facing " + facing
+                            + " gives off " + state.getLightEmission());
+                }
+                clear(helper, facing);
             }
         }
-        helper.succeedWhen(() -> {
-            for (Shape shape : PLATES) {
-                PlateBlock plate = plate(shape);
-                for (Direction facing : plate.facings()) {
-                    BlockPos where = at(shape, facing);
-                    if (plate.facing(helper.getBlockState(where)) != facing) {
-                        throw new GameTestAssertException(shape + " at " + where + " turned");
-                    }
-                    brightness(helper, where, 15);
-                }
-            }
-        });
+        helper.succeed();
+    }
+
+    /** And the light does reach the air, which the one above deliberately does not wait for. */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void aPlateLightsTheRoom(GameTestHelper helper) {
+        put(helper, plate(Shape.SPOTLIGHT), Direction.UP);
+        helper.succeedWhen(() -> brightness(helper, WHERE.above(), 14));
     }
 
     /**
@@ -208,10 +215,10 @@ public final class LaternaTests {
         for (Shape shape : PLATES) {
             PlateBlock plate = plate(shape);
             for (Direction facing : plate.facings()) {
-                helper.setBlock(WHERE, plate.withFacing(plate.defaultBlockState(), facing));
+                BlockState state = put(helper, plate, facing);
                 Direction against = PlateBlock.against(facing);
-                VoxelShape outline = helper.getBlockState(WHERE)
-                        .getShape(helper.getLevel(), helper.absolutePos(WHERE));
+                VoxelShape outline = state.getShape(helper.getLevel(),
+                        helper.absolutePos(WHERE));
                 boolean high = against.getAxisDirection() == Direction.AxisDirection.POSITIVE;
                 double near = high
                         ? outline.min(against.getAxis())
@@ -223,6 +230,7 @@ public final class LaternaTests {
                             + " should hug its " + against + " face, but its outline reaches "
                             + near);
                 }
+                clear(helper, facing);
             }
         }
         helper.succeed();
@@ -233,14 +241,14 @@ public final class LaternaTests {
      * {@code VoxelShape} of no thickness is a block that cannot be selected or broken, so
      * every plate keeps one to be pointed at. What differs is whether there is anything
      * to stand on: recessed means flush, so the spotlight has no collision at all, while
-     * a slab is a step and is supposed to be.
+     * a slab is a step and a bulb is something to bump into.
      */
     @GameTest(template = TestStructures.FLOOR)
     public static void onlyTheRecessedOneIsNotAStep(GameTestHelper helper) {
+        BlockPos absolute = helper.absolutePos(WHERE);
         for (Shape shape : PLATES) {
-            helper.setBlock(WHERE, plate(shape));
-            BlockState state = helper.getBlockState(WHERE);
-            BlockPos absolute = helper.absolutePos(WHERE);
+            PlateBlock plate = plate(shape);
+            BlockState state = put(helper, plate, plate.facings().iterator().next());
             if (state.getShape(helper.getLevel(), absolute).isEmpty()) {
                 throw new GameTestAssertException(shape + " cannot be pointed at");
             }
@@ -249,6 +257,7 @@ public final class LaternaTests {
                 throw new GameTestAssertException(shape + " is "
                         + (step ? "something" : "nothing") + " to stand on, which is wrong");
             }
+            clear(helper, plate.facings().iterator().next());
         }
         helper.succeed();
     }
@@ -257,13 +266,64 @@ public final class LaternaTests {
     @GameTest(template = TestStructures.FLOOR)
     public static void platesHoldWater(GameTestHelper helper) {
         for (Shape shape : PLATES) {
-            helper.setBlock(WHERE, plate(shape).defaultBlockState()
+            PlateBlock plate = plate(shape);
+            Direction facing = plate.facings().iterator().next();
+            helper.setBlock(WHERE.relative(PlateBlock.against(facing)), Blocks.STONE);
+            helper.setBlock(WHERE, plate.withFacing(plate.defaultBlockState(), facing)
                     .setValue(PlateBlock.WATERLOGGED, true));
             if (!helper.getBlockState(WHERE).getFluidState().is(Fluids.WATER)) {
                 throw new GameTestAssertException("the water went missing under a " + shape);
             }
+            clear(helper, facing);
         }
         helper.succeed();
+    }
+
+    /**
+     * ⚠ <b>Anything mounted on a face falls with that face; anything that lies or
+     * stands stays.</b> Taking a wall down should take its lights with it rather than
+     * leaving a field of them hanging to be knocked out one at a time - and a bulb or a
+     * fitting is as plainly attached to its wall as a recessed light is. A slab or a panel
+     * is a thing in its own right, and pulling the block behind one is not a reason for it
+     * to go.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void onlyTheRecessedOneFallsWithItsWall(GameTestHelper helper) {
+        for (Shape shape : PLATES) {
+            PlateBlock plate = plate(shape);
+            Direction facing = plate.facings().iterator().next();
+            put(helper, plate, facing);
+            helper.setBlock(WHERE.relative(PlateBlock.against(facing)), Blocks.AIR);
+            boolean gone = helper.getBlockState(WHERE).isAir();
+            if (gone != (shape.mount() == Shape.Mount.ANY)) {
+                throw new GameTestAssertException(shape + (gone ? " fell" : " stayed up")
+                        + " when its wall went, which is the wrong answer for it");
+            }
+            clear(helper, facing);
+        }
+        helper.succeed();
+    }
+
+    /**
+     * A plate at {@link #WHERE}, with something behind it to cling to.
+     *
+     * <p>⚠ <b>The support is not decoration.</b> A recessed light falls when what it
+     * was set into goes, so one placed into thin air is gone before it can be looked at -
+     * which is how these tests found out that they had been placing everything in mid-air.
+     */
+    private static BlockState put(GameTestHelper helper, PlateBlock plate, Direction facing) {
+        helper.setBlock(WHERE.relative(PlateBlock.against(facing)), Blocks.STONE);
+        helper.setBlock(WHERE, plate.withFacing(plate.defaultBlockState(), facing));
+        BlockState state = helper.getBlockState(WHERE);
+        if (state.isAir()) {
+            throw new GameTestAssertException("the plate did not stay where it was put");
+        }
+        return state;
+    }
+
+    private static void clear(GameTestHelper helper, Direction facing) {
+        helper.setBlock(WHERE, Blocks.AIR);
+        helper.setBlock(WHERE.relative(PlateBlock.against(facing)), Blocks.AIR);
     }
 
     /** Every form that stacks, which is the slab lying down and the slab standing up. */
@@ -352,7 +412,8 @@ public final class LaternaTests {
 
     /** A spot of its own for each form and face, so one test can hold all of them. */
     private static BlockPos at(Shape shape, Direction facing) {
-        return new BlockPos(1 + facing.ordinal(), 1 + shape.ordinal(), 1);
+        return new BlockPos(1 + facing.ordinal(), 1 + shape.ordinal() % 3,
+                1 + shape.ordinal() / 3);
     }
 
     private static void lit(GameTestHelper helper, BlockPos pos, boolean expected) {

@@ -1,0 +1,20 @@
+{
+  "values": [
+    "laterna:white_fixture",
+    "laterna:orange_fixture",
+    "laterna:magenta_fixture",
+    "laterna:light_blue_fixture",
+    "laterna:yellow_fixture",
+    "laterna:lime_fixture",
+    "laterna:pink_fixture",
+    "laterna:gray_fixture",
+    "laterna:light_gray_fixture",
+    "laterna:cyan_fixture",
+    "laterna:purple_fixture",
+    "laterna:blue_fixture",
+    "laterna:brown_fixture",
+    "laterna:green_fixture",
+    "laterna:red_fixture",
+    "laterna:black_fixture"
+  ]
+}

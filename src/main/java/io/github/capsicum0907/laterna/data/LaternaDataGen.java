@@ -224,7 +224,44 @@ public final class LaternaDataGen {
                 case LAMP -> models().cubeAll(skin, modLoc("block/" + skin));
                 case SPOTLIGHT -> plate(skin);
                 case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL -> box(shape, skin);
+                case BULB, FIXTURE -> fitting(shape, skin);
             };
+        }
+
+        /**
+         * A small box standing on the middle of the north face of the cell.
+         *
+         * <p>⚠ <b>Every face is given the whole texture, rather than the piece of it the
+         * game would work out.</b> A face six pixels across takes a six-pixel corner of a
+         * sixteen-pixel picture if nothing says otherwise, which is the crude slice the
+         * broad forms were pulled up on. Written out, the small face wears the whole lamp,
+         * scaled - and the masters for these forms are drawn without a border for exactly
+         * that reason.
+         *
+         * <p>A bulb glows on every side of itself, so it has no rim; a fitting is a lit
+         * face in one, like everything else that lies against a surface.
+         */
+        private ModelFile fitting(Shape shape, String skin) {
+            float inset = (float) shape.inset();
+            float depth = (float) shape.depth();
+            boolean rimmed = shape != Shape.BULB;
+            return models().getBuilder(skin)
+                    .parent(new ModelFile.UncheckedModelFile("block/block"))
+                    .texture("face", modLoc("block/" + skin))
+                    .texture("edge", modLoc("block/" + skin
+                            + (rimmed ? Masters.Layer.EDGE.suffix() : "")))
+                    .texture("particle", modLoc("block/" + skin))
+                    .element()
+                        .from(inset, inset, 0).to(16 - inset, 16 - inset, depth)
+                        .allFaces((direction, face) -> {
+                            face.texture(direction.getAxis() == Direction.Axis.Z
+                                    ? "#face" : "#edge");
+                            face.uvs(0, 0, 16, 16);
+                            if (direction == Direction.NORTH) {
+                                face.cullface(Direction.NORTH);
+                            }
+                        })
+                    .end();
         }
 
         /**
@@ -347,7 +384,7 @@ public final class LaternaDataGen {
         private void item(Lamp lamp, ModelFile model) {
             switch (lamp.shape()) {
                 // A box has thickness and reads perfectly well held at an angle.
-                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL ->
+                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL, BULB, FIXTURE ->
                         itemModels().withExistingParent(lamp.id(), model.getLocation());
                 // ⚠ A slab that lies down has to be authored lying down. The block
                 // model of every plate stands against the north face so that one rotation
@@ -411,7 +448,7 @@ public final class LaternaDataGen {
                         case VERTICAL_SLAB -> pair(block,
                                 StatePropertiesPredicate.Builder.properties()
                                         .hasProperty(UprightStackingPlateBlock.DOUBLE, true));
-                        case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL ->
+                        case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE ->
                                 createSingleItemTable(block);
                     });
                 }
@@ -522,6 +559,21 @@ public final class LaternaDataGen {
                 // changes.
                 case VERTICAL_SLAB, VERTICAL_PANEL -> {
                 }
+                // A little glass on a stand, and eight of them from it.
+                case BULB -> raw(output, white, ShapedRecipeBuilder
+                        .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 8)
+                        .pattern(" b ")
+                        .pattern("aaa")
+                        .define('a', Tags.Items.STONES)
+                        .define('b', Items.GLOWSTONE));
+                // A lens in a cross of iron, which is the ring of the spotlight opened out.
+                case FIXTURE -> raw(output, white, ShapedRecipeBuilder
+                        .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 8)
+                        .pattern(" a ")
+                        .pattern("aba")
+                        .pattern(" a ")
+                        .define('a', Tags.Items.NUGGETS_IRON)
+                        .define('b', Items.GLOWSTONE));
             }
         }
 

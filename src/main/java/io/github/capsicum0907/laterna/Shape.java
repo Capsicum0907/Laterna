@@ -69,7 +69,22 @@ public enum Shape {
 
     /** The panel stood on its edge; see {@link #VERTICAL_SLAB}. */
     VERTICAL_PANEL("vertical_lamp_panel", SoundType.GLASS, 0.3F, 4.0, Mount.UPRIGHT,
-            List.of(Wiring.ALWAYS));
+            List.of(Wiring.ALWAYS)),
+
+    /**
+     * A small bulb on a face, glowing on every side of itself.
+     *
+     * <p>The first form that does not reach the edges of its own face, and so the first
+     * with an inset. Six pixels of lamp with five of nothing around it.
+     */
+    BULB("bulb", SoundType.GLASS, 0.3F, 6.0, 5.0, Mount.ANY, List.of(Wiring.ALWAYS)),
+
+    /**
+     * A shallow fitting: a lit face in a rim, wider than a bulb and barely proud of the
+     * surface. What the spotlight would be if it were mounted on the wall rather than
+     * sunk into it.
+     */
+    FIXTURE("fixture", SoundType.GLASS, 0.3F, 2.0, 3.0, Mount.ANY, List.of(Wiring.ALWAYS));
 
     /**
      * How a form meets the block it is put against, which decides what states it keeps
@@ -93,17 +108,35 @@ public enum Shape {
     private final SoundType sound;
     private final float strength;
     private final double depth;
+    private final double inset;
     private final Mount mount;
     private final List<Wiring> wirings;
 
     Shape(String id, SoundType sound, float strength, double depth, Mount mount,
             List<Wiring> wirings) {
+        this(id, sound, strength, depth, 0.0, mount, wirings);
+    }
+
+    Shape(String id, SoundType sound, float strength, double depth, double inset, Mount mount,
+            List<Wiring> wirings) {
         this.id = id;
         this.sound = sound;
         this.strength = strength;
         this.depth = depth;
+        this.inset = inset;
         this.mount = mount;
         this.wirings = wirings;
+    }
+
+    /**
+     * How far in from the edges of its face this form sits, in pixels of the sixteen.
+     *
+     * <p>Nought for everything that covers its face. A bulb and a fitting do not, and the
+     * same one number trims the box the model is built from and the outline you point at -
+     * so a small lamp cannot end up with a full-face hit box.
+     */
+    public double inset() {
+        return inset;
     }
 
     public Mount mount() {
@@ -126,7 +159,7 @@ public enum Shape {
     public boolean stacks() {
         return switch (this) {
             case SLAB, VERTICAL_SLAB -> true;
-            case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL -> false;
+            case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE -> false;
         };
     }
 
@@ -140,7 +173,7 @@ public enum Shape {
      */
     public Optional<Shape> turned() {
         return switch (this) {
-            case LAMP, SPOTLIGHT -> Optional.empty();
+            case LAMP, SPOTLIGHT, BULB, FIXTURE -> Optional.empty();
             case SLAB -> Optional.of(VERTICAL_SLAB);
             case VERTICAL_SLAB -> Optional.of(SLAB);
             case PANEL -> Optional.of(VERTICAL_PANEL);

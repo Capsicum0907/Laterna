@@ -55,8 +55,12 @@ public abstract class PlateBlock extends Block implements SimpleWaterloggedBlock
     private final Map<Direction, VoxelShape> shapes;
 
     protected PlateBlock(double depth, Properties properties) {
+        this(depth, 0.0, properties);
+    }
+
+    protected PlateBlock(double depth, double inset, Properties properties) {
         super(properties);
-        this.shapes = shapes(depth);
+        this.shapes = shapes(depth, inset);
     }
 
     /** Which way this plate shines, whatever property its form keeps that in. */
@@ -148,7 +152,7 @@ public abstract class PlateBlock extends Block implements SimpleWaterloggedBlock
      * others were right, so nothing about the shape of the mistake suggested itself.
      * Derived from the direction, there is no list to get out of order.
      */
-    private static Map<Direction, VoxelShape> shapes(double depth) {
+    private static Map<Direction, VoxelShape> shapes(double depth, double inset) {
         Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
         double far = 16.0 - depth;
         for (Direction facing : Direction.values()) {
@@ -156,12 +160,12 @@ public abstract class PlateBlock extends Block implements SimpleWaterloggedBlock
             boolean high = against.getAxisDirection() == Direction.AxisDirection.POSITIVE;
             Direction.Axis axis = against.getAxis();
             shapes.put(facing, Block.box(
-                    high && axis == Direction.Axis.X ? far : 0,
-                    high && axis == Direction.Axis.Y ? far : 0,
-                    high && axis == Direction.Axis.Z ? far : 0,
-                    !high && axis == Direction.Axis.X ? depth : 16,
-                    !high && axis == Direction.Axis.Y ? depth : 16,
-                    !high && axis == Direction.Axis.Z ? depth : 16));
+                    axis == Direction.Axis.X ? (high ? far : 0) : inset,
+                    axis == Direction.Axis.Y ? (high ? far : 0) : inset,
+                    axis == Direction.Axis.Z ? (high ? far : 0) : inset,
+                    axis == Direction.Axis.X ? (high ? 16 : depth) : 16 - inset,
+                    axis == Direction.Axis.Y ? (high ? 16 : depth) : 16 - inset,
+                    axis == Direction.Axis.Z ? (high ? 16 : depth) : 16 - inset));
         }
         return Map.copyOf(shapes);
     }

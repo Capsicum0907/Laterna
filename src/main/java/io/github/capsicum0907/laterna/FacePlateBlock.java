@@ -7,7 +7,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,8 +31,8 @@ import org.jetbrains.annotations.Nullable;
 public class FacePlateBlock extends PlateBlock {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
-    public FacePlateBlock(double depth, Properties properties) {
-        super(depth, properties);
+    public FacePlateBlock(double depth, double inset, Properties properties) {
+        super(depth, inset, properties);
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.UP)
                 .setValue(WATERLOGGED, false));
@@ -76,6 +79,35 @@ public class FacePlateBlock extends PlateBlock {
             facing = plate.facing(against);
         }
         return defaultBlockState().setValue(FACING, facing).setValue(WATERLOGGED, flooded(context));
+    }
+
+    /**
+     * ⚠ <b>These fall when what they are mounted on goes.</b> A light recessed into a
+     * wall is a hole in that wall, and a bulb or a fitting is bolted to one; with the wall
+     * gone there is nothing holding any of them, and they drop as items rather than
+     * hanging in the air.
+     *
+     * <p>Only the forms that go on a face. A slab or a panel is a thing in its own right
+     * and stays where it is - the game's own {@code glow_lichen} pops off and Simply
+     * Light's thin lamps do not bother, and each is right about a different shape. The
+     * reason to pop off here is the practical one: taking a wall down should take its
+     * lights with it, rather than leaving a field of them to be knocked out one at a
+     * time.
+     */
+    @Override
+    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        Direction against = against(facing(state));
+        BlockPos support = pos.relative(against);
+        return level.getBlockState(support).isFaceSturdy(level, support, against.getOpposite());
+    }
+
+    @Override
+    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbour,
+            LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
+        if (direction == against(facing(state)) && !canSurvive(state, level, pos)) {
+            return Blocks.AIR.defaultBlockState();
+        }
+        return super.updateShape(state, direction, neighbour, level, pos, neighbourPos);
     }
 
     @Override

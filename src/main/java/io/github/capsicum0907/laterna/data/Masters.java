@@ -84,8 +84,9 @@ public final class Masters {
 
     public static List<Layer> layers(Shape shape) {
         return switch (shape) {
-            case LAMP -> List.of(Layer.BODY);
+            case LAMP, BULB -> List.of(Layer.BODY);
             case SPOTLIGHT -> List.of(Layer.BODY, Layer.RING);
+            case FIXTURE -> List.of(Layer.BODY, Layer.EDGE);
             case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL -> List.of(Layer.BODY, Layer.EDGE);
         };
     }
@@ -110,6 +111,12 @@ public final class Masters {
         return switch (shape) {
             case LAMP -> face(lit);
             case SPOTLIGHT -> layer.equals(Layer.RING) ? ring() : lens();
+            // ⚠ Frameless, because these are shown small. The face of a cube is drawn
+            // at sixteen pixels and its one-pixel border reads; stretched onto a face six
+            // pixels across the same border is a third of a pixel, which is a smudge. A
+            // plain glow has nothing to lose at that size.
+            case BULB -> glow();
+            case FIXTURE -> layer.equals(Layer.EDGE) ? edge() : glow();
             // The slab and the panel wear the cube's lit face on the two broad sides, and
             // a rim of their own on the four cut ones. They get files of their own rather
             // than borrowing the cube's, so that a resource pack can retexture a panel
@@ -207,6 +214,18 @@ public final class Masters {
                 float lean = -((x + 0.5F - half) + (y + 0.5F - half)) / (radius * 2.0F);
                 master.level()[y][x] = lean > BEVEL_EDGE ? BEVEL_LIT
                         : lean < -BEVEL_EDGE ? BEVEL_DARK : 0.5F;
+            }
+        }
+        return master;
+    }
+
+    /** A face of light with no border, for the forms that are shown too small for one. */
+    private static Master glow() {
+        Master master = Master.blank();
+        for (int y = 0; y < Master.SIZE; y++) {
+            for (int x = 0; x < Master.SIZE; x++) {
+                master.alpha()[y][x] = 1.0F;
+                master.level()[y][x] = FACE_LIT - FALLOFF_LIT * squared(x, y);
             }
         }
         return master;

@@ -209,7 +209,13 @@ gradlew runData           # regenerate models, textures, recipes and language
       listed, a single item on the bench turning one mounting into the other, and two
       slabs stacking into a whole block that still looks like a slab, lying or standing
 - [ ] **4** — bulb, fixture, rod
-- [ ] **5** — each shape checked by game tests as it lands, rather than by eye
+- [ ] **5** — a frame that is not the lamp's own colour: the cube, the slab and the panel
+      again with the border fixed black, and again fixed white. Asked for on 2026-08-29.
+      The master already keeps the frame and the face as separate numbers, so this is a
+      second colour handed to the tint rather than a second set of shapes — but it is a
+      third axis of the product, and how it reaches the recipes and the creative tab has
+      to be decided before any of it is written
+- [ ] **6** — each shape checked by game tests as it lands, rather than by eye
 
 ## Related
 
