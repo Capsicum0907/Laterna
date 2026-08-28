@@ -1,0 +1,20 @@
+{
+  "values": [
+    "laterna:white_vertical_lamp_slab",
+    "laterna:orange_vertical_lamp_slab",
+    "laterna:magenta_vertical_lamp_slab",
+    "laterna:light_blue_vertical_lamp_slab",
+    "laterna:yellow_vertical_lamp_slab",
+    "laterna:lime_vertical_lamp_slab",
+    "laterna:pink_vertical_lamp_slab",
+    "laterna:gray_vertical_lamp_slab",
+    "laterna:light_gray_vertical_lamp_slab",
+    "laterna:cyan_vertical_lamp_slab",
+    "laterna:purple_vertical_lamp_slab",
+    "laterna:blue_vertical_lamp_slab",
+    "laterna:brown_vertical_lamp_slab",
+    "laterna:green_vertical_lamp_slab",
+    "laterna:red_vertical_lamp_slab",
+    "laterna:black_vertical_lamp_slab"
+  ]
+}

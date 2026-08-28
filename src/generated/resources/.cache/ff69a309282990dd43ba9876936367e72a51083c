@@ -1,6 +1,8 @@
-// 1.21.1	2026-08-28T23:40:01.0999797	Tags for minecraft:block mod id laterna
+// 1.21.1	2026-08-29T00:12:19.1721104	Tags for minecraft:block mod id laterna
 630b396660158a4437467eeb2b73cdbf7116f8ac data/laterna/tags/block/inverted_lamps.json
 5f8bcef9770db299bd52ab8f9d0bedd60fa1f145 data/laterna/tags/block/lamps.json
 2df8a8bd883b801bef88a0cc1938120077cfa5a2 data/laterna/tags/block/lamp_panels.json
 8eb9e8ed76c26c39397531e228003af4d6bbf5d4 data/laterna/tags/block/lamp_slabs.json
 5187e9d5a9595a5742d863051ca22137fe9f1705 data/laterna/tags/block/spotlights.json
+f205f729887cdd2fd71a2809149320f930daa3c7 data/laterna/tags/block/vertical_lamp_panels.json
+aee4e5d96c8ef502b338e06abea19a982c4625eb data/laterna/tags/block/vertical_lamp_slabs.json

@@ -1,0 +1,42 @@
+{
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "texture": "#edge"
+        },
+        "east": {
+          "texture": "#edge"
+        },
+        "north": {
+          "cullface": "north",
+          "texture": "#face"
+        },
+        "south": {
+          "texture": "#face"
+        },
+        "up": {
+          "texture": "#edge"
+        },
+        "west": {
+          "texture": "#edge"
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        4
+      ]
+    }
+  ],
+  "textures": {
+    "edge": "laterna:block/cyan_vertical_lamp_panel_edge",
+    "face": "laterna:block/cyan_vertical_lamp_panel",
+    "particle": "laterna:block/cyan_vertical_lamp_panel"
+  }
+}

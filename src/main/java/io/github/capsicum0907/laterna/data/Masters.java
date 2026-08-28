@@ -86,7 +86,7 @@ public final class Masters {
         return switch (shape) {
             case LAMP -> List.of(Layer.BODY);
             case SPOTLIGHT -> List.of(Layer.BODY, Layer.RING);
-            case SLAB, PANEL -> List.of(Layer.BODY, Layer.EDGE);
+            case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL -> List.of(Layer.BODY, Layer.EDGE);
         };
     }
 
@@ -114,7 +114,8 @@ public final class Masters {
             // a rim of their own on the four cut ones. They get files of their own rather
             // than borrowing the cube's, so that a resource pack can retexture a panel
             // without touching every lamp in the world.
-            case SLAB, PANEL -> layer.equals(Layer.EDGE) ? edge() : face(lit);
+            case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL ->
+                    layer.equals(Layer.EDGE) ? edge() : face(lit);
         };
     }
 

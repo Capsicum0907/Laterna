@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "laterna:green_lamp_slab"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "laterna:green_vertical_lamp_slab"
+  }
+}

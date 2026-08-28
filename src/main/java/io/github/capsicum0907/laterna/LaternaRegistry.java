@@ -49,10 +49,12 @@ public final class LaternaRegistry {
      * import blocks in order to describe itself.
      */
     private static Function<BlockBehaviour.Properties, Block> built(Lamp lamp) {
-        return switch (lamp.shape()) {
-            case LAMP -> properties -> new LampBlock(lamp.wiring(), properties);
-            case SPOTLIGHT, SLAB, PANEL ->
-                    properties -> new PlateBlock(lamp.shape().depth(), properties);
+        double depth = lamp.shape().depth();
+        return switch (lamp.shape().mount()) {
+            case NONE -> properties -> new LampBlock(lamp.wiring(), properties);
+            case ANY -> properties -> new FacePlateBlock(depth, properties);
+            case FLAT -> properties -> new FlatPlateBlock(depth, properties);
+            case UPRIGHT -> properties -> new UprightPlateBlock(depth, properties);
         };
     }
 
@@ -72,13 +74,13 @@ public final class LaternaRegistry {
                 .lightLevel(lamp.switched()
                         ? state -> state.getValue(LampBlock.LIT) ? 15 : 0
                         : state -> 15);
-        return switch (lamp.shape()) {
-            case LAMP -> properties;
+        return switch (lamp.shape().mount()) {
+            case NONE -> properties;
             // A plate is not a cube and must not hide the face behind it. Recessed also
             // means flush, so the spotlight is nothing to stand on - but a slab is a step
             // and is supposed to be. See PlateBlock.
-            case SPOTLIGHT -> properties.noOcclusion().noCollission();
-            case SLAB, PANEL -> properties.noOcclusion();
+            case ANY -> properties.noOcclusion().noCollission();
+            case FLAT, UPRIGHT -> properties.noOcclusion();
         };
     }
 

@@ -2,6 +2,10 @@ package io.github.capsicum0907.laterna;
 
 import io.github.capsicum0907.laterna.data.TestStructures;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -30,7 +34,8 @@ public final class LaternaTests {
     private static final Lamp NORMAL = new Lamp(Shape.LAMP, Wiring.NORMAL, DyeColor.WHITE);
     private static final Lamp INVERTED = new Lamp(Shape.LAMP, Wiring.INVERTED, DyeColor.WHITE);
     /** Every form that clings to a face, which is every form the plate tests are about. */
-    private static final Shape[] PLATES = { Shape.SPOTLIGHT, Shape.SLAB, Shape.PANEL };
+    private static final Shape[] PLATES = { Shape.SPOTLIGHT, Shape.SLAB, Shape.VERTICAL_SLAB,
+            Shape.PANEL, Shape.VERTICAL_PANEL };
 
     private LaternaTests() {
     }
@@ -129,7 +134,8 @@ public final class LaternaTests {
     }
 
     /**
-     * Every plate on each of the six faces, lit and facing the way it was put.
+     * Every plate, in every direction its own form can be mounted in, lit and pointing
+     * the way it was put.
      *
      * <p>⚠ <b>What this cannot check is where the plate is drawn.</b> The rotation
      * table lives in the model generator, and a test can only see the state - so if the
@@ -137,18 +143,20 @@ public final class LaternaTests {
      * That one is checked by looking.
      */
     @GameTest(template = TestStructures.FLOOR)
-    public static void platesLightOnEveryFace(GameTestHelper helper) {
+    public static void platesLightInEveryDirectionTheyHave(GameTestHelper helper) {
         for (Shape shape : PLATES) {
-            for (Direction facing : Direction.values()) {
-                helper.setBlock(at(shape, facing), plate(shape).defaultBlockState()
-                        .setValue(PlateBlock.FACING, facing));
+            PlateBlock plate = plate(shape);
+            for (Direction facing : plate.facings()) {
+                helper.setBlock(at(shape, facing),
+                        plate.withFacing(plate.defaultBlockState(), facing));
             }
         }
         helper.succeedWhen(() -> {
             for (Shape shape : PLATES) {
-                for (Direction facing : Direction.values()) {
+                PlateBlock plate = plate(shape);
+                for (Direction facing : plate.facings()) {
                     BlockPos where = at(shape, facing);
-                    if (helper.getBlockState(where).getValue(PlateBlock.FACING) != facing) {
+                    if (plate.facing(helper.getBlockState(where)) != facing) {
                         throw new GameTestAssertException(shape + " at " + where + " turned");
                     }
                     brightness(helper, where, 15);
@@ -158,7 +166,31 @@ public final class LaternaTests {
     }
 
     /**
-     * ⚠ <b>The outline sits on the face the plate is drawn on, for all six and for
+     * ⚠ <b>Which directions a form has at all.</b> A slab lies down and a vertical one
+     * stands up, and neither can be put the other way: that is the whole reason they are
+     * two blocks rather than one, and it is what lets each be placed the way its own
+     * shape is expected to be.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void eachFormIsMountedItsOwnWay(GameTestHelper helper) {
+        for (Shape shape : PLATES) {
+            Collection<Direction> facings = plate(shape).facings();
+            Collection<Direction> wanted = switch (shape.mount()) {
+                case ANY -> List.of(Direction.values());
+                case FLAT -> List.of(Direction.UP, Direction.DOWN);
+                case UPRIGHT -> Direction.Plane.HORIZONTAL.stream().toList();
+                case NONE -> throw new GameTestAssertException(shape + " is not a plate");
+            };
+            if (!Set.copyOf(facings).equals(Set.copyOf(wanted))) {
+                throw new GameTestAssertException(
+                        shape + " can be mounted " + facings + ", wanted " + wanted);
+            }
+        }
+        helper.succeed();
+    }
+
+    /**
+     * ⚠ <b>The outline sits on the face the plate is drawn on, for every direction and
      * every depth.</b>
      *
      * <p>This is the test that was missing. The six shapes used to be a list written out
@@ -173,9 +205,9 @@ public final class LaternaTests {
     @GameTest(template = TestStructures.FLOOR)
     public static void plateOutlinesAreWhereThePlatesAre(GameTestHelper helper) {
         for (Shape shape : PLATES) {
-            for (Direction facing : Direction.values()) {
-                helper.setBlock(WHERE, plate(shape).defaultBlockState()
-                        .setValue(PlateBlock.FACING, facing));
+            PlateBlock plate = plate(shape);
+            for (Direction facing : plate.facings()) {
+                helper.setBlock(WHERE, plate.withFacing(plate.defaultBlockState(), facing));
                 Direction against = PlateBlock.against(facing);
                 VoxelShape outline = helper.getBlockState(WHERE)
                         .getShape(helper.getLevel(), helper.absolutePos(WHERE));
@@ -233,11 +265,12 @@ public final class LaternaTests {
         helper.succeed();
     }
 
-    private static net.minecraft.world.level.block.Block plate(Shape shape) {
-        return LaternaRegistry.block(new Lamp(shape, Wiring.ALWAYS, DyeColor.WHITE)).get();
+    private static PlateBlock plate(Shape shape) {
+        return (PlateBlock) LaternaRegistry.block(
+                new Lamp(shape, Wiring.ALWAYS, DyeColor.WHITE)).get();
     }
 
-    /** A spot of its own for each form and face, so one test can hold all eighteen. */
+    /** A spot of its own for each form and face, so one test can hold all of them. */
     private static BlockPos at(Shape shape, Direction facing) {
         return new BlockPos(1 + facing.ordinal(), 1 + shape.ordinal(), 1);
     }

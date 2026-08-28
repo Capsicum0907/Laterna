@@ -1,0 +1,20 @@
+{
+  "values": [
+    "laterna:white_vertical_lamp_panel",
+    "laterna:orange_vertical_lamp_panel",
+    "laterna:magenta_vertical_lamp_panel",
+    "laterna:light_blue_vertical_lamp_panel",
+    "laterna:yellow_vertical_lamp_panel",
+    "laterna:lime_vertical_lamp_panel",
+    "laterna:pink_vertical_lamp_panel",
+    "laterna:gray_vertical_lamp_panel",
+    "laterna:light_gray_vertical_lamp_panel",
+    "laterna:cyan_vertical_lamp_panel",
+    "laterna:purple_vertical_lamp_panel",
+    "laterna:blue_vertical_lamp_panel",
+    "laterna:brown_vertical_lamp_panel",
+    "laterna:green_vertical_lamp_panel",
+    "laterna:red_vertical_lamp_panel",
+    "laterna:black_vertical_lamp_panel"
+  ]
+}

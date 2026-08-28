@@ -4,9 +4,10 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 *Laterna* is Latin for a lantern.
 
-> **Status: the cube, the recessed spotlight, the slab and the panel — 80 blocks.**
-> Everything else in the table below is still to come. Ten game tests cover what they
-> claim, except where a test cannot reach: see the note under the spotlight.
+> **Status: the cube, the recessed spotlight, and the slab and panel each in two
+> mountings — 112 blocks.** Everything else in the table below is still to come. Eleven
+> game tests cover what they claim, except where a test cannot reach: see the note under
+> the spotlight.
 
 ## Target
 
@@ -66,8 +67,10 @@ and mixing the two kinds is what makes a scaffold stall.
 | Shape | Blocks | Note |
 |---|---|---|
 | **Lamp** | **32** | **Done.** Full cube, redstone, normal + inverted |
-| **Lamp slab** | **16** | **Done.** 8px, any of six faces, waterloggable |
-| **Lamp panel** | **16** | **Done.** 4px, likewise |
+| **Lamp slab** | **16** | **Done.** 8px, lying down, placed as vanilla places a slab |
+| **Vertical lamp slab** | **16** | **Done.** The same, standing against a wall |
+| **Lamp panel** | **16** | **Done.** 4px, lying down |
+| **Vertical lamp panel** | **16** | **Done.** 4px, standing |
 | **Recessed spotlight** | 16 | **Done.** Zero thickness, a round lens in a grey ring |
 | Bulb | 16 | Small fitting, always lit |
 | Fixture | 16 | Wall/ceiling/floor fitting |
@@ -77,11 +80,25 @@ and mixing the two kinds is what makes a scaffold stall.
 
 That is **128 blocks** from eight enum entries.
 
-The three forms that cling to a face — the spotlight, the slab and the panel — are one
-block class, `PlateBlock`, and differ only in how deep they are. Each sits against one
-face of its own cell, turns with `FACING`, holds water, and takes its depth from the one
-number on `Shape`. That number is read by the outline and by the box the model is built
-from, and by nothing else.
+**How a lamp is mounted is a different block, not a setting.** Everything that clings to
+a face is a `PlateBlock` — it sits against one face of its own cell, holds water, and
+takes its depth from the one number on `Shape`, read by the outline and by the box the
+model is built from and by nothing else. What differs between them is which faces they can
+sit on and how a click is read, and that is not a flag but a different set of block
+states, so it is a subclass each: any of the six for the spotlight, up and down for the
+slab and panel, the four walls for their vertical twins.
+
+⚠ **That split came out of using it.** The slab first took the face you clicked, the way
+the spotlight does, and it was wrong in the hand: clicking the side of a block gave a slab
+standing against that side, where every player's hands expect one lying at the bottom or
+the top of the cell — and an upper slab could only be had by finding a ceiling to click.
+One block cannot be placed the way a slab is placed *and* the way a wall panel is placed,
+because a click on a side has to mean one of the two. So each is placed the way its own
+shape is expected to be, and one item on the bench turns either into the other.
+
+Above that line nothing knows which property a plate keeps its direction in: the model
+generator, the outline and the tests all ask it which way it faces. A fourth kind of
+mounting would need no change outside its own class.
 
 The ids carry `lamp` in front of them — `white_lamp_slab`, not `white_slab` — because a
 `white_slab` reads as stone and a `white_panel` reads as a building block. Only the
@@ -134,9 +151,14 @@ the difference between the two in the world as well as on the bench. The spotlig
 same glowstone in a ring of iron nuggets, which is the thing it is: a lens in a metal rim,
 and cheap, because eight come out. The slab is a row of glowstone over a row of stone.
 
-The panel is the exception: it is a slab split in two, the way the game splits its own
-slabs. Two patterns of stone and glowstone that differed only in arrangement would have
-been arbitrary, and a shapeless recipe of one input cannot be ambiguous with anything.
+The panel is cut from the slab, the way the game cuts a block into slabs and by the same
+arithmetic: three slabs of eight pixels are six panels of four.
+
+The vertical forms have no recipe of their own at all — one of either turns into one of
+its twin, in every colour and both ways. ⚠ **That is why nothing else in the mod is a
+shapeless recipe of a single item.** Two such recipes taking the same one item are
+ambiguous, and the game settles them by whichever it happened to load first; reserving
+that shape of recipe for turning is what keeps every other one unmistakable.
 
 Every other colour is eight of the same thing around a dye, the way the game dyes glass,
 taken through a tag per shape and wiring so that dyeing an inverted lamp gives an inverted
@@ -168,9 +190,9 @@ gradlew runData           # regenerate models, textures, recipes and language
 - [x] **2** — the recessed spotlight: a second shape, a third wiring (always lit, and so
       no `LIT` state at all), a second texture layer, and its own geometry and item model,
       added without touching how the first shape works
-- [x] **3** — slab and panel, on any of six faces: one `PlateBlock` for all three
-      face-clinging forms, parameterised by depth, and the boxes derived from the
-      direction rather than listed
+- [x] **3** — slab and panel, each in two mountings: `PlateBlock` parameterised by depth
+      with a subclass per mounting, the boxes derived from the direction rather than
+      listed, and a single item on the bench turning one mounting into the other
 - [ ] **4** — bulb, fixture, rod
 - [ ] **5** — each shape checked by game tests as it lands, rather than by eye
 

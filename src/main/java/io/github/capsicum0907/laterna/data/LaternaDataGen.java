@@ -13,6 +13,7 @@ import io.github.capsicum0907.laterna.LaternaRegistry;
 import io.github.capsicum0907.laterna.LaternaTags;
 import io.github.capsicum0907.laterna.Shape;
 import io.github.capsicum0907.laterna.PlateBlock;
+import io.github.capsicum0907.laterna.Shape.Mount;
 import io.github.capsicum0907.laterna.Wiring;
 
 import net.minecraft.core.Direction;
@@ -37,6 +38,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
+import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
@@ -158,27 +160,31 @@ public final class LaternaDataGen {
             for (Lamp lamp : Lamp.all()) {
                 Block block = LaternaRegistry.block(lamp).get();
                 ModelFile model = models.get(lamp.skin(lamp.litByDefault()));
-                switch (lamp.shape()) {
-                    case LAMP -> getVariantBuilder(block)
+                switch (lamp.shape().mount()) {
+                    case NONE -> getVariantBuilder(block)
                             .partialState().with(LampBlock.LIT, true)
                             .modelForState().modelFile(models.get(lamp.skin(true))).addModel()
                             .partialState().with(LampBlock.LIT, false)
                             .modelForState().modelFile(models.get(lamp.skin(false))).addModel();
-                    case SPOTLIGHT, SLAB, PANEL -> {
-                        for (Direction facing : Direction.values()) {
-                            int[] turn = ROTATION.get(PlateBlock.against(facing));
-                            getVariantBuilder(block)
-                                    .partialState().with(PlateBlock.FACING, facing)
-                                    .modelForState().modelFile(model)
+                    // One arm for every way of clinging to a face. Which states a form
+                    // keeps is its own business - the plate is asked which way it faces
+                    // and the answer is turned onto that face, so a fourth kind of
+                    // mounting would arrive here needing nothing.
+                    case ANY, FLAT, UPRIGHT -> {
+                        PlateBlock plate = (PlateBlock) block;
+                        getVariantBuilder(block).forAllStatesExcept(state -> {
+                            int[] turn = ROTATION.get(PlateBlock.against(plate.facing(state)));
+                            return ConfiguredModel.builder()
+                                    .modelFile(model)
                                     .rotationX(turn[0]).rotationY(turn[1])
                                     // ⚠ Only the flat one. Locking the texture to the
                                     // world is what keeps the spotlight's bevel pointing
                                     // the same way whichever face it is on; on a box it
                                     // would instead change how the four thin sides are
                                     // cut out of a texture drawn for a square face.
-                                    .uvLock(lamp.shape() == Shape.SPOTLIGHT)
-                                    .addModel();
-                        }
+                                    .uvLock(lamp.shape().mount() == Mount.ANY)
+                                    .build();
+                        }, PlateBlock.WATERLOGGED);
                     }
                 }
                 item(lamp, model);
@@ -190,7 +196,7 @@ public final class LaternaDataGen {
             return switch (shape) {
                 case LAMP -> models().cubeAll(skin, modLoc("block/" + skin));
                 case SPOTLIGHT -> plate(skin);
-                case SLAB, PANEL -> box(shape, skin);
+                case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL -> box(shape, skin);
             };
         }
 
@@ -270,7 +276,7 @@ public final class LaternaDataGen {
         private void item(Lamp lamp, ModelFile model) {
             switch (lamp.shape()) {
                 // A box has thickness and reads perfectly well held at an angle.
-                case LAMP, SLAB, PANEL ->
+                case LAMP, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL ->
                         itemModels().withExistingParent(lamp.id(), model.getLocation());
                 // The ring is the base and the lens goes over it, the same way round as
                 // the two elements of the block model.
@@ -361,6 +367,7 @@ public final class LaternaDataGen {
                 if (lamp.colour() != DyeColor.WHITE) {
                     dyeing(output, lamp);
                 }
+                turning(output, lamp);
             }
         }
 
@@ -398,17 +405,39 @@ public final class LaternaDataGen {
                         .pattern("aaa")
                         .define('a', Tags.Items.STONES)
                         .define('b', Items.GLOWSTONE));
-                // ⚠ The one form not made out of raw materials. Two patterns of stone
-                // and glowstone differing only in arrangement would be arbitrary; a panel
-                // is a slab split, which is what the game does with slabs itself, and a
-                // shapeless recipe of one input cannot be ambiguous with anything.
-                case PANEL -> ShapelessRecipeBuilder
-                        .shapeless(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 2)
-                        .requires(LaternaRegistry.item(
-                                new Lamp(Shape.SLAB, Wiring.ALWAYS, DyeColor.WHITE)).get())
-                        .unlockedBy("has_glowstone", has(Items.GLOWSTONE))
-                        .save(output, name(white));
+                // Cut thinner, the way the game cuts a block into slabs, and by the same
+                // arithmetic: three slabs of eight are six panels of four.
+                case PANEL -> raw(output, white, ShapedRecipeBuilder
+                        .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 6)
+                        .pattern("aaa")
+                        .define('a', LaternaRegistry.item(
+                                new Lamp(Shape.SLAB, Wiring.ALWAYS, DyeColor.WHITE)).get()));
+                // Nothing. A form that stands on its edge is the one that lies down,
+                // turned - see turning() - and giving it a recipe of its own as well would
+                // be two ways to make one thing, drifting apart the first time either
+                // changes.
+                case VERTICAL_SLAB, VERTICAL_PANEL -> {
+                }
             }
+        }
+
+        /**
+         * One of a turnable form makes one of its twin, in every colour and both ways.
+         *
+         * <p>⚠ <b>This is why nothing else is a shapeless recipe of a single item.</b>
+         * Two such recipes taking the same one item are ambiguous, and the game picks
+         * between them by whichever it happened to load first. Reserving that shape of
+         * recipe for turning is what keeps every other one unmistakable - it is the reason
+         * the panel is three slabs in a row rather than one slab split.
+         */
+        private void turning(RecipeOutput output, Lamp lamp) {
+            lamp.shape().turned().ifPresent(other -> ShapelessRecipeBuilder
+                    .shapeless(RecipeCategory.DECORATIONS, LaternaRegistry.item(lamp).get())
+                    .requires(LaternaRegistry.item(
+                            new Lamp(other, lamp.wiring(), lamp.colour())).get())
+                    .unlockedBy("has_glowstone", has(Items.GLOWSTONE))
+                    .save(output, ResourceLocation.fromNamespaceAndPath(
+                            Laterna.MODID, lamp.id() + "_from_turning")));
         }
 
         /** Saved the same way whatever the pattern was, so the arms above stay patterns. */

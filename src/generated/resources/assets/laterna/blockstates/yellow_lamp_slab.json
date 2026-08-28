@@ -1,27 +1,12 @@
 {
   "variants": {
-    "facing=down": {
-      "model": "laterna:block/yellow_lamp_slab",
-      "x": 270
-    },
-    "facing=east": {
-      "model": "laterna:block/yellow_lamp_slab",
-      "y": 270
-    },
-    "facing=north": {
-      "model": "laterna:block/yellow_lamp_slab",
-      "y": 180
-    },
-    "facing=south": {
-      "model": "laterna:block/yellow_lamp_slab"
-    },
-    "facing=up": {
+    "half=bottom": {
       "model": "laterna:block/yellow_lamp_slab",
       "x": 90
     },
-    "facing=west": {
+    "half=top": {
       "model": "laterna:block/yellow_lamp_slab",
-      "y": 90
+      "x": 270
     }
   }
 }

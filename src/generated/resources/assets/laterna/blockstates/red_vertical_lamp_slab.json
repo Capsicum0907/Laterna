@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "laterna:block/red_vertical_lamp_slab",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "laterna:block/red_vertical_lamp_slab",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "laterna:block/red_vertical_lamp_slab"
+    },
+    "facing=west": {
+      "model": "laterna:block/red_vertical_lamp_slab",
+      "y": 90
+    }
+  }
+}
