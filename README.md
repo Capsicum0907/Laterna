@@ -96,12 +96,13 @@ with a lit face on it is a tile stuck to a wall; a plate flush with the surface 
 something standing out of it is a lamp bolted to one. At four by four there is room for
 both, because the base and the stem are different sizes rather than one inset in the other.
 
-⚠ **The fitting is one box, and that took three tries to accept.** A rim inside it left
-too little lamp — eight by four minus a pixel each way is six by two, a third of the face.
-A plate outside it kept the light but made the outline ten by six, which is not the shape
-being matched. There is no third place to put a rim. Simply Light's is one box as well;
-what makes theirs read as a fitting is drawn into the texture — an atlas that every model
-crops its own piece out of by its own coordinates — rather than built out of boxes.
+⚠ **The collar goes behind the light, and finding that took four passes.** A rim inside
+the face left too little lamp — eight by four minus a pixel each way is six by two, a third
+of it. A plate around the face kept the light but made the outline ten by six, which is not
+the shape being matched. Dropping the collar altogether matched the outline and lost the
+fitting. The arrangement that costs neither is the one Simply Light uses: the same eight by
+four, one pixel of it dark and against the surface, the rest lamp. **The depth is the third
+place an edge can go**, and the first three passes only ever looked across the face.
 
 **And a form may be a different size on a wall than on a floor.** The fitting is a wide
 bar where it is bolted to a wall and a small disc where it is set into a ceiling. ⚠ No

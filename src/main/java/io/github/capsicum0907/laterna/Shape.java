@@ -171,12 +171,10 @@ public enum Shape {
      * single box that gives both. So the size is asked for per face, and the model
      * generator and the outline both ask the same question.
      *
-     * <p>⚠ <b>This is the whole of the form, and for a fitting it is the whole of the
-     * light too.</b> The fitting has no plate: the mod this follows builds it as one box
-     * eight by four by three, and there is no way to keep that outline and add a plate -
-     * inside it there is not enough lamp left to take a rim out of, and outside it the
-     * outline stops being eight by four. What makes theirs read as a fitting is drawn in
-     * the texture, not built out of boxes.
+     * <p>⚠ <b>This is the whole of the form, collar and all.</b> A fitting is eight by
+     * four by three of block, of which the pixel nearest the surface is a dark collar and
+     * the rest is lamp - the collar is stacked behind the light rather than wrapped around
+     * it, which is the only arrangement that keeps both the outline and the light.
      *
      * <p>Everything else answers the same whichever face it is on, out of its depth and
      * its inset, and says so once here rather than in each of them.

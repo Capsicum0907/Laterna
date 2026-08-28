@@ -274,23 +274,26 @@ public final class LaternaDataGen {
             float wide = (float) fit.wide();
             float tall = (float) fit.tall();
             float deep = (float) fit.deep();
-            // ⚠ A bulb is a base with a stem standing out of it - two boxes, and small
-            // enough that the base reads as a base. A fitting is one box that is all lamp:
-            // its outline is only eight by four, and a plate either eats the light from
-            // the inside or spoils the outline from the outside. Theirs is one box too.
+            // ⚠ The collar is stacked in front of the light, not wrapped around it.
+            // A rim taken out of the face leaves too little lamp at eight by four, and a
+            // plate added around it spoils the outline - but a band of the same width and
+            // one pixel deep, sitting between the light and the surface, costs neither.
+            // It is what Simply Light does, and what three passes here kept missing: the
+            // depth is the third place to put an edge, and the only one that works.
+            //
+            // A bulb is different again - its stem is narrower than its base, so there the
+            // two boxes differ across the face as well.
             boolean stemmed = shape == Shape.BULB;
-            float[] base = stemmed ? box(wide, tall, 0, 1) : null;
-            float[] lit = stemmed ? box(wide - 2, tall - 2, 1, deep) : box(wide, tall, 0, deep);
+            float[] base = box(wide, tall, 0, 1);
+            float[] lit = stemmed ? box(wide - 2, tall - 2, 1, deep) : box(wide, tall, 1, deep);
             BlockModelBuilder builder = models().getBuilder(skin
                     + (facing.getAxis() == Direction.Axis.Y ? "_flat" : ""))
                     .parent(new ModelFile.UncheckedModelFile("block/block"))
                     .texture("face", modLoc("block/" + skin))
                     .texture("edge", modLoc("block/" + skin + Masters.Layer.EDGE.suffix()))
                     .texture("particle", modLoc("block/" + skin));
-            if (base != null) {
-                part(builder, base, "#edge", true);
-            }
-            part(builder, lit, "#face", base == null);
+            part(builder, base, "#edge", true);
+            part(builder, lit, "#face", false);
             return builder;
         }
 
