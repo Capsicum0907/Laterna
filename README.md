@@ -96,17 +96,24 @@ with a lit face on it is a tile stuck to a wall; a plate flush with the surface 
 something standing out of it is a lamp bolted to one. At four by four there is room for
 both, because the base and the stem are different sizes rather than one inset in the other.
 
-⚠ **The housing is the five faces that are not the light, and finding that took five
-passes.** A rim inside the face left too little lamp — eight by four minus a pixel each way
-is six by two, a third of it. A plate around the face kept the light but made the outline
-ten by six. Dropping the housing matched the outline and lost the fitting. A dark band
-behind the light was invisible from in front and left the sides shining. What it actually
-is: **one box, lit on the one face that points away from the wall and dark on the other
-five** — seen from below, a ceiling fitting shows a lit underside and dark sides, which is
-what makes it a lamp in a case rather than a glowing brick.
+⚠ **A fitting is housed differently on a wall than on a ceiling, and finding that took
+six passes.** A rim inside the face left too little lamp — eight by four minus a pixel each
+way is six by two, a third of it. A plate around the face kept the light but made the
+outline ten by six. Dropping the housing matched the outline and lost the fitting. A band
+behind the light was invisible from in front. Darkening all five other faces borrowed what
+a slab does, where the sides are cut material — but on a fitting the sides are the lamp and
+are meant to be seen. What it is:
 
-**A bulb is a body inside a shell.** A dark base, a coloured body standing out of it, and
-a translucent shell a shade larger over the body — the same nesting vanilla's beacon uses,
+- **on a ceiling or a floor**, a dark plate against the surface and the lamp below it, lit
+  on every side but the one it hangs from;
+- **on a wall**, a hood: housing down the back and along the top — an L seen from the side —
+  with the lamp filling the rest, so the light shows on the front, the underside and the
+  two ends.
+
+**A bulb is a body inside a shell.** A dark base, a dark neck, a coloured body standing out
+of that, and a translucent shell a shade larger over the body. ⚠ The neck is housing and not
+lamp: where the body meets its base there has to be something holding it, and drawing that
+in the lamp's own colour makes the light look as though it starts at the ceiling — the same nesting vanilla's beacon uses,
 though the beacon reaches it with a cutout texture rather than a translucent one. ⚠ One
 model cannot be part solid and part see-through, because the render type belongs to the
 whole of it, so the two are separate models joined by the game's composite loader.

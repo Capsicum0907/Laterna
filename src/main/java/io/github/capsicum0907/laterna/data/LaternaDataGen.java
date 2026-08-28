@@ -277,51 +277,82 @@ public final class LaternaDataGen {
             float deep = (float) fit.deep();
             // ⚠ The model gets a name per face, because a fitting is a different size
             // on a wall than on a floor - but the textures do not: there is one set per
-            // colour, and both models wear it.
-            String name = skin + (facing.getAxis() == Direction.Axis.Y ? "_flat" : "");
-            return shape == Shape.BULB
-                    ? bulb(name, skin, wide, tall, deep)
-                    : housing(name, skin, wide, tall, deep);
+            // colour, and every model of that colour wears it.
+            boolean flat = facing.getAxis() == Direction.Axis.Y;
+            String name = skin + (flat ? "_flat" : "");
+            if (shape == Shape.BULB) {
+                return bulb(name, skin, wide, tall, deep);
+            }
+            return flat
+                    ? plated(name, skin, wide, tall, deep)
+                    : hooded(name, skin, wide, tall, deep);
         }
 
         /**
-         * A fitting: one box, lit on the one face that points away from the wall.
+         * A fitting on a ceiling or a floor: a dark plate against the surface and the lamp
+         * below it.
          *
-         * <p>⚠ <b>The housing is the other five faces, not a band around the front.</b>
-         * Seen from below, a ceiling fitting shows a lit underside and dark sides; that is
-         * what makes it a lamp in a case rather than a glowing brick. Three earlier passes
-         * put the dark part around the light or behind it, and both left the sides
-         * shining.
+         * <p>Lit on every side but the one against the plate, because from underneath a
+         * ceiling light you see its underside and its edges at once and both are the lamp.
          */
-        private ModelFile housing(String name, String skin, float wide, float tall, float deep) {
-            return dressed(models().getBuilder(name), skin)
-                    .element()
-                        .from((16 - wide) / 2, (16 - tall) / 2, 0)
-                        .to((16 + wide) / 2, (16 + tall) / 2, deep)
-                        .allFaces((direction, face) -> {
-                            face.texture(direction == Direction.SOUTH ? "#face" : "#edge");
-                            face.uvs(0, 0, 16, 16);
-                            if (direction == Direction.NORTH) {
-                                face.cullface(Direction.NORTH);
-                            }
-                        })
-                    .end();
+        private ModelFile plated(String name, String skin, float wide, float tall, float deep) {
+            BlockModelBuilder builder = dressed(models().getBuilder(name), skin);
+            part(builder, box(wide, tall, 0, 1), "#edge", true);
+            part(builder, box(wide, tall, 1, deep), "#face", false);
+            return builder;
         }
 
         /**
-         * A bulb: a dark base, a coloured body standing out of it, and a shell over that.
+         * A fitting on a wall: a hood over a lamp.
          *
-         * <p>⚠ <b>The shell is a second model, drawn translucent.</b> One model cannot
-         * be part solid and part see-through - the render type belongs to the whole of it -
-         * so the two are separate models joined by the game's composite loader, which is
-         * how the mod this follows does it too. Painting the body brighter is not the same
-         * thing: what reads is a body seen <em>through</em> something.
+         * <p>⚠ <b>The housing is an L seen from the side</b> - down the back, where it
+         * meets the wall, and along the top, where the hood is. The lamp fills the rest, so
+         * the light shows on the front, the underside and the two ends, and what you see
+         * from above is all housing.
+         *
+         * <pre>
+         *     back  #■■■■■   the top of the fitting, its whole depth
+         *      of    ■.....
+         *      it    ■.....   the lamp
+         *            ■.....
+         * </pre>
+         *
+         * <p>Painting all five faces dark, which is what a slab does, is what this replaces:
+         * on a slab the sides are cut material and belong to the block, but on a fitting
+         * they are the lamp and are meant to be seen.
+         */
+        private ModelFile hooded(String name, String skin, float wide, float tall, float deep) {
+            float low = (16 - tall) / 2;
+            float high = (16 + tall) / 2;
+            BlockModelBuilder builder = dressed(models().getBuilder(name), skin);
+            part(builder, box(wide, tall, 0, 1), "#edge", true);
+            part(builder, new float[] { (16 - wide) / 2, high - 1, 1,
+                    (16 + wide) / 2, high, deep }, "#edge", false);
+            part(builder, new float[] { (16 - wide) / 2, low, 1,
+                    (16 + wide) / 2, high - 1, deep }, "#face", false);
+            return builder;
+        }
+
+        /**
+         * A bulb: a dark base, a dark neck, a coloured body, and a shell over the body.
+         *
+         * <p>⚠ <b>The neck is housing, not lamp.</b> Where the body meets its base there
+         * has to be something holding it, and drawing that in the lamp's own colour makes
+         * the light look as though it starts at the ceiling. One pixel of dark between the
+         * two is the whole difference.
+         *
+         * <p>⚠ <b>The shell is a second model, drawn translucent.</b> One model cannot be
+         * part solid and part see-through - the render type belongs to the whole of it - so
+         * the two are separate models joined by the game's composite loader. This is the
+         * nesting vanilla's beacon uses as well, though the beacon reaches it with a cutout
+         * texture rather than a translucent one.
          */
         private ModelFile bulb(String name, String skin, float wide, float tall, float deep) {
             BlockModelBuilder solid = dressed(models().getBuilder(name + "_body"), skin)
                     .renderType("minecraft:solid");
             part(solid, box(wide, tall, 0, 1), "#edge", true);
-            part(solid, box(wide - 2, tall - 2, 1, deep), "#face", false);
+            part(solid, box(wide - 2, tall - 2, 1, 2), "#edge", false);
+            part(solid, box(wide - 2, tall - 2, 2, deep), "#face", false);
 
             BlockModelBuilder shell = models().getBuilder(name + "_shell")
                     .parent(new ModelFile.UncheckedModelFile("block/block"))
@@ -329,10 +360,10 @@ public final class LaternaDataGen {
                     .ao(false)
                     .texture("halo", modLoc("block/" + skin + Masters.Layer.HALO.suffix()))
                     .texture("particle", modLoc("block/" + skin));
-            // A shade wider than the body and standing a shade clear of the base, so the
-            // body is seen through it rather than coincident with it.
+            // A shade wider than the body and clear of the neck, so the body is seen
+            // through it rather than coincident with it.
             shell.element()
-                    .from((16 - wide) / 2 + 0.75F, (16 - tall) / 2 + 0.75F, 1.5F)
+                    .from((16 - wide) / 2 + 0.75F, (16 - tall) / 2 + 0.75F, 2)
                     .to((16 + wide) / 2 - 0.75F, (16 + tall) / 2 - 0.75F, deep + 0.25F)
                     .shade(false)
                     .allFaces((direction, face) -> {
