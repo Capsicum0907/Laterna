@@ -19,6 +19,11 @@ public class Laterna {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public Laterna(IEventBus modEventBus, ModContainer modContainer) {
-        LOGGER.info("Laterna {} loaded.", modContainer.getModInfo().getVersion());
+        LaternaRegistry.BLOCKS.register(modEventBus);
+        LaternaRegistry.ITEMS.register(modEventBus);
+        LaternaRegistry.TABS.register(modEventBus);
+
+        LOGGER.info("Laterna {} loaded, {} lamps.", modContainer.getModInfo().getVersion(),
+                Lamp.all().size());
     }
 }

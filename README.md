@@ -4,7 +4,8 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 *Laterna* is Latin for a lantern.
 
-> **Status: scaffold only.** The mod loads and does nothing.
+> **Status: the cube, in sixteen colours, both wirings — 32 blocks.** Everything else in
+> the table below is still to come. Six game tests cover what the wirings claim.
 
 ## Target
 
@@ -16,8 +17,8 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 ## Design
 
-**One product is the source of everything.** A lamp is a `Shape` and a `DyeColor`,
-and nothing else. Registration, block models, textures, loot tables, recipes,
+**One product is the source of everything.** A lamp is a `Shape`, a `Wiring` and a
+`DyeColor`, and nothing else. Registration, block models, textures, loot tables, recipes,
 language and tags are all derived from that single product at data-generation
 time. Adding a shape is one entry in an enum; adding a colour is not possible,
 because the sixteen come from the game.
@@ -36,10 +37,16 @@ white. A frame comes out at `0.34`, a glowing face at `0.80`. Parts that must
 untinted layer composited over the tinted one.
 
 **No block entities and no particles.** Light comes from
-`lightLevel(state -> state.getValue(ON) ? 15 : 0)`, and redstone only chooses
+`lightLevel(state -> state.getValue(LIT) ? 15 : 0)`, and redstone only chooses
 which state the block is in. A lamp costs the game exactly what a stone block costs.
 
-**Inverted lamps are separate blocks, and have to be.** `ON` is a block state, so
+**Switched immediately, both ways.** Vanilla's redstone lamp waits four ticks before
+going dark so a signal with a one-tick gap does not blink. This one does not: the delay
+needs a scheduled tick whose condition has to be wiring-aware, and getting that backwards
+is invisible until an inverted lamp behaves strangely. If the flicker turns out to matter
+it goes in `LampBlock#lit`, which is the one place either wiring asks the question.
+
+**Inverted lamps are separate blocks, and have to be.** `LIT` is a block state, so
 it does not survive being carried as an item; a lamp always returns to its default
 when placed. "Normal" and "inverted" are therefore two blocks with the same
 appearance whose only difference is that default, converted into each other by
@@ -53,7 +60,7 @@ and mixing the two kinds is what makes a scaffold stall.
 
 | Shape | Blocks | Note |
 |---|---|---|
-| Illuminant block | 32 | Full cube, redstone, normal + inverted |
+| **Lamp** | **32** | **Done.** Full cube, redstone, normal + inverted |
 | Slab | 16 | 8px, any of six faces, waterloggable |
 | Panel | 16 | 4px, likewise |
 | **Recessed spotlight** | 16 | **Zero thickness.** A round lens in a grey ring |
@@ -85,6 +92,14 @@ Three things follow from having no thickness:
   reads as metal and the lens as light. (NeoForge renamed this to `light_emission`
   in 21.11; 1.21.1 predates that.)
 
+### Recipes
+
+The white lamp is the only one made of anything: glowstone in a frame of stone, around a
+pinch of redstone — or around a redstone torch, which is the inverted one and is also the
+difference between them in the world. Every other colour is eight lamps around a dye, the
+way the game dyes glass, taken through a tag per form and wiring so that dyeing an
+inverted lamp gives an inverted lamp back and no recipe ever names a colour.
+
 ### What the colours are, and are not
 
 Vanilla light is monochrome. Sixteen colours means sixteen coloured *textures*
@@ -105,12 +120,13 @@ gradlew runData           # regenerate models, textures, recipes and language
 ## Roadmap
 
 - [x] **0** — scaffold; the mod loads
-- [ ] **1** — illuminant block, sixteen colours, redstone, normal and inverted;
-      the generator that produces all of it
+- [x] **1** — the cube, sixteen colours, redstone, normal and inverted, and the
+      generator that produces all of it: blocks, models, textures, loot, recipes,
+      language, tags and a creative tab, none of which names a colour
 - [ ] **2** — the recessed spotlight, proving a shape can be added to that generator
 - [ ] **3** — slab and panel, on any of six faces
 - [ ] **4** — bulb, fixture, rod
-- [ ] **5** — checked by game tests rather than by eye
+- [ ] **5** — each shape checked by game tests as it lands, rather than by eye
 
 ## Related
 

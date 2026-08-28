@@ -1,0 +1,20 @@
+{
+  "values": [
+    "laterna:white_lamp",
+    "laterna:orange_lamp",
+    "laterna:magenta_lamp",
+    "laterna:light_blue_lamp",
+    "laterna:yellow_lamp",
+    "laterna:lime_lamp",
+    "laterna:pink_lamp",
+    "laterna:gray_lamp",
+    "laterna:light_gray_lamp",
+    "laterna:cyan_lamp",
+    "laterna:purple_lamp",
+    "laterna:blue_lamp",
+    "laterna:brown_lamp",
+    "laterna:green_lamp",
+    "laterna:red_lamp",
+    "laterna:black_lamp"
+  ]
+}
