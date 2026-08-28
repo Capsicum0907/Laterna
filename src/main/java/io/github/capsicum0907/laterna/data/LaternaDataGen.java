@@ -249,6 +249,11 @@ public final class LaternaDataGen {
          */
         private ModelFile box(Shape shape, String skin) {
             return models().getBuilder(skin)
+                    // The item is this same model, and a model with no parent inherits no
+                    // display transforms - so it was drawn square-on in the hand and in
+                    // the slot, which is to say flat. block/block carries nothing but
+                    // those transforms, and is what every cube in the game is built on.
+                    .parent(new ModelFile.UncheckedModelFile("block/block"))
                     .texture("face", modLoc("block/" + skin))
                     .texture("edge", modLoc("block/" + skin + Masters.Layer.EDGE.suffix()))
                     .texture("particle", modLoc("block/" + skin))
