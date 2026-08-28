@@ -41,6 +41,10 @@ public final class Masters {
     private static final float HALO_LEVEL = 0.86F;
     private static final float HALO_ALPHA = 0.45F;
 
+    /** The case of a cased lamp: nearer its own colour than the bulb's shell, and thinner. */
+    private static final float PANE_LEVEL = 0.62F;
+    private static final float PANE_ALPHA = 0.24F;
+
     private static final float FRAME_UNLIT = 0.20F;
     private static final float FACE_UNLIT = 0.34F;
     private static final float FALLOFF_UNLIT = 0.05F;
@@ -122,8 +126,12 @@ public final class Masters {
             // texture comes out of that as a long white ellipse - which is what it looked
             // like. Nothing shaped survives being stretched that far.
             case ROD -> flat();
-            // The core is a plain block of light; what shapes it is the case around it.
-            case CASED -> layer.equals(Layer.HALO) ? halo() : flat();
+            // ⚠ The core is a lamp, not a plain block of light - it is the cube's own
+            // face, drawn with a two-pixel frame so that shrunk onto the core's eight
+            // pixels the frame is still a pixel. The case around it is clearer than a
+            // bulb's shell: at a bulb's size a milky film reads as glass, but stretched
+            // over a whole block the same film is fog, and the lamp inside disappears.
+            case CASED -> layer.equals(Layer.HALO) ? pane() : face(true, 2);
             case SPOTLIGHT -> layer.equals(Layer.RING) ? ring() : lens();
             // ⚠ Frameless, because these are shown small. The face of a cube is drawn
             // at sixteen pixels and its one-pixel border reads; stretched onto a face six
@@ -148,6 +156,15 @@ public final class Masters {
      * face alone has no edge, and a row of them merges.
      */
     private static Master face(boolean lit) {
+        return face(lit, 1);
+    }
+
+    /**
+     * @param border how many pixels of frame, for a face that will be shown shrunk
+     *     ⚠ a one-pixel frame stretched onto an eight-pixel face is half a pixel, which
+     *     is a smudge; drawn two thick it lands back on a pixel boundary.
+     */
+    private static Master face(boolean lit, int border) {
         float frame = lit ? FRAME_LIT : FRAME_UNLIT;
         float centre = lit ? FACE_LIT : FACE_UNLIT;
         float falloff = lit ? FALLOFF_LIT : FALLOFF_UNLIT;
@@ -157,7 +174,7 @@ public final class Masters {
         for (int y = 0; y < Master.SIZE; y++) {
             for (int x = 0; x < Master.SIZE; x++) {
                 master.alpha()[y][x] = 1.0F;
-                if (x == 0 || y == 0 || x == last || y == last) {
+                if (x < border || y < border || x > last - border || y > last - border) {
                     master.level()[y][x] = frame;
                 } else {
                     master.level()[y][x] = centre - falloff * squared(x, y);
@@ -249,6 +266,18 @@ public final class Masters {
             for (int x = 0; x < Master.SIZE; x++) {
                 master.alpha()[y][x] = HALO_ALPHA;
                 master.level()[y][x] = HALO_LEVEL;
+            }
+        }
+        return master;
+    }
+
+    /** The case around a whole block: enough to see, little enough to see through. */
+    private static Master pane() {
+        Master master = Master.blank();
+        for (int y = 0; y < Master.SIZE; y++) {
+            for (int x = 0; x < Master.SIZE; x++) {
+                master.alpha()[y][x] = PANE_ALPHA;
+                master.level()[y][x] = PANE_LEVEL;
             }
         }
         return master;
