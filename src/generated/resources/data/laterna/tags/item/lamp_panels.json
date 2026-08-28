@@ -1,0 +1,20 @@
+{
+  "values": [
+    "laterna:white_lamp_panel",
+    "laterna:orange_lamp_panel",
+    "laterna:magenta_lamp_panel",
+    "laterna:light_blue_lamp_panel",
+    "laterna:yellow_lamp_panel",
+    "laterna:lime_lamp_panel",
+    "laterna:pink_lamp_panel",
+    "laterna:gray_lamp_panel",
+    "laterna:light_gray_lamp_panel",
+    "laterna:cyan_lamp_panel",
+    "laterna:purple_lamp_panel",
+    "laterna:blue_lamp_panel",
+    "laterna:brown_lamp_panel",
+    "laterna:green_lamp_panel",
+    "laterna:red_lamp_panel",
+    "laterna:black_lamp_panel"
+  ]
+}

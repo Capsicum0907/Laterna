@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "laterna:block/lime_lamp_panel",
+      "x": 270
+    },
+    "facing=east": {
+      "model": "laterna:block/lime_lamp_panel",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "laterna:block/lime_lamp_panel",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "laterna:block/lime_lamp_panel"
+    },
+    "facing=up": {
+      "model": "laterna:block/lime_lamp_panel",
+      "x": 90
+    },
+    "facing=west": {
+      "model": "laterna:block/lime_lamp_panel",
+      "y": 90
+    }
+  }
+}

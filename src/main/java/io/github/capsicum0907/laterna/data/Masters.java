@@ -80,7 +80,7 @@ public final class Masters {
 
     public static List<Layer> layers(Shape shape) {
         return switch (shape) {
-            case LAMP -> List.of(Layer.BODY);
+            case LAMP, SLAB, PANEL -> List.of(Layer.BODY);
             case SPOTLIGHT -> List.of(Layer.BODY, Layer.RING);
         };
     }
@@ -103,7 +103,10 @@ public final class Masters {
      */
     public static Master of(Shape shape, Layer layer, boolean lit) {
         return switch (shape) {
-            case LAMP -> face(lit);
+            // The slab and the panel are the cube cut down, and wear its lit face. They
+            // get files of their own rather than borrowing the cube's, so that a resource
+            // pack can retexture a panel without touching every lamp in the world.
+            case LAMP, SLAB, PANEL -> face(lit);
             case SPOTLIGHT -> layer.equals(Layer.RING) ? ring() : lens();
         };
     }

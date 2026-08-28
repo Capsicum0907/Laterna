@@ -4,9 +4,9 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 *Laterna* is Latin for a lantern.
 
-> **Status: the cube and the recessed spotlight — 48 blocks.** Everything else in the
-> table below is still to come. Nine game tests cover what they claim, except where a
-> test cannot reach: see the note under the spotlight.
+> **Status: the cube, the recessed spotlight, the slab and the panel — 80 blocks.**
+> Everything else in the table below is still to come. Ten game tests cover what they
+> claim, except where a test cannot reach: see the note under the spotlight.
 
 ## Target
 
@@ -66,8 +66,8 @@ and mixing the two kinds is what makes a scaffold stall.
 | Shape | Blocks | Note |
 |---|---|---|
 | **Lamp** | **32** | **Done.** Full cube, redstone, normal + inverted |
-| Slab | 16 | 8px, any of six faces, waterloggable |
-| Panel | 16 | 4px, likewise |
+| **Lamp slab** | **16** | **Done.** 8px, any of six faces, waterloggable |
+| **Lamp panel** | **16** | **Done.** 4px, likewise |
 | **Recessed spotlight** | 16 | **Done.** Zero thickness, a round lens in a grey ring |
 | Bulb | 16 | Small fitting, always lit |
 | Fixture | 16 | Wall/ceiling/floor fitting |
@@ -76,6 +76,16 @@ and mixing the two kinds is what makes a scaffold stall.
 | *Lamp post* | — | Deferred: three blocks that must stay consistent |
 
 That is **128 blocks** from eight enum entries.
+
+The three forms that cling to a face — the spotlight, the slab and the panel — are one
+block class, `PlateBlock`, and differ only in how deep they are. Each sits against one
+face of its own cell, turns with `FACING`, holds water, and takes its depth from the one
+number on `Shape`. That number is read by the outline and by the box the model is built
+from, and by nothing else.
+
+The ids carry `lamp` in front of them — `white_lamp_slab`, not `white_slab` — because a
+`white_slab` reads as stone and a `white_panel` reads as a building block. Only the
+spotlight, which is nothing else's name, stands alone.
 
 ### The spotlight has no thickness
 
@@ -118,11 +128,15 @@ still passes with every light on the wrong surface. That one is checked by looki
 
 ### Recipes
 
-Each shape has exactly one recipe of its own, in white. The cube is glowstone in a frame
-of stone around a pinch of redstone — or around a redstone torch, which is the inverted
-one, and is the difference between the two in the world as well as on the bench. The
-spotlight is the same glowstone in a ring of iron nuggets, which is the thing it is: a
-lens in a metal rim, and cheap, because eight come out.
+Each shape has one recipe of its own, in white. The cube is glowstone in a frame of stone
+around a pinch of redstone — or around a redstone torch, which is the inverted one, and is
+the difference between the two in the world as well as on the bench. The spotlight is the
+same glowstone in a ring of iron nuggets, which is the thing it is: a lens in a metal rim,
+and cheap, because eight come out. The slab is a row of glowstone over a row of stone.
+
+The panel is the exception: it is a slab split in two, the way the game splits its own
+slabs. Two patterns of stone and glowstone that differed only in arrangement would have
+been arbitrary, and a shapeless recipe of one input cannot be ambiguous with anything.
 
 Every other colour is eight of the same thing around a dye, the way the game dyes glass,
 taken through a tag per shape and wiring so that dyeing an inverted lamp gives an inverted
@@ -154,7 +168,9 @@ gradlew runData           # regenerate models, textures, recipes and language
 - [x] **2** — the recessed spotlight: a second shape, a third wiring (always lit, and so
       no `LIT` state at all), a second texture layer, and its own geometry and item model,
       added without touching how the first shape works
-- [ ] **3** — slab and panel, on any of six faces
+- [x] **3** — slab and panel, on any of six faces: one `PlateBlock` for all three
+      face-clinging forms, parameterised by depth, and the boxes derived from the
+      direction rather than listed
 - [ ] **4** — bulb, fixture, rod
 - [ ] **5** — each shape checked by game tests as it lands, rather than by eye
 

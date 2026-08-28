@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "laterna:block/cyan_lamp_panel",
+      "x": 270
+    },
+    "facing=east": {
+      "model": "laterna:block/cyan_lamp_panel",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "laterna:block/cyan_lamp_panel",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "laterna:block/cyan_lamp_panel"
+    },
+    "facing=up": {
+      "model": "laterna:block/cyan_lamp_panel",
+      "x": 90
+    },
+    "facing=west": {
+      "model": "laterna:block/cyan_lamp_panel",
+      "y": 90
+    }
+  }
+}

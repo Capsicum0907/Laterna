@@ -26,7 +26,7 @@ public enum Shape {
      * <p>Hardness is glowstone's, and so is the sound: it is a lamp made of the stuff,
      * and a player who has broken glowstone already knows how long this takes.
      */
-    LAMP("lamp", SoundType.GLASS, 0.3F, List.of(Wiring.NORMAL, Wiring.INVERTED)),
+    LAMP("lamp", SoundType.GLASS, 0.3F, 16.0, List.of(Wiring.NORMAL, Wiring.INVERTED)),
 
     /**
      * A round lens in a grey ring, set flush into whatever face it is put on.
@@ -35,17 +35,35 @@ public enum Shape {
      * shape one pixel deep only because a block with none cannot be pointed at or broken.
      * Always lit, so sixteen blocks and one state.
      */
-    SPOTLIGHT("spotlight", SoundType.GLASS, 0.3F, List.of(Wiring.ALWAYS));
+    SPOTLIGHT("spotlight", SoundType.GLASS, 0.3F, 1.0, List.of(Wiring.ALWAYS)),
+
+    /**
+     * Half a lamp, laid against any of the six faces. The everyday one: a ceiling of
+     * these is a lit ceiling.
+     */
+    SLAB("lamp_slab", SoundType.GLASS, 0.3F, 8.0, List.of(Wiring.ALWAYS)),
+
+    /**
+     * A quarter as deep again, for a light that is meant to disappear into the surface
+     * it is set in.
+     *
+     * <p>The name carries {@code lamp} in front of it, as the slab does, because
+     * {@code white_panel} and {@code white_slab} read as building blocks rather than as
+     * lights - and {@code white_slab} in particular reads as stone.
+     */
+    PANEL("lamp_panel", SoundType.GLASS, 0.3F, 4.0, List.of(Wiring.ALWAYS));
 
     private final String id;
     private final SoundType sound;
     private final float strength;
+    private final double depth;
     private final List<Wiring> wirings;
 
-    Shape(String id, SoundType sound, float strength, List<Wiring> wirings) {
+    Shape(String id, SoundType sound, float strength, double depth, List<Wiring> wirings) {
         this.id = id;
         this.sound = sound;
         this.strength = strength;
+        this.depth = depth;
         this.wirings = wirings;
     }
 
@@ -64,6 +82,20 @@ public enum Shape {
 
     public List<Wiring> wirings() {
         return wirings;
+    }
+
+    /**
+     * How deep this form is, in pixels of the sixteen.
+     *
+     * <p><b>One number, read by three things</b>: the block's outline, the box the model
+     * is built from, and nothing else. The cube fills its cell and so is sixteen.
+     *
+     * <p>⚠ <b>The spotlight is one here and nought in the model.</b> Its drawing is a
+     * plate with no thickness; the pixel is what makes it possible to point at. That gap
+     * is deliberate, and it is the only place the two numbers differ.
+     */
+    public double depth() {
+        return depth;
     }
 
     /**

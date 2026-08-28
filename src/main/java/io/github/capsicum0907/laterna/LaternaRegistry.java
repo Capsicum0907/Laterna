@@ -51,7 +51,8 @@ public final class LaternaRegistry {
     private static Function<BlockBehaviour.Properties, Block> built(Lamp lamp) {
         return switch (lamp.shape()) {
             case LAMP -> properties -> new LampBlock(lamp.wiring(), properties);
-            case SPOTLIGHT -> SpotlightBlock::new;
+            case SPOTLIGHT, SLAB, PANEL ->
+                    properties -> new PlateBlock(lamp.shape().depth(), properties);
         };
     }
 
@@ -73,9 +74,11 @@ public final class LaternaRegistry {
                         : state -> 15);
         return switch (lamp.shape()) {
             case LAMP -> properties;
-            // A plate is not a cube: it must not hide the face behind it, and being flush
-            // means being nothing to stand on. See SpotlightBlock.
+            // A plate is not a cube and must not hide the face behind it. Recessed also
+            // means flush, so the spotlight is nothing to stand on - but a slab is a step
+            // and is supposed to be. See PlateBlock.
             case SPOTLIGHT -> properties.noOcclusion().noCollission();
+            case SLAB, PANEL -> properties.noOcclusion();
         };
     }
 

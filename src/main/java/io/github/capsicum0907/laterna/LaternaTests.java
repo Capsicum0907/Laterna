@@ -29,7 +29,8 @@ public final class LaternaTests {
 
     private static final Lamp NORMAL = new Lamp(Shape.LAMP, Wiring.NORMAL, DyeColor.WHITE);
     private static final Lamp INVERTED = new Lamp(Shape.LAMP, Wiring.INVERTED, DyeColor.WHITE);
-    private static final Lamp SPOTLIGHT = new Lamp(Shape.SPOTLIGHT, Wiring.ALWAYS, DyeColor.WHITE);
+    /** Every form that clings to a face, which is every form the plate tests are about. */
+    private static final Shape[] PLATES = { Shape.SPOTLIGHT, Shape.SLAB, Shape.PANEL };
 
     private LaternaTests() {
     }
@@ -128,54 +129,37 @@ public final class LaternaTests {
     }
 
     /**
-     * A spotlight on each of the six faces, lit and facing the way it was put.
+     * Every plate on each of the six faces, lit and facing the way it was put.
      *
-     * <p>⚠ <b>What this cannot check is where the plate is drawn.</b> The rotation table
-     * lives in the model generator, and a test can only see the state - so if the
+     * <p>⚠ <b>What this cannot check is where the plate is drawn.</b> The rotation
+     * table lives in the model generator, and a test can only see the state - so if the
      * rotations were inverted, this would pass with every light on the wrong surface.
      * That one is checked by looking.
      */
     @GameTest(template = TestStructures.FLOOR)
-    public static void spotlightLightsOnEveryFace(GameTestHelper helper) {
-        for (Direction facing : Direction.values()) {
-            BlockPos at = new BlockPos(1 + facing.ordinal(), 2, 1);
-            helper.setBlock(at, LaternaRegistry.block(SPOTLIGHT).get().defaultBlockState()
-                    .setValue(SpotlightBlock.FACING, facing));
+    public static void platesLightOnEveryFace(GameTestHelper helper) {
+        for (Shape shape : PLATES) {
+            for (Direction facing : Direction.values()) {
+                helper.setBlock(at(shape, facing), plate(shape).defaultBlockState()
+                        .setValue(PlateBlock.FACING, facing));
+            }
         }
         helper.succeedWhen(() -> {
-            for (Direction facing : Direction.values()) {
-                BlockPos at = new BlockPos(1 + facing.ordinal(), 2, 1);
-                BlockState state = helper.getBlockState(at);
-                if (state.getValue(SpotlightBlock.FACING) != facing) {
-                    throw new GameTestAssertException("spotlight at " + at + " turned");
+            for (Shape shape : PLATES) {
+                for (Direction facing : Direction.values()) {
+                    BlockPos where = at(shape, facing);
+                    if (helper.getBlockState(where).getValue(PlateBlock.FACING) != facing) {
+                        throw new GameTestAssertException(shape + " at " + where + " turned");
+                    }
+                    brightness(helper, where, 15);
                 }
-                brightness(helper, at, 15);
             }
         });
     }
 
     /**
-     * ⚠ <b>The two shapes a plate has, and why they differ.</b> Nothing to walk on, so a
-     * light set into a floor is flush with it; but still something to point at, because a
-     * {@code VoxelShape} of no thickness is a block that cannot be selected or broken.
-     * This is the trap the form is built around, and it is cheap to check.
-     */
-    @GameTest(template = TestStructures.FLOOR)
-    public static void spotlightIsFlushButStillThere(GameTestHelper helper) {
-        helper.setBlock(WHERE, LaternaRegistry.block(SPOTLIGHT).get());
-        BlockState state = helper.getBlockState(WHERE);
-        BlockPos absolute = helper.absolutePos(WHERE);
-        if (!state.getCollisionShape(helper.getLevel(), absolute).isEmpty()) {
-            throw new GameTestAssertException("a recessed light should not be a step");
-        }
-        if (state.getShape(helper.getLevel(), absolute).isEmpty()) {
-            throw new GameTestAssertException("a light nobody can point at cannot be broken");
-        }
-        helper.succeed();
-    }
-
-    /**
-     * ⚠ <b>The outline sits on the face the plate is drawn on, for all six.</b>
+     * ⚠ <b>The outline sits on the face the plate is drawn on, for all six and for
+     * every depth.</b>
      *
      * <p>This is the test that was missing. The six shapes used to be a list written out
      * by hand, copied from another mod with east and west swapped in the copying, and the
@@ -183,41 +167,79 @@ public final class LaternaTests {
      * of the six were right, which is why nothing looked wrong until one was pointed at.
      *
      * <p>It cannot see where the model was drawn - but the model's rotation and this
-     * shape now come from the same {@link SpotlightBlock#against}, so a mistake there
-     * moves both together instead of pulling them apart.
+     * shape now come from the same {@link PlateBlock#against}, so a mistake there moves
+     * both together instead of pulling them apart.
      */
     @GameTest(template = TestStructures.FLOOR)
-    public static void spotlightOutlineIsWhereThePlateIs(GameTestHelper helper) {
-        for (Direction facing : Direction.values()) {
-            helper.setBlock(WHERE, LaternaRegistry.block(SPOTLIGHT).get().defaultBlockState()
-                    .setValue(SpotlightBlock.FACING, facing));
-            Direction against = SpotlightBlock.against(facing);
-            VoxelShape shape = helper.getBlockState(WHERE)
-                    .getShape(helper.getLevel(), helper.absolutePos(WHERE));
-            boolean high = against.getAxisDirection() == Direction.AxisDirection.POSITIVE;
-            double near = high ? shape.min(against.getAxis()) : shape.max(against.getAxis());
-            double thickness = SpotlightBlock.DEPTH / 16.0;
-            double wanted = high ? 1.0 - thickness : thickness;
-            if (Math.abs(near - wanted) > 1.0E-6) {
-                throw new GameTestAssertException("a light facing " + facing
-                        + " should hug its " + against + " face, but its outline reaches "
-                        + near);
+    public static void plateOutlinesAreWhereThePlatesAre(GameTestHelper helper) {
+        for (Shape shape : PLATES) {
+            for (Direction facing : Direction.values()) {
+                helper.setBlock(WHERE, plate(shape).defaultBlockState()
+                        .setValue(PlateBlock.FACING, facing));
+                Direction against = PlateBlock.against(facing);
+                VoxelShape outline = helper.getBlockState(WHERE)
+                        .getShape(helper.getLevel(), helper.absolutePos(WHERE));
+                boolean high = against.getAxisDirection() == Direction.AxisDirection.POSITIVE;
+                double near = high
+                        ? outline.min(against.getAxis())
+                        : outline.max(against.getAxis());
+                double depth = shape.depth() / 16.0;
+                double wanted = high ? 1.0 - depth : depth;
+                if (Math.abs(near - wanted) > 1.0E-6) {
+                    throw new GameTestAssertException(shape + " facing " + facing
+                            + " should hug its " + against + " face, but its outline reaches "
+                            + near);
+                }
             }
         }
         helper.succeed();
     }
 
-    /** Placed in water it holds the water, rather than leaving a bubble in it. */
+    /**
+     * ⚠ <b>The two shapes a plate has, and where they part company.</b> A
+     * {@code VoxelShape} of no thickness is a block that cannot be selected or broken, so
+     * every plate keeps one to be pointed at. What differs is whether there is anything
+     * to stand on: recessed means flush, so the spotlight has no collision at all, while
+     * a slab is a step and is supposed to be.
+     */
     @GameTest(template = TestStructures.FLOOR)
-    public static void spotlightHoldsWater(GameTestHelper helper) {
-        helper.setBlock(WHERE, LaternaRegistry.block(SPOTLIGHT).get().defaultBlockState()
-                .setValue(SpotlightBlock.WATERLOGGED, true));
-        helper.succeedWhen(() -> {
-            if (!helper.getBlockState(WHERE).getFluidState().is(Fluids.WATER)) {
-                throw new GameTestAssertException("the water went missing");
+    public static void onlyTheRecessedOneIsNotAStep(GameTestHelper helper) {
+        for (Shape shape : PLATES) {
+            helper.setBlock(WHERE, plate(shape));
+            BlockState state = helper.getBlockState(WHERE);
+            BlockPos absolute = helper.absolutePos(WHERE);
+            if (state.getShape(helper.getLevel(), absolute).isEmpty()) {
+                throw new GameTestAssertException(shape + " cannot be pointed at");
             }
-            brightness(helper, WHERE, 15);
-        });
+            boolean step = !state.getCollisionShape(helper.getLevel(), absolute).isEmpty();
+            if (step != (shape != Shape.SPOTLIGHT)) {
+                throw new GameTestAssertException(shape + " is "
+                        + (step ? "something" : "nothing") + " to stand on, which is wrong");
+            }
+        }
+        helper.succeed();
+    }
+
+    /** Placed in water they hold the water, rather than leaving a bubble in it. */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void platesHoldWater(GameTestHelper helper) {
+        for (Shape shape : PLATES) {
+            helper.setBlock(WHERE, plate(shape).defaultBlockState()
+                    .setValue(PlateBlock.WATERLOGGED, true));
+            if (!helper.getBlockState(WHERE).getFluidState().is(Fluids.WATER)) {
+                throw new GameTestAssertException("the water went missing under a " + shape);
+            }
+        }
+        helper.succeed();
+    }
+
+    private static net.minecraft.world.level.block.Block plate(Shape shape) {
+        return LaternaRegistry.block(new Lamp(shape, Wiring.ALWAYS, DyeColor.WHITE)).get();
+    }
+
+    /** A spot of its own for each form and face, so one test can hold all eighteen. */
+    private static BlockPos at(Shape shape, Direction facing) {
+        return new BlockPos(1 + facing.ordinal(), 1 + shape.ordinal(), 1);
     }
 
     private static void lit(GameTestHelper helper, BlockPos pos, boolean expected) {
