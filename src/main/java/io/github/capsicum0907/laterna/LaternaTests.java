@@ -13,8 +13,10 @@ import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -260,6 +262,55 @@ public final class LaternaTests {
                     .setValue(PlateBlock.WATERLOGGED, true));
             if (!helper.getBlockState(WHERE).getFluidState().is(Fluids.WATER)) {
                 throw new GameTestAssertException("the water went missing under a " + shape);
+            }
+        }
+        helper.succeed();
+    }
+
+    /**
+     * Two slabs laid together are one whole block, and are still worth two.
+     *
+     * <p>The shape is the cell, not half of it, and the loot table for a stacked form is
+     * the game's own - writing the ordinary one would quietly halve what a doubled slab
+     * is worth.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void stackedSlabsFillTheirCell(GameTestHelper helper) {
+        StackingPlateBlock slab = (StackingPlateBlock) plate(Shape.SLAB);
+        helper.setBlock(WHERE, slab.defaultBlockState()
+                .setValue(StackingPlateBlock.TYPE, SlabType.DOUBLE));
+        BlockState state = helper.getBlockState(WHERE);
+        if (!slab.whole(state)) {
+            throw new GameTestAssertException("a stacked slab does not know it is whole");
+        }
+        if (!Block.isShapeFullBlock(state.getShape(helper.getLevel(),
+                helper.absolutePos(WHERE)))) {
+            throw new GameTestAssertException("a stacked slab is not a whole block");
+        }
+        helper.succeed();
+    }
+
+    /**
+     * ⚠ <b>Only the stacked one stops light.</b> Every other plate is declared
+     * {@code noOcclusion}, because a thin thing is not a wall - but two slabs together
+     * are a whole block, and a room walled with them would be lit straight through if
+     * they were not asked to occlude.
+     *
+     * <p>Checked as the light each state blocks rather than by building a room and
+     * looking at the far side: the number is the thing that decides it, and a probe in an
+     * open room measures how light goes round a wall as much as through it.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void onlyAStackedSlabStopsLight(GameTestHelper helper) {
+        StackingPlateBlock slab = (StackingPlateBlock) plate(Shape.SLAB);
+        BlockPos absolute = helper.absolutePos(WHERE);
+        for (SlabType type : SlabType.values()) {
+            helper.setBlock(WHERE,
+                    slab.defaultBlockState().setValue(StackingPlateBlock.TYPE, type));
+            int blocked = helper.getBlockState(WHERE).getLightBlock(helper.getLevel(), absolute);
+            if ((blocked >= 15) != (type == SlabType.DOUBLE)) {
+                throw new GameTestAssertException("a " + type + " slab blocks " + blocked
+                        + ", which is the wrong answer for it");
             }
         }
         helper.succeed();

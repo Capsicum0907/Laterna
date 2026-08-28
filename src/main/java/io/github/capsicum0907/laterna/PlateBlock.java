@@ -6,6 +6,7 @@ import java.util.Map;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -66,6 +67,28 @@ public abstract class PlateBlock extends Block implements SimpleWaterloggedBlock
 
     /** Every direction this form can be mounted in, which is not always all six. */
     public abstract Collection<Direction> facings();
+
+    /**
+     * Whether this state fills its cell rather than clinging to one face of it.
+     *
+     * <p>True only of a stacked pair - see {@link StackingPlateBlock}. Everything that
+     * turns a plate onto a face asks this first, because a whole block has no face to be
+     * turned onto.
+     */
+    public boolean whole(BlockState state) {
+        return false;
+    }
+
+    /**
+     * Whether a click landed in the upper half of the cell it is building in.
+     *
+     * <p>Vanilla's expression, shared so that the rule for which half a slab lands in and
+     * the rule for when a second slab stacks cannot drift apart - they are the same
+     * question asked twice.
+     */
+    protected static boolean upperHalf(BlockPlaceContext context) {
+        return context.getClickLocation().y - context.getClickedPos().getY() > 0.5;
+    }
 
     /**
      * A slab of the cell hugging the face the plate sits on, worked out rather than listed.
@@ -129,7 +152,7 @@ public abstract class PlateBlock extends Block implements SimpleWaterloggedBlock
     }
 
     /** Whether the cell being built in is already water, for every form of plate. */
-    protected static boolean flooded(net.minecraft.world.item.context.BlockPlaceContext context) {
+    protected static boolean flooded(BlockPlaceContext context) {
         return context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER;
     }
 }

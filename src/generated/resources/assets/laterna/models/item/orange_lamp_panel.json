@@ -8,18 +8,22 @@
           "texture": "#face"
         },
         "east": {
+          "cullface": "east",
           "texture": "#edge"
         },
         "north": {
+          "cullface": "north",
           "texture": "#edge"
         },
         "south": {
+          "cullface": "south",
           "texture": "#edge"
         },
         "up": {
           "texture": "#face"
         },
         "west": {
+          "cullface": "west",
           "texture": "#edge"
         }
       },

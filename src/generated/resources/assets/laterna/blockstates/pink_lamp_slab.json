@@ -1,10 +1,13 @@
 {
   "variants": {
-    "half=bottom": {
+    "type=bottom": {
       "model": "laterna:block/pink_lamp_slab",
       "x": 90
     },
-    "half=top": {
+    "type=double": {
+      "model": "laterna:block/pink_lamp_slab_double"
+    },
+    "type=top": {
       "model": "laterna:block/pink_lamp_slab",
       "x": 270
     }

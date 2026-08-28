@@ -53,7 +53,9 @@ public final class LaternaRegistry {
         return switch (lamp.shape().mount()) {
             case NONE -> properties -> new LampBlock(lamp.wiring(), properties);
             case ANY -> properties -> new FacePlateBlock(depth, properties);
-            case FLAT -> properties -> new FlatPlateBlock(depth, properties);
+            case FLAT -> lamp.shape().stacks()
+                    ? properties -> new StackingPlateBlock(depth, properties)
+                    : properties -> new FlatPlateBlock(depth, properties);
             case UPRIGHT -> properties -> new UprightPlateBlock(depth, properties);
         };
     }
@@ -80,7 +82,12 @@ public final class LaternaRegistry {
             // means flush, so the spotlight is nothing to stand on - but a slab is a step
             // and is supposed to be. See PlateBlock.
             case ANY -> properties.noOcclusion().noCollission();
-            case FLAT, UPRIGHT -> properties.noOcclusion();
+            // ⚠ The one that stacks keeps its occlusion. A thin thing is not a wall,
+            // but two of these laid together are a whole block and have to stop light -
+            // so it is left alone and answers with its shape instead. See
+            // StackingPlateBlock.
+            case FLAT -> lamp.shape().stacks() ? properties : properties.noOcclusion();
+            case UPRIGHT -> properties.noOcclusion();
         };
     }
 

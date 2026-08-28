@@ -67,7 +67,7 @@ and mixing the two kinds is what makes a scaffold stall.
 | Shape | Blocks | Note |
 |---|---|---|
 | **Lamp** | **32** | **Done.** Full cube, redstone, normal + inverted |
-| **Lamp slab** | **16** | **Done.** 8px, lying down, placed as vanilla places a slab |
+| **Lamp slab** | **16** | **Done.** 8px, lying down, placed and stacked as vanilla does |
 | **Vertical lamp slab** | **16** | **Done.** The same, standing against a wall |
 | **Lamp panel** | **16** | **Done.** 4px, lying down |
 | **Vertical lamp panel** | **16** | **Done.** 4px, standing |
@@ -87,6 +87,15 @@ model is built from and by nothing else. What differs between them is which face
 sit on and how a click is read, and that is not a flag but a different set of block
 states, so it is a subclass each: any of the six for the spotlight, up and down for the
 slab and panel, the four walls for their vertical twins.
+
+**Two slabs stack into a whole block, and it is still a slab.** A cube of this mod wears
+its lit face on all six sides; a stacked pair keeps the slab's own look — the face up and
+down, the plain rim around the four cut sides — because that is what it is, and a
+full-height course beside a single slab has to match. ⚠ It is also the one plate that
+occludes: the others are declared `noOcclusion` because a thin thing is not a wall, but a
+stacked pair is a whole block and a room walled with them would otherwise be lit straight
+through. Only the slab stacks — two panels are eight pixels and not sixteen, and drawing
+that as a whole block would be a lie about how much light is in it.
 
 ⚠ **That split came out of using it.** The slab first took the face you clicked, the way
 the spotlight does, and it was wrong in the hand: clicking the side of a block gave a slab
@@ -192,7 +201,8 @@ gradlew runData           # regenerate models, textures, recipes and language
       added without touching how the first shape works
 - [x] **3** — slab and panel, each in two mountings: `PlateBlock` parameterised by depth
       with a subclass per mounting, the boxes derived from the direction rather than
-      listed, and a single item on the bench turning one mounting into the other
+      listed, a single item on the bench turning one mounting into the other, and two
+      slabs stacking into a whole block that still looks like a slab
 - [ ] **4** — bulb, fixture, rod
 - [ ] **5** — each shape checked by game tests as it lands, rather than by eye
 

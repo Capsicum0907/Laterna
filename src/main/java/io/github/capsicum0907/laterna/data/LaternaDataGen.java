@@ -173,7 +173,13 @@ public final class LaternaDataGen {
                     // mounting would arrive here needing nothing.
                     case ANY, FLAT, UPRIGHT -> {
                         PlateBlock plate = (PlateBlock) block;
+                        ModelFile whole = lamp.shape().stacks()
+                                ? doubled(lamp.skin(true))
+                                : null;
                         getVariantBuilder(block).forAllStatesExcept(state -> {
+                            if (plate.whole(state)) {
+                                return ConfiguredModel.builder().modelFile(whole).build();
+                            }
                             int[] turn = ROTATION.get(PlateBlock.against(plate.facing(state)));
                             return ConfiguredModel.builder()
                                     .modelFile(model)
@@ -249,7 +255,20 @@ public final class LaternaDataGen {
          * strip of the texture rather than a squashed copy of the whole of it.
          */
         private ModelFile box(Shape shape, String skin) {
-            return cut(models().getBuilder(skin), shape, skin, Direction.Axis.Z);
+            return cut(models().getBuilder(skin), shape.depth(), skin, Direction.Axis.Z);
+        }
+
+        /**
+         * The same form with two of it laid together: a whole block, still wearing the
+         * slab's own look rather than the cube's.
+         *
+         * <p>Which is the whole of what it is for. A cube of this mod carries its lit face
+         * on all six sides; two slabs carry the face up and down and the plain rim around
+         * the four cut sides, and a course of them beside a single slab has to match.
+         * It is the same builder, asked for a depth of sixteen.
+         */
+        private ModelFile doubled(String skin) {
+            return cut(models().getBuilder(skin + "_double"), 16.0, skin, Direction.Axis.Y);
         }
 
         /**
@@ -268,9 +287,9 @@ public final class LaternaDataGen {
          * from where the element is, which is what keeps the four cut sides showing a
          * strip of the rim rather than a squashed copy of the whole of it.
          */
-        private <T extends ModelBuilder<T>> T cut(T builder, Shape shape, String skin,
+        private <T extends ModelBuilder<T>> T cut(T builder, double thickness, String skin,
                 Direction.Axis flat) {
-            float depth = (float) shape.depth();
+            float depth = (float) thickness;
             Direction back = Direction.fromAxisAndDirection(flat,
                     Direction.AxisDirection.NEGATIVE);
             return builder
@@ -286,8 +305,12 @@ public final class LaternaDataGen {
                         .allFaces((direction, face) -> {
                             // The two broad sides are the lamp; the four cut ones are a rim.
                             face.texture(direction.getAxis() == flat ? "#face" : "#edge");
-                            if (direction == back) {
-                                face.cullface(back);
+                            // ⚠ Every face that reaches the wall of its cell is culled,
+                            // not only the one at the back. The four cut sides span the
+                            // cell in their own plane and so meet a neighbour too - a
+                            // course of these is a lot of quads to draw that nobody sees.
+                            if (direction != back.getOpposite() || depth == 16.0F) {
+                                face.cullface(direction);
                             }
                         })
                     .end();
@@ -312,8 +335,8 @@ public final class LaternaDataGen {
                 // but an item is never turned, so reusing the block model handed back a
                 // standing plate for the lying form and the standing one alike, and the
                 // two were the same picture in the hand.
-                case SLAB, PANEL -> cut(itemModels().getBuilder(lamp.id()), lamp.shape(),
-                        lamp.skin(true), Direction.Axis.Y);
+                case SLAB, PANEL -> cut(itemModels().getBuilder(lamp.id()),
+                        lamp.shape().depth(), lamp.skin(true), Direction.Axis.Y);
                 // The ring is the base and the lens goes over it, the same way round as
                 // the two elements of the block model.
                 case SPOTLIGHT -> itemModels().getBuilder(lamp.id())
@@ -356,7 +379,13 @@ public final class LaternaDataGen {
             @Override
             protected void generate() {
                 for (Lamp lamp : Lamp.all()) {
-                    dropSelf(LaternaRegistry.block(lamp).get());
+                    Block block = LaternaRegistry.block(lamp).get();
+                    // ⚠ A stacked pair has to give both back. The game keeps a table
+                    // for exactly this, and writing dropSelf for it would quietly halve
+                    // what a doubled slab is worth.
+                    add(block, lamp.shape().stacks()
+                            ? createSlabItemTable(block)
+                            : createSingleItemTable(block));
                 }
             }
 

@@ -68,10 +68,9 @@ public class FlatPlateBlock extends PlateBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        BlockPos pos = context.getClickedPos();
         Direction clicked = context.getClickedFace();
         boolean upper = clicked == Direction.DOWN
-                || (clicked != Direction.UP && context.getClickLocation().y - pos.getY() > 0.5);
+                || (clicked != Direction.UP && upperHalf(context));
         return defaultBlockState()
                 .setValue(HALF, upper ? Half.TOP : Half.BOTTOM)
                 .setValue(WATERLOGGED, flooded(context));

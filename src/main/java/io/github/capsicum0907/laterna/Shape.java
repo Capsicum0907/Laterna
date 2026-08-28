@@ -111,6 +111,25 @@ public enum Shape {
     }
 
     /**
+     * Whether two of these laid together make one whole block.
+     *
+     * ⚠ <b>A separate question from {@link #mount}.</b> The slab and the panel are
+     * mounted identically - both lie down - and differ only here, so folding this into
+     * the mounting would make that enum a product of two things and every switch over it
+     * grow an arm it does not care about.
+     *
+     * <p>Only the slab. Two panels are eight pixels and not sixteen, and a pair of them
+     * drawn as a whole block would be a lie about how much light is there; reaching a
+     * whole block out of quarters is a block of layers, which is a different thing.
+     */
+    public boolean stacks() {
+        return switch (this) {
+            case SLAB -> true;
+            case LAMP, SPOTLIGHT, VERTICAL_SLAB, PANEL, VERTICAL_PANEL -> false;
+        };
+    }
+
+    /**
      * The same form turned the other way, where there is one.
      *
      * <p>A pair here is a pair on the bench: one of either makes one of the other, so
