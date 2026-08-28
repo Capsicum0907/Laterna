@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "laterna:block/gray_cased_lamp"
+    }
+  }
+}

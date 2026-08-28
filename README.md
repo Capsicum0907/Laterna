@@ -4,7 +4,7 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 *Laterna* is Latin for a lantern.
 
-> **Status: every form but the two deferred ones — 160 blocks.** Nineteen game tests
+> **Status: every form but the two deferred ones — 176 blocks.** Nineteen game tests
 > cover what they claim, except where a test cannot reach: see the note under the
 > spotlight.
 
@@ -74,6 +74,7 @@ and mixing the two kinds is what makes a scaffold stall.
 | **Bulb** | **16** | **Done.** A base and a narrow bulb standing out of it |
 | **Fixture** | **16** | **Done.** A bar on a wall, a disc on a floor |
 | **Rod** | **16** | **Done.** A thin bar running the length of its cell |
+| **Cased lamp** | **16** | **Done.** An opaque core inside a clear case, filling its cell |
 | *Edge strip* | — | Deferred: shaping it to its neighbours needs a UI |
 | *Lamp post* | — | Deferred: three blocks that must stay consistent |
 
@@ -109,6 +110,11 @@ are meant to be seen. What it is:
 - **on a wall**, a hood: housing down the back and along the top — an L seen from the side —
   with the lamp filling the rest, so the light shows on the front, the underside and the
   two ends.
+
+**A cased lamp is the same idea grown to a whole block**: an opaque core four pixels in
+on every side, inside a clear cover that fills the cell. It came out of looking at the
+bulb — the bulb with its base taken off — and it is the one cube here that is always lit,
+so it keeps no `LIT` state and is a plain block rather than a `LampBlock`.
 
 **A bulb is a body inside a shell.** A dark base, a dark neck, a coloured body standing out
 of that, and a translucent shell a shade larger over the body. ⚠ The neck is housing and not

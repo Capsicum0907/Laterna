@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "laterna:block/red_cased_lamp"
+    }
+  }
+}

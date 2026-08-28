@@ -51,7 +51,11 @@ public final class LaternaRegistry {
     private static Function<BlockBehaviour.Properties, Block> built(Lamp lamp) {
         Shape shape = lamp.shape();
         return switch (shape.mount()) {
-            case NONE -> properties -> new LampBlock(lamp.wiring(), properties);
+            // ⚠ A cube that is always lit needs no LIT state and so no LampBlock -
+            // there is nothing for redstone to flip.
+            case NONE -> shape.switched()
+                    ? properties -> new LampBlock(lamp.wiring(), properties)
+                    : Block::new;
             case ANY -> properties -> new FacePlateBlock(shape, properties);
             case FLAT -> shape.stacks()
                     ? properties -> new StackingPlateBlock(shape, properties)
@@ -80,7 +84,9 @@ public final class LaternaRegistry {
                         ? state -> state.getValue(LampBlock.LIT) ? 15 : 0
                         : state -> 15);
         return switch (lamp.shape().mount()) {
-            case NONE -> properties;
+            // ⚠ A case is see-through, so it must not be treated as a solid wall, but
+            // it does fill its cell and is something to walk into.
+            case NONE -> lamp.shape() == Shape.CASED ? properties.noOcclusion() : properties;
             // A plate is not a cube and must not hide the face behind it. Recessed also
             // means flush, so the spotlight is nothing to stand on - but a slab is a step
             // and is supposed to be. See PlateBlock.

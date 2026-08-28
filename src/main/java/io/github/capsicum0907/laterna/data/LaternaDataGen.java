@@ -175,11 +175,19 @@ public final class LaternaDataGen {
                 Block block = LaternaRegistry.block(lamp).get();
                 ModelFile model = models.get(lamp.skin(lamp.litByDefault()));
                 switch (lamp.shape().mount()) {
-                    case NONE -> getVariantBuilder(block)
+                    // A cube has one look and no states to pick between.
+                    case NONE -> {
+                        if (!lamp.switched()) {
+                            getVariantBuilder(block).partialState()
+                                    .modelForState().modelFile(model).addModel();
+                            break;
+                        }
+                        getVariantBuilder(block)
                             .partialState().with(LampBlock.LIT, true)
                             .modelForState().modelFile(models.get(lamp.skin(true))).addModel()
                             .partialState().with(LampBlock.LIT, false)
                             .modelForState().modelFile(models.get(lamp.skin(false))).addModel();
+                    }
                     // One arm for every way of clinging to a face. Which states a form
                     // keeps is its own business - the plate is asked which way it faces
                     // and the answer is turned onto that face, so a fourth kind of
@@ -250,6 +258,7 @@ public final class LaternaDataGen {
                 case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL -> box(shape, skin);
                 case BULB, FIXTURE -> fitting(shape, skin, Direction.NORTH);
                 case ROD -> rod(shape, skin);
+                case CASED -> cased(shape, skin);
             };
         }
 
@@ -411,6 +420,59 @@ public final class LaternaDataGen {
                     .texture("face", modLoc("block/" + skin))
                     .texture("edge", modLoc("block/" + skin + Masters.Layer.EDGE.suffix()))
                     .texture("particle", modLoc("block/" + skin));
+        }
+
+        /**
+         * A lamp in a case: an opaque core with a clear cover around it, filling the cell.
+         *
+         * <p>WARN <b>The cover has to be a second model.</b> A render type belongs to the
+         * whole of a model, so a block that is solid in the middle and see-through around
+         * it is two models joined by the composite loader - the same arrangement as the
+         * bulb, and the same nesting vanilla's beacon uses.
+         *
+         * <p>The core sits four pixels in on every side, so the cover reads as a case with
+         * something inside it rather than as a tinted block.
+         */
+        private ModelFile cased(Shape shape, String skin) {
+            float inset = (float) shape.inset();
+            BlockModelBuilder core = models().getBuilder(skin + "_core")
+                    .parent(new ModelFile.UncheckedModelFile("block/block"))
+                    .renderType("minecraft:solid")
+                    .texture("face", modLoc("block/" + skin))
+                    .texture("particle", modLoc("block/" + skin));
+            core.element()
+                    .from(inset, inset, inset).to(16 - inset, 16 - inset, 16 - inset)
+                    .allFaces((direction, face) -> {
+                        face.texture("#face");
+                        face.uvs(0, 0, 16, 16);
+                    })
+                    .end();
+
+            BlockModelBuilder cover = models().getBuilder(skin + "_cover")
+                    .parent(new ModelFile.UncheckedModelFile("block/block"))
+                    .renderType("minecraft:translucent")
+                    .ao(false)
+                    .texture("halo", modLoc("block/" + skin + Masters.Layer.HALO.suffix()))
+                    .texture("particle", modLoc("block/" + skin));
+            cover.element()
+                    .from(0, 0, 0).to(16, 16, 16)
+                    .shade(false)
+                    .allFaces((direction, face) -> {
+                        face.texture("#halo");
+                        face.uvs(0, 0, 16, 16);
+                    })
+                    .end();
+
+            return models().getBuilder(skin)
+                    .parent(new ModelFile.UncheckedModelFile("block/block"))
+                    .texture("particle", modLoc("block/" + skin))
+                    .customLoader(CompositeModelBuilder::begin)
+                        .child("core", models().nested()
+                                .parent(core).renderType("minecraft:solid"))
+                        .child("cover", models().nested()
+                                .parent(cover).renderType("minecraft:translucent"))
+                        .itemRenderOrder("core", "cover")
+                    .end();
         }
 
         /**
@@ -578,7 +640,7 @@ public final class LaternaDataGen {
         private void item(Lamp lamp, ModelFile model) {
             switch (lamp.shape()) {
                 // A box has thickness and reads perfectly well held at an angle.
-                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL, FIXTURE, ROD ->
+                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL, FIXTURE, ROD, CASED ->
                         itemModels().withExistingParent(lamp.id(), model.getLocation());
                 case BULB -> itemModels().withExistingParent(lamp.id(),
                         bulb(lamp.skin(true) + "_held", lamp.skin(true),
@@ -648,7 +710,7 @@ public final class LaternaDataGen {
                         case VERTICAL_SLAB -> pair(block,
                                 StatePropertiesPredicate.Builder.properties()
                                         .hasProperty(UprightStackingPlateBlock.DOUBLE, true));
-                        case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD ->
+                        case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD, CASED ->
                                 createSingleItemTable(block);
                     });
                 }
@@ -761,6 +823,14 @@ public final class LaternaDataGen {
                 }
                 // Stood on end rather than laid in a row, which is what tells this apart
                 // from every other pattern here as well as being the shape of the thing.
+                // Glass around a block of light, which is what it is.
+                case CASED -> raw(output, white, ShapedRecipeBuilder
+                        .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 8)
+                        .pattern("aaa")
+                        .pattern("aba")
+                        .pattern("aaa")
+                        .define('a', Tags.Items.GLASS_BLOCKS)
+                        .define('b', Items.GLOWSTONE));
                 case ROD -> raw(output, white, ShapedRecipeBuilder
                         .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 8)
                         .pattern("a")

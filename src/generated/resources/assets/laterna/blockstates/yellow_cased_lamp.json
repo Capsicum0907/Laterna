@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "laterna:block/yellow_cased_lamp"
+    }
+  }
+}

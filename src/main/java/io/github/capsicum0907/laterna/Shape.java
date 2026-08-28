@@ -101,7 +101,16 @@ public enum Shape {
      * strip light rather than more fittings. Its inset is how thin it is across; its depth
      * is the whole cell, because that is how long it is.
      */
-    ROD("rod", SoundType.GLASS, 0.3F, 16.0, 7.0, Mount.AXIS, List.of(Wiring.ALWAYS));
+    ROD("rod", SoundType.GLASS, 0.3F, 16.0, 7.0, Mount.AXIS, List.of(Wiring.ALWAYS)),
+
+    /**
+     * A lamp in a case: an opaque core with a clear cover around it, filling its cell.
+     *
+     * <p>The bulb with its base taken off and grown to a whole block - the same nesting,
+     * and the same nesting vanilla's beacon uses. Always lit, and the only cube here that
+     * is not the plain one.
+     */
+    CASED("cased_lamp", SoundType.GLASS, 0.3F, 16.0, 4.0, Mount.NONE, List.of(Wiring.ALWAYS));
 
     /**
      * How a form meets the block it is put against, which decides what states it keeps
@@ -188,6 +197,7 @@ public enum Shape {
             // ⚠ Asking a rod which face it is on has no answer, and quietly making one
             // up would put a rod-shaped hole in whatever asked.
             case ROD -> throw new IllegalStateException("a rod sits against no face");
+            case CASED -> throw new IllegalStateException("a cased lamp fills its cell");
         };
     }
 
@@ -221,7 +231,7 @@ public enum Shape {
     public boolean stacks() {
         return switch (this) {
             case SLAB, VERTICAL_SLAB -> true;
-            case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD -> false;
+            case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD, CASED -> false;
         };
     }
 
@@ -235,7 +245,7 @@ public enum Shape {
      */
     public Optional<Shape> turned() {
         return switch (this) {
-            case LAMP, SPOTLIGHT, BULB, FIXTURE, ROD -> Optional.empty();
+            case LAMP, SPOTLIGHT, BULB, FIXTURE, ROD, CASED -> Optional.empty();
             case SLAB -> Optional.of(VERTICAL_SLAB);
             case VERTICAL_SLAB -> Optional.of(SLAB);
             case PANEL -> Optional.of(VERTICAL_PANEL);

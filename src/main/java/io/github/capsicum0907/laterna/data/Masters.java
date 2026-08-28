@@ -90,6 +90,7 @@ public final class Masters {
     public static List<Layer> layers(Shape shape) {
         return switch (shape) {
             case LAMP, ROD -> List.of(Layer.BODY);
+            case CASED -> List.of(Layer.BODY, Layer.HALO);
             case BULB -> List.of(Layer.BODY, Layer.EDGE, Layer.HALO);
             case SPOTLIGHT -> List.of(Layer.BODY, Layer.RING);
             case FIXTURE -> List.of(Layer.BODY, Layer.EDGE);
@@ -121,6 +122,8 @@ public final class Masters {
             // texture comes out of that as a long white ellipse - which is what it looked
             // like. Nothing shaped survives being stretched that far.
             case ROD -> flat();
+            // The core is a plain block of light; what shapes it is the case around it.
+            case CASED -> layer.equals(Layer.HALO) ? halo() : flat();
             case SPOTLIGHT -> layer.equals(Layer.RING) ? ring() : lens();
             // ⚠ Frameless, because these are shown small. The face of a cube is drawn
             // at sixteen pixels and its one-pixel border reads; stretched onto a face six

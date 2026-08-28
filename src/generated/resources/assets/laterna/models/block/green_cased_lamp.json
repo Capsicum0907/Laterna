@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "children": {
+    "core": {
+      "parent": "laterna:block/green_cased_lamp_core",
+      "render_type": "minecraft:solid"
+    },
+    "cover": {
+      "parent": "laterna:block/green_cased_lamp_cover",
+      "render_type": "minecraft:translucent"
+    }
+  },
+  "item_render_order": [
+    "core",
+    "cover"
+  ],
+  "loader": "neoforge:composite",
+  "textures": {
+    "particle": "laterna:block/green_cased_lamp"
+  }
+}

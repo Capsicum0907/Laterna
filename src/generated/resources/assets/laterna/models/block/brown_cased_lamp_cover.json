@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "texture": "#halo"
+        },
+        "east": {
+          "texture": "#halo"
+        },
+        "north": {
+          "texture": "#halo"
+        },
+        "south": {
+          "texture": "#halo"
+        },
+        "up": {
+          "texture": "#halo"
+        },
+        "west": {
+          "texture": "#halo"
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "shade": false,
+      "to": [
+        16,
+        16,
+        16
+      ]
+    }
+  ],
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "halo": "laterna:block/brown_cased_lamp_halo",
+    "particle": "laterna:block/brown_cased_lamp"
+  }
+}
