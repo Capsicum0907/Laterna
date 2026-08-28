@@ -281,7 +281,7 @@ public final class LaternaDataGen {
             boolean flat = facing.getAxis() == Direction.Axis.Y;
             String name = skin + (flat ? "_flat" : "");
             if (shape == Shape.BULB) {
-                return bulb(name, skin, wide, tall, deep);
+                return bulb(name, skin, wide, tall, deep, false);
             }
             return flat
                     ? plated(name, skin, wide, tall, deep)
@@ -347,12 +347,13 @@ public final class LaternaDataGen {
          * nesting vanilla's beacon uses as well, though the beacon reaches it with a cutout
          * texture rather than a translucent one.
          */
-        private ModelFile bulb(String name, String skin, float wide, float tall, float deep) {
+        private ModelFile bulb(String name, String skin, float wide, float tall, float deep,
+                boolean standing) {
             BlockModelBuilder solid = dressed(models().getBuilder(name + "_body"), skin)
                     .renderType("minecraft:solid");
-            part(solid, box(wide, tall, 0, 1), "#edge", true);
-            part(solid, box(wide - 2, tall - 2, 1, 2), "#edge", false);
-            part(solid, box(wide - 2, tall - 2, 2, deep), "#face", false);
+            part(solid, upright(box(wide, tall, 0, 1), standing), "#edge", !standing);
+            part(solid, upright(box(wide - 2, tall - 2, 1, 2), standing), "#edge", false);
+            part(solid, upright(box(wide - 2, tall - 2, 2, deep), standing), "#face", false);
 
             BlockModelBuilder shell = models().getBuilder(name + "_shell")
                     .parent(new ModelFile.UncheckedModelFile("block/block"))
@@ -362,9 +363,11 @@ public final class LaternaDataGen {
                     .texture("particle", modLoc("block/" + skin));
             // A shade wider than the body and clear of the neck, so the body is seen
             // through it rather than coincident with it.
+            float[] glass = upright(new float[] { (16 - wide) / 2 + 0.75F,
+                    (16 - tall) / 2 + 0.75F, 2, (16 + wide) / 2 - 0.75F,
+                    (16 + tall) / 2 - 0.75F, deep + 0.25F }, standing);
             shell.element()
-                    .from((16 - wide) / 2 + 0.75F, (16 - tall) / 2 + 0.75F, 2)
-                    .to((16 + wide) / 2 - 0.75F, (16 + tall) / 2 - 0.75F, deep + 0.25F)
+                    .from(glass[0], glass[1], glass[2]).to(glass[3], glass[4], glass[5])
                     .shade(false)
                     .allFaces((direction, face) -> {
                         face.texture("#halo");
@@ -373,6 +376,10 @@ public final class LaternaDataGen {
                     .end();
 
             return models().getBuilder(name)
+                    // ⚠ Without a parent a composite inherits no display transforms, and
+                    // the game draws it square-on - which is how a bulb came to be held
+                    // lying on its side.
+                    .parent(new ModelFile.UncheckedModelFile("block/block"))
                     .texture("particle", modLoc("block/" + skin))
                     .customLoader(CompositeModelBuilder::begin)
                         .child("body", models().nested()
@@ -381,6 +388,20 @@ public final class LaternaDataGen {
                                 .parent(shell).renderType("minecraft:translucent"))
                         .itemRenderOrder("body", "shell")
                     .end();
+        }
+
+        /**
+         * The same box stood on end.
+         *
+         * <p>⚠ <b>A block model is built against the north face so one rotation table can
+         * turn it onto any other; an item is never turned.</b> So the bulb is authored a
+         * second time standing on its base, which is the way it is held and the way it sits
+         * in a slot - the same trick the lying slab needs, for the same reason.
+         */
+        private float[] upright(float[] box, boolean standing) {
+            return standing
+                    ? new float[] { box[0], box[2], box[1], box[3], box[5], box[4] }
+                    : box;
         }
 
         /** The textures and the parent every fitting wears. */
@@ -557,8 +578,14 @@ public final class LaternaDataGen {
         private void item(Lamp lamp, ModelFile model) {
             switch (lamp.shape()) {
                 // A box has thickness and reads perfectly well held at an angle.
-                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL, BULB, FIXTURE, ROD ->
+                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL, FIXTURE, ROD ->
                         itemModels().withExistingParent(lamp.id(), model.getLocation());
+                case BULB -> itemModels().withExistingParent(lamp.id(),
+                        bulb(lamp.skin(true) + "_held", lamp.skin(true),
+                                (float) lamp.shape().fit(Direction.NORTH).wide(),
+                                (float) lamp.shape().fit(Direction.NORTH).tall(),
+                                (float) lamp.shape().fit(Direction.NORTH).deep(),
+                                true).getLocation());
                 // ⚠ A slab that lies down has to be authored lying down. The block
                 // model of every plate stands against the north face so that one rotation
                 // table can turn it onto any other, and the blockstate does the turning -

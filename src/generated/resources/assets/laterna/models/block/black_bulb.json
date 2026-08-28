@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "children": {
     "body": {
       "parent": "laterna:block/black_bulb_body",

@@ -116,8 +116,11 @@ public final class Masters {
     public static Master of(Shape shape, Layer layer, boolean lit) {
         return switch (shape) {
             case LAMP -> face(lit);
-            // A bar seen from every side at once; a border on it would be a stripe.
-            case ROD -> glow();
+            // ⚠ A flat colour, with none of the falloff the other faces have. The
+            // bar's faces are two pixels by sixteen, and a glow drawn round on a square
+            // texture comes out of that as a long white ellipse - which is what it looked
+            // like. Nothing shaped survives being stretched that far.
+            case ROD -> flat();
             case SPOTLIGHT -> layer.equals(Layer.RING) ? ring() : lens();
             // ⚠ Frameless, because these are shown small. The face of a cube is drawn
             // at sixteen pixels and its one-pixel border reads; stretched onto a face six
@@ -243,6 +246,18 @@ public final class Masters {
             for (int x = 0; x < Master.SIZE; x++) {
                 master.alpha()[y][x] = HALO_ALPHA;
                 master.level()[y][x] = HALO_LEVEL;
+            }
+        }
+        return master;
+    }
+
+    /** One shade, for a face too long and thin for anything drawn on it to survive. */
+    private static Master flat() {
+        Master master = Master.blank();
+        for (int y = 0; y < Master.SIZE; y++) {
+            for (int x = 0; x < Master.SIZE; x++) {
+                master.alpha()[y][x] = 1.0F;
+                master.level()[y][x] = FACE_LIT;
             }
         }
         return master;

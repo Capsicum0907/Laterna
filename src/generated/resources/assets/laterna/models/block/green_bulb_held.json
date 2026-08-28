@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "children": {
+    "body": {
+      "parent": "laterna:block/green_bulb_held_body",
+      "render_type": "minecraft:solid"
+    },
+    "shell": {
+      "parent": "laterna:block/green_bulb_held_shell",
+      "render_type": "minecraft:translucent"
+    }
+  },
+  "item_render_order": [
+    "body",
+    "shell"
+  ],
+  "loader": "neoforge:composite",
+  "textures": {
+    "particle": "laterna:block/green_bulb"
+  }
+}
