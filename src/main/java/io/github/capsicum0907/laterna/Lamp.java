@@ -57,11 +57,17 @@ public record Lamp(Shape shape, Wiring wiring, DyeColor colour) {
      * the form and the colour only, and the two blocks point at the same two files.
      */
     public static String skin(Shape shape, DyeColor colour, boolean lit) {
-        return colour.getName() + "_" + shape.id() + (lit ? "_on" : "_off");
+        String state = shape.switched() ? (lit ? "_on" : "_off") : "";
+        return colour.getName() + "_" + shape.id() + state;
     }
 
     public String skin(boolean lit) {
         return skin(shape, colour, lit);
+    }
+
+    /** Whether this lamp has a {@code LIT} state for redstone to flip. */
+    public boolean switched() {
+        return wiring.switched();
     }
 
     /**

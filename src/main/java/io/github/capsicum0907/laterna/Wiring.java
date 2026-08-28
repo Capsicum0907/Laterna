@@ -13,22 +13,37 @@ package io.github.capsicum0907.laterna;
  */
 public enum Wiring {
     /** Dark until a signal reaches it. */
-    NORMAL(false, "", ""),
+    NORMAL(false, "", "", true),
     /** Lit until a signal reaches it, and dark while one does. */
-    INVERTED(true, "inverted_", "Inverted ");
+    INVERTED(true, "inverted_", "Inverted ", true),
+    /**
+     * Lit, and not listening.
+     *
+     * <p>A form wired this way has no {@code LIT} state at all - not one that is stuck
+     * on, but none, so there is no second model, no second texture and nothing for a
+     * neighbour change to do. Sixteen blocks rather than thirty-two.
+     */
+    ALWAYS(true, "", "", false);
 
     private final boolean litWhenUnpowered;
     private final String prefix;
     private final String namePrefix;
+    private final boolean switched;
 
-    Wiring(boolean litWhenUnpowered, String prefix, String namePrefix) {
+    Wiring(boolean litWhenUnpowered, String prefix, String namePrefix, boolean switched) {
         this.litWhenUnpowered = litWhenUnpowered;
         this.prefix = prefix;
         this.namePrefix = namePrefix;
+        this.switched = switched;
     }
 
     public boolean litWhenUnpowered() {
         return litWhenUnpowered;
+    }
+
+    /** Whether the block carries a {@code LIT} state for redstone to flip. */
+    public boolean switched() {
+        return switched;
     }
 
     /**

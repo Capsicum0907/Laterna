@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "laterna:block/lime_spotlight",
+    "layer1": "laterna:block/spotlight_ring"
+  }
+}

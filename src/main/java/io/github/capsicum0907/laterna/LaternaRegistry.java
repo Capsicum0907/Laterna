@@ -2,12 +2,14 @@ package io.github.capsicum0907.laterna;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -27,16 +29,30 @@ public final class LaternaRegistry {
     public static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Laterna.MODID);
 
-    private static final Map<Lamp, DeferredBlock<LampBlock>> BLOCK = new LinkedHashMap<>();
+    private static final Map<Lamp, DeferredBlock<Block>> BLOCK = new LinkedHashMap<>();
     private static final Map<Lamp, DeferredItem<BlockItem>> ITEM = new LinkedHashMap<>();
 
     static {
         for (Lamp lamp : Lamp.all()) {
-            DeferredBlock<LampBlock> block = BLOCKS.registerBlock(lamp.id(),
-                    properties -> new LampBlock(lamp.wiring(), properties), properties(lamp));
+            DeferredBlock<Block> block =
+                    BLOCKS.registerBlock(lamp.id(), built(lamp), properties(lamp));
             BLOCK.put(lamp, block);
             ITEM.put(lamp, ITEMS.registerSimpleBlockItem(block));
         }
+    }
+
+    /**
+     * Which class a form is made of.
+     *
+     * <p>A switch over the forms rather than a field on {@link Shape}: what a block class
+     * is belongs to the code, and putting a constructor in the enum would have the enum
+     * import blocks in order to describe itself.
+     */
+    private static Function<BlockBehaviour.Properties, Block> built(Lamp lamp) {
+        return switch (lamp.shape()) {
+            case LAMP -> properties -> new LampBlock(lamp.wiring(), properties);
+            case SPOTLIGHT -> SpotlightBlock::new;
+        };
     }
 
     /**
@@ -48,11 +64,19 @@ public final class LaternaRegistry {
      * read off the state, which is what keeps this a plain block.
      */
     private static BlockBehaviour.Properties properties(Lamp lamp) {
-        return BlockBehaviour.Properties.of()
+        BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .mapColor(lamp.colour().getMapColor())
                 .strength(lamp.shape().strength())
                 .sound(lamp.shape().sound())
-                .lightLevel(state -> state.getValue(LampBlock.LIT) ? 15 : 0);
+                .lightLevel(lamp.switched()
+                        ? state -> state.getValue(LampBlock.LIT) ? 15 : 0
+                        : state -> 15);
+        return switch (lamp.shape()) {
+            case LAMP -> properties;
+            // A plate is not a cube: it must not hide the face behind it, and being flush
+            // means being nothing to stand on. See SpotlightBlock.
+            case SPOTLIGHT -> properties.noOcclusion().noCollission();
+        };
     }
 
     /**
@@ -78,7 +102,7 @@ public final class LaternaRegistry {
     private LaternaRegistry() {
     }
 
-    public static DeferredBlock<LampBlock> block(Lamp lamp) {
+    public static DeferredBlock<Block> block(Lamp lamp) {
         return BLOCK.get(lamp);
     }
 

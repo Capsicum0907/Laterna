@@ -4,8 +4,9 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 *Laterna* is Latin for a lantern.
 
-> **Status: the cube, in sixteen colours, both wirings — 32 blocks.** Everything else in
-> the table below is still to come. Six game tests cover what the wirings claim.
+> **Status: the cube and the recessed spotlight — 48 blocks.** Everything else in the
+> table below is still to come. Nine game tests cover what they claim, except where a
+> test cannot reach: see the note under the spotlight.
 
 ## Target
 
@@ -32,9 +33,13 @@ wrong with the result; it is just 160 lines that a product would have written.
 A shape carries a grayscale master drawn from a formula, not a PNG, so the
 repository holds no images at all. The master follows one convention: `0.5` is
 the dye colour untouched, below that darkens it, above that carries it towards
-white. A frame comes out at `0.34`, a glowing face at `0.80`. Parts that must
-*not* take the colour — the grey ring around a spotlight — are a separate,
-untinted layer composited over the tinted one.
+white. A frame comes out at `0.34`, a glowing face at `0.80`.
+
+A shape can have more than one layer. Parts that must *not* take the colour — the grey
+ring around a spotlight — are a layer of their own, drawn once in a fixed grey and laid
+over the tinted one **in the model, not in the texture**. So the ring is one file for all
+sixteen colours rather than sixteen composites, and the lens can be told to draw at full
+brightness while the fitting around it is not.
 
 **No block entities and no particles.** Light comes from
 `lightLevel(state -> state.getValue(LIT) ? 15 : 0)`, and redstone only chooses
@@ -63,7 +68,7 @@ and mixing the two kinds is what makes a scaffold stall.
 | **Lamp** | **32** | **Done.** Full cube, redstone, normal + inverted |
 | Slab | 16 | 8px, any of six faces, waterloggable |
 | Panel | 16 | 4px, likewise |
-| **Recessed spotlight** | 16 | **Zero thickness.** A round lens in a grey ring |
+| **Recessed spotlight** | 16 | **Done.** Zero thickness, a round lens in a grey ring |
 | Bulb | 16 | Small fitting, always lit |
 | Fixture | 16 | Wall/ceiling/floor fitting |
 | Rod | 16 | Strip light |
@@ -88,17 +93,32 @@ Three things follow from having no thickness:
 - **Round comes from the alpha channel**, so the model declares
   `"render_type": "minecraft:cutout"`. Without it the transparent corners are black.
 - **The lens is drawn at full brightness** — `"neoforge_data": {"block_light": 15,
-  "sky_light": 15}` on that face, and deliberately not on the ring, so the fitting
+  "sky_light": 15}` on that element, and deliberately not on the ring, so the fitting
   reads as metal and the lens as light. (NeoForge renamed this to `light_emission`
   in 21.11; 1.21.1 predates that.)
 
+And one that does not follow from the geometry at all: **a plate cannot be its own item
+model.** In the hand and in a slot the block model is seen at an angle from which a shape
+with no thickness is a line. Vanilla gives its flat blocks a flat *item* model instead —
+`item/generated` over the texture layers — and so does this.
+
+⚠ **The one thing no test reaches.** Which of the six faces the plate is drawn on comes
+from a rotation table in the model generator, taken from vanilla's own `glow_lichen`
+blockstate. A game test can assert the block faces up; it cannot assert the plate was
+drawn on the floor rather than the ceiling. Invert the `getOpposite()` and every test
+still passes with every light on the wrong surface. That one is checked by looking.
+
 ### Recipes
 
-The white lamp is the only one made of anything: glowstone in a frame of stone, around a
-pinch of redstone — or around a redstone torch, which is the inverted one and is also the
-difference between them in the world. Every other colour is eight lamps around a dye, the
-way the game dyes glass, taken through a tag per form and wiring so that dyeing an
-inverted lamp gives an inverted lamp back and no recipe ever names a colour.
+Each shape has exactly one recipe of its own, in white. The cube is glowstone in a frame
+of stone around a pinch of redstone — or around a redstone torch, which is the inverted
+one, and is the difference between the two in the world as well as on the bench. The
+spotlight is the same glowstone in a ring of iron nuggets, which is the thing it is: a
+lens in a metal rim, and cheap, because eight come out.
+
+Every other colour is eight of the same thing around a dye, the way the game dyes glass,
+taken through a tag per shape and wiring so that dyeing an inverted lamp gives an inverted
+lamp back and no recipe ever names a colour.
 
 ### What the colours are, and are not
 
@@ -123,7 +143,9 @@ gradlew runData           # regenerate models, textures, recipes and language
 - [x] **1** — the cube, sixteen colours, redstone, normal and inverted, and the
       generator that produces all of it: blocks, models, textures, loot, recipes,
       language, tags and a creative tab, none of which names a colour
-- [ ] **2** — the recessed spotlight, proving a shape can be added to that generator
+- [x] **2** — the recessed spotlight: a second shape, a third wiring (always lit, and so
+      no `LIT` state at all), a second texture layer, and its own geometry and item model,
+      added without touching how the first shape works
 - [ ] **3** — slab and panel, on any of six faces
 - [ ] **4** — bulb, fixture, rod
 - [ ] **5** — each shape checked by game tests as it lands, rather than by eye

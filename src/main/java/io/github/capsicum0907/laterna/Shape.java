@@ -26,7 +26,16 @@ public enum Shape {
      * <p>Hardness is glowstone's, and so is the sound: it is a lamp made of the stuff,
      * and a player who has broken glowstone already knows how long this takes.
      */
-    LAMP("lamp", SoundType.GLASS, 0.3F, List.of(Wiring.NORMAL, Wiring.INVERTED));
+    LAMP("lamp", SoundType.GLASS, 0.3F, List.of(Wiring.NORMAL, Wiring.INVERTED)),
+
+    /**
+     * A round lens in a grey ring, set flush into whatever face it is put on.
+     *
+     * <p>The form with no thickness at all: what is drawn is a plate, and it carries a
+     * shape one pixel deep only because a block with none cannot be pointed at or broken.
+     * Always lit, so sixteen blocks and one state.
+     */
+    SPOTLIGHT("spotlight", SoundType.GLASS, 0.3F, List.of(Wiring.ALWAYS));
 
     private final String id;
     private final SoundType sound;
@@ -55,5 +64,13 @@ public enum Shape {
 
     public List<Wiring> wirings() {
         return wirings;
+    }
+
+    /**
+     * Whether this form has a {@code LIT} state, and so two textures and two models
+     * rather than one. Read off the wirings, because that is the same question.
+     */
+    public boolean switched() {
+        return wirings.stream().anyMatch(Wiring::switched);
     }
 }

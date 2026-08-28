@@ -1,0 +1,20 @@
+{
+  "values": [
+    "laterna:white_spotlight",
+    "laterna:orange_spotlight",
+    "laterna:magenta_spotlight",
+    "laterna:light_blue_spotlight",
+    "laterna:yellow_spotlight",
+    "laterna:lime_spotlight",
+    "laterna:pink_spotlight",
+    "laterna:gray_spotlight",
+    "laterna:light_gray_spotlight",
+    "laterna:cyan_spotlight",
+    "laterna:purple_spotlight",
+    "laterna:blue_spotlight",
+    "laterna:brown_spotlight",
+    "laterna:green_spotlight",
+    "laterna:red_spotlight",
+    "laterna:black_spotlight"
+  ]
+}

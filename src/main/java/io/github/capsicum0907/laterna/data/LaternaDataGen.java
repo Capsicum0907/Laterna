@@ -12,8 +12,10 @@ import io.github.capsicum0907.laterna.Laterna;
 import io.github.capsicum0907.laterna.LaternaRegistry;
 import io.github.capsicum0907.laterna.LaternaTags;
 import io.github.capsicum0907.laterna.Shape;
+import io.github.capsicum0907.laterna.SpotlightBlock;
 import io.github.capsicum0907.laterna.Wiring;
 
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -29,6 +31,7 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -106,35 +109,128 @@ public final class LaternaDataGen {
             super(output, Laterna.MODID, existingFileHelper);
         }
 
+        /**
+         * ⚠ <b>Where the plate is drawn, as a rotation of one model.</b> The model is
+         * authored with its plate on the north face of the cell; these are the rotations
+         * that carry it onto each of the six, read off vanilla's own {@code glow_lichen}
+         * blockstate rather than worked out. {@code FACING} is the direction the light
+         * shines, so the face wanted is always its opposite.
+         *
+         * <p>⚠ <b>A game test cannot check this.</b> It can say the block faces up; it
+         * cannot say the plate was drawn on the floor rather than the ceiling. If the
+         * {@code getOpposite} were dropped, every test would still pass.
+         */
+        private static final Map<Direction, int[]> ROTATION = Map.of(
+                Direction.NORTH, new int[] { 0, 0 },
+                Direction.EAST, new int[] { 0, 90 },
+                Direction.SOUTH, new int[] { 0, 180 },
+                Direction.WEST, new int[] { 0, 270 },
+                Direction.UP, new int[] { 270, 0 },
+                Direction.DOWN, new int[] { 90, 0 });
+
+        /** How far off the face the plate stands, and the ring a shade further still. */
+        private static final float PLATE = 0.1F;
+        private static final float OVER = 0.11F;
+
         @Override
         protected void registerStatesAndModels() {
-            Map<String, ModelFile> skins = new HashMap<>();
+            Map<String, ModelFile> models = new HashMap<>();
             for (Shape shape : Shape.values()) {
                 for (DyeColor colour : DyeColor.values()) {
                     for (boolean lit : new boolean[] { true, false }) {
+                        if (!lit && !shape.switched()) {
+                            continue;
+                        }
                         String skin = Lamp.skin(shape, colour, lit);
-                        skins.put(skin, shaped(shape, skin));
+                        models.put(skin, shaped(shape, skin));
                     }
                 }
             }
 
             for (Lamp lamp : Lamp.all()) {
                 Block block = LaternaRegistry.block(lamp).get();
-                getVariantBuilder(block)
-                        .partialState().with(LampBlock.LIT, true)
-                        .modelForState().modelFile(skins.get(lamp.skin(true))).addModel()
-                        .partialState().with(LampBlock.LIT, false)
-                        .modelForState().modelFile(skins.get(lamp.skin(false))).addModel();
-                itemModels().withExistingParent(lamp.id(),
-                        modLoc("block/" + lamp.skin(lamp.litByDefault())));
+                ModelFile model = models.get(lamp.skin(lamp.litByDefault()));
+                switch (lamp.shape()) {
+                    case LAMP -> getVariantBuilder(block)
+                            .partialState().with(LampBlock.LIT, true)
+                            .modelForState().modelFile(models.get(lamp.skin(true))).addModel()
+                            .partialState().with(LampBlock.LIT, false)
+                            .modelForState().modelFile(models.get(lamp.skin(false))).addModel();
+                    case SPOTLIGHT -> {
+                        for (Direction facing : Direction.values()) {
+                            int[] turn = ROTATION.get(facing.getOpposite());
+                            getVariantBuilder(block)
+                                    .partialState().with(SpotlightBlock.FACING, facing)
+                                    .modelForState().modelFile(model)
+                                    .rotationX(turn[0]).rotationY(turn[1]).uvLock(true)
+                                    .addModel();
+                        }
+                    }
+                }
+                item(lamp, model);
             }
         }
 
-        /** The geometry a form has. One arm today; the switch is where the next one lands. */
+        /** The geometry a form has. */
         private ModelFile shaped(Shape shape, String skin) {
             return switch (shape) {
                 case LAMP -> models().cubeAll(skin, modLoc("block/" + skin));
+                case SPOTLIGHT -> plate(skin);
             };
+        }
+
+        /**
+         * A lens and a ring, both with no thickness, drawn on the north face of the cell.
+         *
+         * <p><b>Two elements rather than one picture</b> so that the ring is a single file
+         * for all sixteen colours, and so the lens can be told to draw at full brightness
+         * while the fitting is not. They never both cover a pixel - the lens is transparent
+         * outside its disc and the ring inside it - but the ring is set a hundredth of a
+         * pixel further out anyway, which costs nothing and settles the question of what
+         * happens where two quads share a plane.
+         *
+         * <p>Both sides of each plate are drawn, as vanilla does for the same shapes: the
+         * block behind can be broken, and a plate with one side is a plate you can see
+         * through.
+         */
+        private ModelFile plate(String skin) {
+            return models().getBuilder(skin)
+                    .renderType("minecraft:cutout")
+                    .ao(false)
+                    .texture("lens", modLoc("block/" + skin))
+                    .texture("ring", modLoc("block/" + Shape.SPOTLIGHT.id() + "_ring"))
+                    .texture("particle", modLoc("block/" + skin))
+                    .element()
+                        .from(0, 0, PLATE).to(16, 16, PLATE)
+                        .shade(false)
+                        .emissivity(15, 15)
+                        .face(Direction.NORTH).texture("#lens").uvs(16, 0, 0, 16).end()
+                        .face(Direction.SOUTH).texture("#lens").uvs(0, 0, 16, 16).end()
+                    .end()
+                    .element()
+                        .from(0, 0, OVER).to(16, 16, OVER)
+                        .shade(false)
+                        .face(Direction.NORTH).texture("#ring").uvs(16, 0, 0, 16).end()
+                        .face(Direction.SOUTH).texture("#ring").uvs(0, 0, 16, 16).end()
+                    .end();
+        }
+
+        /**
+         * What the thing looks like in your hand.
+         *
+         * <p>⚠ <b>A plate cannot be its own item model.</b> Held or in a slot the block
+         * model is seen at an angle from which a shape with no thickness is a line. The
+         * game gives its own flat blocks a flat item instead, and so does this: the layers
+         * of the texture, stacked, exactly as {@code glow_lichen} does it.
+         */
+        private void item(Lamp lamp, ModelFile model) {
+            switch (lamp.shape()) {
+                case LAMP -> itemModels().withExistingParent(lamp.id(), model.getLocation());
+                case SPOTLIGHT -> itemModels().getBuilder(lamp.id())
+                        .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                        .texture("layer0", modLoc("block/" + lamp.skin(true)))
+                        .texture("layer1", modLoc("block/" + Shape.SPOTLIGHT.id() + "_ring"));
+            }
         }
     }
 
@@ -220,22 +316,36 @@ public final class LaternaDataGen {
             }
         }
 
-        /** Glowstone in a frame of stone, around whichever way the redstone reads. */
+        /**
+         * What each form is made of, in white.
+         *
+         * <p>The cube is glowstone in a frame of stone around whichever way the redstone
+         * reads - dust or a torch, which is the difference between the two wirings in the
+         * world as well as on the bench. The spotlight is the same glowstone in a ring of
+         * iron nuggets, which is the thing it is: a lens in a metal rim, and cheap, because
+         * eight come out.
+         */
         private void base(RecipeOutput output, Lamp white) {
-            ShapedRecipeBuilder builder = ShapedRecipeBuilder
-                    .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 4)
-                    .pattern("aba")
-                    .pattern("bcb")
-                    .pattern("aba")
-                    .define('a', Tags.Items.STONES)
-                    .define('b', Items.GLOWSTONE)
-                    .unlockedBy("has_glowstone", has(Items.GLOWSTONE));
-            if (white.wiring() == Wiring.INVERTED) {
-                builder.define('c', Items.REDSTONE_TORCH);
-            } else {
-                builder.define('c', Tags.Items.DUSTS_REDSTONE);
-            }
-            builder.save(output, name(white));
+            ShapedRecipeBuilder builder = switch (white.shape()) {
+                case LAMP -> ShapedRecipeBuilder
+                        .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 4)
+                        .pattern("aba")
+                        .pattern("bcb")
+                        .pattern("aba")
+                        .define('a', Tags.Items.STONES)
+                        .define('b', Items.GLOWSTONE)
+                        .define('c', white.wiring() == Wiring.INVERTED
+                                ? Ingredient.of(Items.REDSTONE_TORCH)
+                                : Ingredient.of(Tags.Items.DUSTS_REDSTONE));
+                case SPOTLIGHT -> ShapedRecipeBuilder
+                        .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 8)
+                        .pattern("aaa")
+                        .pattern("aba")
+                        .pattern("aaa")
+                        .define('a', Tags.Items.NUGGETS_IRON)
+                        .define('b', Items.GLOWSTONE);
+            };
+            builder.unlockedBy("has_glowstone", has(Items.GLOWSTONE)).save(output, name(white));
         }
 
         /** Eight of a kind around one dye, the way the game dyes glass. */

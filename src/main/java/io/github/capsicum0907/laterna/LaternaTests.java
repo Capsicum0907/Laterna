@@ -3,6 +3,7 @@ package io.github.capsicum0907.laterna;
 import io.github.capsicum0907.laterna.data.TestStructures;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -10,6 +11,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -26,6 +28,7 @@ public final class LaternaTests {
 
     private static final Lamp NORMAL = new Lamp(Shape.LAMP, Wiring.NORMAL, DyeColor.WHITE);
     private static final Lamp INVERTED = new Lamp(Shape.LAMP, Wiring.INVERTED, DyeColor.WHITE);
+    private static final Lamp SPOTLIGHT = new Lamp(Shape.SPOTLIGHT, Wiring.ALWAYS, DyeColor.WHITE);
 
     private LaternaTests() {
     }
@@ -120,6 +123,66 @@ public final class LaternaTests {
                 BlockPos at = new BlockPos(colour.getId() % 8, 1 + colour.getId() / 8, 0);
                 lit(helper, at, true);
             }
+        });
+    }
+
+    /**
+     * A spotlight on each of the six faces, lit and facing the way it was put.
+     *
+     * <p>⚠ <b>What this cannot check is where the plate is drawn.</b> The rotation table
+     * lives in the model generator, and a test can only see the state - so if the
+     * rotations were inverted, this would pass with every light on the wrong surface.
+     * That one is checked by looking.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void spotlightLightsOnEveryFace(GameTestHelper helper) {
+        for (Direction facing : Direction.values()) {
+            BlockPos at = new BlockPos(1 + facing.ordinal(), 2, 1);
+            helper.setBlock(at, LaternaRegistry.block(SPOTLIGHT).get().defaultBlockState()
+                    .setValue(SpotlightBlock.FACING, facing));
+        }
+        helper.succeedWhen(() -> {
+            for (Direction facing : Direction.values()) {
+                BlockPos at = new BlockPos(1 + facing.ordinal(), 2, 1);
+                BlockState state = helper.getBlockState(at);
+                if (state.getValue(SpotlightBlock.FACING) != facing) {
+                    throw new GameTestAssertException("spotlight at " + at + " turned");
+                }
+                brightness(helper, at, 15);
+            }
+        });
+    }
+
+    /**
+     * ⚠ <b>The two shapes a plate has, and why they differ.</b> Nothing to walk on, so a
+     * light set into a floor is flush with it; but still something to point at, because a
+     * {@code VoxelShape} of no thickness is a block that cannot be selected or broken.
+     * This is the trap the form is built around, and it is cheap to check.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void spotlightIsFlushButStillThere(GameTestHelper helper) {
+        helper.setBlock(WHERE, LaternaRegistry.block(SPOTLIGHT).get());
+        BlockState state = helper.getBlockState(WHERE);
+        BlockPos absolute = helper.absolutePos(WHERE);
+        if (!state.getCollisionShape(helper.getLevel(), absolute).isEmpty()) {
+            throw new GameTestAssertException("a recessed light should not be a step");
+        }
+        if (state.getShape(helper.getLevel(), absolute).isEmpty()) {
+            throw new GameTestAssertException("a light nobody can point at cannot be broken");
+        }
+        helper.succeed();
+    }
+
+    /** Placed in water it holds the water, rather than leaving a bubble in it. */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void spotlightHoldsWater(GameTestHelper helper) {
+        helper.setBlock(WHERE, LaternaRegistry.block(SPOTLIGHT).get().defaultBlockState()
+                .setValue(SpotlightBlock.WATERLOGGED, true));
+        helper.succeedWhen(() -> {
+            if (!helper.getBlockState(WHERE).getFluidState().is(Fluids.WATER)) {
+                throw new GameTestAssertException("the water went missing");
+            }
+            brightness(helper, WHERE, 15);
         });
     }
 

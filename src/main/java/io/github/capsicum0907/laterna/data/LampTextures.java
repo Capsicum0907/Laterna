@@ -43,16 +43,39 @@ public class LampTextures implements DataProvider {
         this.textures = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "textures/block");
     }
 
+    /**
+     * What a layer of a form is called: the lamp's own name for the layer that carries
+     * the colour, and the form's name for one that does not.
+     */
+    public static String name(Shape shape, Masters.Layer layer, DyeColor colour, boolean lit) {
+        return (layer.tinted() ? Lamp.skin(shape, colour, lit) : shape.id()) + layer.suffix();
+    }
+
     /** The names this provider will write, for anything that has to know in advance. */
     public static List<String> skins() {
         List<String> names = new ArrayList<>();
         for (Shape shape : Shape.values()) {
-            for (DyeColor colour : DyeColor.values()) {
-                names.add(Lamp.skin(shape, colour, true));
-                names.add(Lamp.skin(shape, colour, false));
+            for (Masters.Layer layer : Masters.layers(shape)) {
+                for (boolean lit : states(shape)) {
+                    if (!layer.tinted()) {
+                        names.add(name(shape, layer, DyeColor.WHITE, lit));
+                        continue;
+                    }
+                    for (DyeColor colour : DyeColor.values()) {
+                        names.add(name(shape, layer, colour, lit));
+                    }
+                }
             }
         }
         return names;
+    }
+
+    /**
+     * The states a form has a picture for: both where redstone can switch it, and lit
+     * alone where it cannot. A form that is always on has no unlit texture to write.
+     */
+    private static boolean[] states(Shape shape) {
+        return shape.switched() ? new boolean[] { true, false } : new boolean[] { true };
     }
 
     @Override
@@ -64,18 +87,32 @@ public class LampTextures implements DataProvider {
     public CompletableFuture<?> run(CachedOutput output) {
         List<CompletableFuture<?>> writing = new ArrayList<>();
         for (Shape shape : Shape.values()) {
-            for (boolean lit : new boolean[] { true, false }) {
-                Master master = Masters.of(shape, lit);
-                for (DyeColor colour : DyeColor.values()) {
-                    int[][] pixels = master.tinted(colour.getTextureDiffuseColor() & 0xFFFFFF);
-                    Path target = textures.file(ResourceLocation.fromNamespaceAndPath(
-                            Laterna.MODID, Lamp.skin(shape, colour, lit)), "png");
-                    writing.add(CompletableFuture.runAsync(() -> write(output, pixels, target),
-                            Util.backgroundExecutor()));
+            for (Masters.Layer layer : Masters.layers(shape)) {
+                for (boolean lit : states(shape)) {
+                    Master master = Masters.of(shape, layer, lit);
+                    if (!layer.tinted()) {
+                        draw(output, writing, master, Masters.plainColour(),
+                                name(shape, layer, DyeColor.WHITE, lit));
+                        continue;
+                    }
+                    for (DyeColor colour : DyeColor.values()) {
+                        draw(output, writing, master,
+                                colour.getTextureDiffuseColor() & 0xFFFFFF,
+                                name(shape, layer, colour, lit));
+                    }
                 }
             }
         }
         return CompletableFuture.allOf(writing.toArray(CompletableFuture[]::new));
+    }
+
+    private void draw(CachedOutput output, List<CompletableFuture<?>> writing, Master master,
+            int colour, String name) {
+        int[][] pixels = master.tinted(colour);
+        Path target = textures.file(
+                ResourceLocation.fromNamespaceAndPath(Laterna.MODID, name), "png");
+        writing.add(CompletableFuture.runAsync(() -> write(output, pixels, target),
+                Util.backgroundExecutor()));
     }
 
     @SuppressWarnings("deprecation") // Hashing.sha1 is what CachedOutput expects
