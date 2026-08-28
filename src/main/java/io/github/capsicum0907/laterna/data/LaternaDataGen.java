@@ -39,6 +39,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
+import net.neoforged.neoforge.client.model.generators.ModelBuilder;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
@@ -248,23 +249,45 @@ public final class LaternaDataGen {
          * strip of the texture rather than a squashed copy of the whole of it.
          */
         private ModelFile box(Shape shape, String skin) {
-            return models().getBuilder(skin)
-                    // The item is this same model, and a model with no parent inherits no
-                    // display transforms - so it was drawn square-on in the hand and in
-                    // the slot, which is to say flat. block/block carries nothing but
-                    // those transforms, and is what every cube in the game is built on.
+            return cut(models().getBuilder(skin), shape, skin, Direction.Axis.Z);
+        }
+
+        /**
+         * A box of the form's own depth, flat against one axis.
+         *
+         * <p>⚠ <b>Which axis is not the same question for a block and for its item.</b>
+         * A block model is always built standing against the north face, because that is
+         * the face the one rotation table turns onto the other five. An item is never
+         * rotated at all - what is authored is what is held - so a form that lies down in
+         * the world has to be authored lying down to be held that way. See {@link #item}.
+         *
+         * <p>The parent carries nothing but the display transforms; without one the game
+         * draws the model square-on, which for a box eight pixels deep is a flat square.
+         *
+         * <p>No {@code uv} is written for any face. Left out, the game works each one out
+         * from where the element is, which is what keeps the four cut sides showing a
+         * strip of the rim rather than a squashed copy of the whole of it.
+         */
+        private <T extends ModelBuilder<T>> T cut(T builder, Shape shape, String skin,
+                Direction.Axis flat) {
+            float depth = (float) shape.depth();
+            Direction back = Direction.fromAxisAndDirection(flat,
+                    Direction.AxisDirection.NEGATIVE);
+            return builder
                     .parent(new ModelFile.UncheckedModelFile("block/block"))
                     .texture("face", modLoc("block/" + skin))
                     .texture("edge", modLoc("block/" + skin + Masters.Layer.EDGE.suffix()))
                     .texture("particle", modLoc("block/" + skin))
                     .element()
-                        .from(0, 0, 0).to(16, 16, (float) shape.depth())
+                        .from(0, 0, 0)
+                        .to(flat == Direction.Axis.X ? depth : 16,
+                                flat == Direction.Axis.Y ? depth : 16,
+                                flat == Direction.Axis.Z ? depth : 16)
                         .allFaces((direction, face) -> {
                             // The two broad sides are the lamp; the four cut ones are a rim.
-                            boolean broad = direction.getAxis() == Direction.Axis.Z;
-                            face.texture(broad ? "#face" : "#edge");
-                            if (direction == Direction.NORTH) {
-                                face.cullface(Direction.NORTH);
+                            face.texture(direction.getAxis() == flat ? "#face" : "#edge");
+                            if (direction == back) {
+                                face.cullface(back);
                             }
                         })
                     .end();
@@ -281,8 +304,16 @@ public final class LaternaDataGen {
         private void item(Lamp lamp, ModelFile model) {
             switch (lamp.shape()) {
                 // A box has thickness and reads perfectly well held at an angle.
-                case LAMP, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL ->
+                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL ->
                         itemModels().withExistingParent(lamp.id(), model.getLocation());
+                // ⚠ A slab that lies down has to be authored lying down. The block
+                // model of every plate stands against the north face so that one rotation
+                // table can turn it onto any other, and the blockstate does the turning -
+                // but an item is never turned, so reusing the block model handed back a
+                // standing plate for the lying form and the standing one alike, and the
+                // two were the same picture in the hand.
+                case SLAB, PANEL -> cut(itemModels().getBuilder(lamp.id()), lamp.shape(),
+                        lamp.skin(true), Direction.Axis.Y);
                 // The ring is the base and the lens goes over it, the same way round as
                 // the two elements of the block model.
                 case SPOTLIGHT -> itemModels().getBuilder(lamp.id())

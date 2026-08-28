@@ -1,3 +1,43 @@
 {
-  "parent": "laterna:block/orange_lamp_slab"
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#face"
+        },
+        "east": {
+          "texture": "#edge"
+        },
+        "north": {
+          "texture": "#edge"
+        },
+        "south": {
+          "texture": "#edge"
+        },
+        "up": {
+          "texture": "#face"
+        },
+        "west": {
+          "texture": "#edge"
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        8,
+        16
+      ]
+    }
+  ],
+  "textures": {
+    "edge": "laterna:block/orange_lamp_slab_edge",
+    "face": "laterna:block/orange_lamp_slab",
+    "particle": "laterna:block/orange_lamp_slab"
+  }
 }
