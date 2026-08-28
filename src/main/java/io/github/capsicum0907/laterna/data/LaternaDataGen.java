@@ -244,11 +244,14 @@ public final class LaternaDataGen {
         private ModelFile box(Shape shape, String skin) {
             return models().getBuilder(skin)
                     .texture("face", modLoc("block/" + skin))
+                    .texture("edge", modLoc("block/" + skin + Masters.Layer.EDGE.suffix()))
                     .texture("particle", modLoc("block/" + skin))
                     .element()
                         .from(0, 0, 0).to(16, 16, (float) shape.depth())
                         .allFaces((direction, face) -> {
-                            face.texture("#face");
+                            // The two broad sides are the lamp; the four cut ones are a rim.
+                            boolean broad = direction.getAxis() == Direction.Axis.Z;
+                            face.texture(broad ? "#face" : "#edge");
                             if (direction == Direction.NORTH) {
                                 face.cullface(Direction.NORTH);
                             }

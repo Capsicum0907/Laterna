@@ -3,10 +3,10 @@
     {
       "faces": {
         "down": {
-          "texture": "#face"
+          "texture": "#edge"
         },
         "east": {
-          "texture": "#face"
+          "texture": "#edge"
         },
         "north": {
           "cullface": "north",
@@ -16,10 +16,10 @@
           "texture": "#face"
         },
         "up": {
-          "texture": "#face"
+          "texture": "#edge"
         },
         "west": {
-          "texture": "#face"
+          "texture": "#edge"
         }
       },
       "from": [
@@ -35,6 +35,7 @@
     }
   ],
   "textures": {
+    "edge": "laterna:block/green_lamp_panel_edge",
     "face": "laterna:block/green_lamp_panel",
     "particle": "laterna:block/green_lamp_panel"
   }

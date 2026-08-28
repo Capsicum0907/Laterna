@@ -34,6 +34,9 @@ public final class Masters {
     private static final float FACE_LIT = 0.80F;
     private static final float FALLOFF_LIT = 0.14F;
 
+    /** The cut side of a slab: brighter than the frame, duller than the face. */
+    private static final float EDGE_FACE = 0.46F;
+
     private static final float FRAME_UNLIT = 0.20F;
     private static final float FACE_UNLIT = 0.34F;
     private static final float FALLOFF_UNLIT = 0.05F;
@@ -76,12 +79,14 @@ public final class Masters {
     public record Layer(String suffix, boolean tinted) {
         public static final Layer BODY = new Layer("", true);
         public static final Layer RING = new Layer("_ring", false);
+        public static final Layer EDGE = new Layer("_edge", true);
     }
 
     public static List<Layer> layers(Shape shape) {
         return switch (shape) {
-            case LAMP, SLAB, PANEL -> List.of(Layer.BODY);
+            case LAMP -> List.of(Layer.BODY);
             case SPOTLIGHT -> List.of(Layer.BODY, Layer.RING);
+            case SLAB, PANEL -> List.of(Layer.BODY, Layer.EDGE);
         };
     }
 
@@ -103,11 +108,13 @@ public final class Masters {
      */
     public static Master of(Shape shape, Layer layer, boolean lit) {
         return switch (shape) {
-            // The slab and the panel are the cube cut down, and wear its lit face. They
-            // get files of their own rather than borrowing the cube's, so that a resource
-            // pack can retexture a panel without touching every lamp in the world.
-            case LAMP, SLAB, PANEL -> face(lit);
+            case LAMP -> face(lit);
             case SPOTLIGHT -> layer.equals(Layer.RING) ? ring() : lens();
+            // The slab and the panel wear the cube's lit face on the two broad sides, and
+            // a rim of their own on the four cut ones. They get files of their own rather
+            // than borrowing the cube's, so that a resource pack can retexture a panel
+            // without touching every lamp in the world.
+            case SLAB, PANEL -> layer.equals(Layer.EDGE) ? edge() : face(lit);
         };
     }
 
@@ -199,6 +206,30 @@ public final class Masters {
                 float lean = -((x + 0.5F - half) + (y + 0.5F - half)) / (radius * 2.0F);
                 master.level()[y][x] = lean > BEVEL_EDGE ? BEVEL_LIT
                         : lean < -BEVEL_EDGE ? BEVEL_DARK : 0.5F;
+            }
+        }
+        return master;
+    }
+
+    /**
+     * The cut side of a slab or a panel: one flat shade, and nothing else.
+     *
+     * <p>⚠ <b>Flat because the crop cannot be predicted.</b> A side face is four pixels
+     * deep or eight, and the game works its texture coordinates out from where the
+     * element is - so a strip is taken across the texture on two of the four sides and
+     * down it on the other two. Anything drawn here with a top or a left would come out
+     * turned on half of them. What was there before was the cube's own face, cropped, and
+     * it read as exactly what it was: a block sliced through.
+     *
+     * <p>A shade above the frame, so the cut edge reads as part of a lit thing rather
+     * than as the dark border around one.
+     */
+    private static Master edge() {
+        Master master = Master.blank();
+        for (int y = 0; y < Master.SIZE; y++) {
+            for (int x = 0; x < Master.SIZE; x++) {
+                master.alpha()[y][x] = 1.0F;
+                master.level()[y][x] = EDGE_FACE;
             }
         }
         return master;
