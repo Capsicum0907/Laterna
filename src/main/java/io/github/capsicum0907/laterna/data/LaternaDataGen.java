@@ -47,6 +47,7 @@ import io.github.capsicum0907.laterna.StackingPlateBlock;
 import io.github.capsicum0907.laterna.UprightStackingPlateBlock;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.model.generators.BlockModelBuilder;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 import net.neoforged.neoforge.client.model.generators.ModelBuilder;
@@ -229,38 +230,55 @@ public final class LaternaDataGen {
         }
 
         /**
-         * A small box standing on the middle of the north face of the cell.
+         * A fitting on the middle of the north face of the cell: a base against the
+         * surface, and the part that glows standing out of it.
          *
-         * <p>⚠ <b>Every face is given the whole texture, rather than the piece of it the
-         * game would work out.</b> A face six pixels across takes a six-pixel corner of a
-         * sixteen-pixel picture if nothing says otherwise, which is the crude slice the
-         * broad forms were pulled up on. Written out, the small face wears the whole lamp,
-         * scaled - and the masters for these forms are drawn without a border for exactly
-         * that reason.
+         * <p>⚠ <b>Two parts, and that is the whole of why these read as fittings.</b>
+         * One box with a lit face on it is a tile stuck to a wall. A plate flush with the
+         * surface with something raised out of it is a lamp bolted to one - which is how
+         * the mod this follows builds both of these, and it was the difference the first
+         * pass missed.
          *
-         * <p>A bulb glows on every side of itself, so it has no rim; a fitting is a lit
-         * face in one, like everything else that lies against a surface.
+         * <p>⚠ <b>Every face is given the whole texture, rather than the piece of it
+         * the game would work out.</b> A face four pixels across takes a four-pixel corner
+         * of a sixteen-pixel picture if nothing says otherwise, which is the crude slice
+         * the broad forms were pulled up on. Written out, the small face wears the whole
+         * lamp, scaled - and the masters for these forms are drawn without a border for
+         * exactly that reason.
          */
         private ModelFile fitting(Shape shape, String skin) {
-            float inset = (float) shape.inset();
-            float depth = (float) shape.depth();
-            boolean rimmed = shape != Shape.BULB;
-            return models().getBuilder(skin)
+            float[] base = switch (shape) {
+                case BULB -> new float[] { 6, 6, 0, 10, 10, 1 };
+                case FIXTURE -> new float[] { 4, 4, 0, 12, 12, 1 };
+                default -> throw new IllegalArgumentException(shape + " is not a fitting");
+            };
+            float[] lit = switch (shape) {
+                case BULB -> new float[] { 7, 7, 1, 9, 9, 5 };
+                case FIXTURE -> new float[] { 5, 5, 1, 11, 11, 3 };
+                default -> throw new IllegalArgumentException(shape + " is not a fitting");
+            };
+            BlockModelBuilder builder = models().getBuilder(skin)
                     .parent(new ModelFile.UncheckedModelFile("block/block"))
                     .texture("face", modLoc("block/" + skin))
-                    .texture("edge", modLoc("block/" + skin
-                            + (rimmed ? Masters.Layer.EDGE.suffix() : "")))
-                    .texture("particle", modLoc("block/" + skin))
-                    .element()
-                        .from(inset, inset, 0).to(16 - inset, 16 - inset, depth)
-                        .allFaces((direction, face) -> {
-                            face.texture(direction.getAxis() == Direction.Axis.Z
-                                    ? "#face" : "#edge");
-                            face.uvs(0, 0, 16, 16);
-                            if (direction == Direction.NORTH) {
-                                face.cullface(Direction.NORTH);
-                            }
-                        })
+                    .texture("edge", modLoc("block/" + skin + Masters.Layer.EDGE.suffix()))
+                    .texture("particle", modLoc("block/" + skin));
+            part(builder, base, "#edge", true);
+            part(builder, lit, "#face", false);
+            return builder;
+        }
+
+        /** One box of a fitting, wearing one texture, with the whole of it on every face. */
+        private void part(BlockModelBuilder builder, float[] box, String texture,
+                boolean against) {
+            builder.element()
+                    .from(box[0], box[1], box[2]).to(box[3], box[4], box[5])
+                    .allFaces((direction, face) -> {
+                        face.texture(texture);
+                        face.uvs(0, 0, 16, 16);
+                        if (against && direction == Direction.NORTH) {
+                            face.cullface(Direction.NORTH);
+                        }
+                    })
                     .end();
         }
 

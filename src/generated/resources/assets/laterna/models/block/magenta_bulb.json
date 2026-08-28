@@ -23,7 +23,7 @@
         },
         "north": {
           "cullface": "north",
-          "texture": "#face",
+          "texture": "#edge",
           "uv": [
             0.0,
             0.0,
@@ -32,7 +32,7 @@
           ]
         },
         "south": {
-          "texture": "#face",
+          "texture": "#edge",
           "uv": [
             0.0,
             0.0,
@@ -60,19 +60,87 @@
         }
       },
       "from": [
-        5,
-        5,
+        6,
+        6,
         0
       ],
       "to": [
-        11,
-        11,
-        6
+        10,
+        10,
+        1
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#face",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#face",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "north": {
+          "texture": "#face",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#face",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "up": {
+          "texture": "#face",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#face",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "from": [
+        7,
+        7,
+        1
+      ],
+      "to": [
+        9,
+        9,
+        5
       ]
     }
   ],
   "textures": {
-    "edge": "laterna:block/magenta_bulb",
+    "edge": "laterna:block/magenta_bulb_edge",
     "face": "laterna:block/magenta_bulb",
     "particle": "laterna:block/magenta_bulb"
   }

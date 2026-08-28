@@ -156,9 +156,10 @@ public final class LaternaTests {
                 if (plate.facing(state) != facing) {
                     throw new GameTestAssertException(shape + " facing " + facing + " turned");
                 }
-                if (state.getLightEmission() != 15) {
+                int given = state.getLightEmission(helper.getLevel(), helper.absolutePos(WHERE));
+                if (given != 15) {
                     throw new GameTestAssertException(shape + " facing " + facing
-                            + " gives off " + state.getLightEmission());
+                            + " gives off " + given);
                 }
                 clear(helper, facing);
             }
@@ -401,6 +402,39 @@ public final class LaternaTests {
                 throw new GameTestAssertException("a pair stacked along " + facing.getAxis()
                         + " came back along " + kept.getAxis());
             }
+        }
+        helper.succeed();
+    }
+
+    /**
+     * The outline of a form follows that form's inset, on both axes across its face.
+     *
+     * <p>⚠ <b>What this does not check is that the inset matches the drawing.</b> Both
+     * the outline and the number it is compared against come from {@code Shape}, so a form
+     * whose inset is simply wrong would pass. What it does catch is the block ignoring the
+     * inset - which is how a spotlight drawn eight pixels across came to have an outline
+     * of the whole sixteen, so that pointing anywhere near one caught it. Whether the
+     * number is the right one is settled by looking, like the rotation table.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void anOutlineIsNoWiderThanItsLamp(GameTestHelper helper) {
+        for (Shape shape : PLATES) {
+            PlateBlock plate = plate(shape);
+            Direction facing = plate.facings().iterator().next();
+            BlockState state = put(helper, plate, facing);
+            VoxelShape outline = state.getShape(helper.getLevel(), helper.absolutePos(WHERE));
+            double wanted = (16.0 - 2 * shape.inset()) / 16.0;
+            for (Direction.Axis axis : Direction.Axis.values()) {
+                if (axis == PlateBlock.against(facing).getAxis()) {
+                    continue;
+                }
+                double across = outline.max(axis) - outline.min(axis);
+                if (Math.abs(across - wanted) > 1.0E-6) {
+                    throw new GameTestAssertException(shape + " is " + across
+                            + " across on " + axis + ", wanted " + wanted);
+                }
+            }
+            clear(helper, facing);
         }
         helper.succeed();
     }

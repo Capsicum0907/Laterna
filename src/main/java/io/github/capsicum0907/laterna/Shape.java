@@ -37,7 +37,7 @@ public enum Shape {
      * shape one pixel deep only because a block with none cannot be pointed at or broken.
      * Always lit, so sixteen blocks and one state.
      */
-    SPOTLIGHT("spotlight", SoundType.GLASS, 0.3F, 1.0, Mount.ANY, List.of(Wiring.ALWAYS)),
+    SPOTLIGHT("spotlight", SoundType.GLASS, 0.3F, 1.0, 4.0, Mount.ANY, List.of(Wiring.ALWAYS)),
 
     /**
      * Half a lamp, laid against any of the six faces. The everyday one: a ceiling of
@@ -74,17 +74,22 @@ public enum Shape {
     /**
      * A small bulb on a face, glowing on every side of itself.
      *
-     * <p>The first form that does not reach the edges of its own face, and so the first
-     * with an inset. Six pixels of lamp with five of nothing around it.
+     * <p>A base flush with the surface and a narrow bulb standing off it - two parts, and
+     * that is what makes it read as a fitting rather than a tile. Four pixels of base with
+     * six of nothing around it, and five pixels proud of the wall.
      */
-    BULB("bulb", SoundType.GLASS, 0.3F, 6.0, 5.0, Mount.ANY, List.of(Wiring.ALWAYS)),
+    BULB("bulb", SoundType.GLASS, 0.3F, 5.0, 6.0, Mount.ANY, List.of(Wiring.ALWAYS)),
 
     /**
-     * A shallow fitting: a lit face in a rim, wider than a bulb and barely proud of the
-     * surface. What the spotlight would be if it were mounted on the wall rather than
-     * sunk into it.
+     * A shallow fitting: a plate on the surface with a lit face raised out of it. What the
+     * spotlight would be if it were mounted on the wall rather than sunk into it.
+     *
+     * ⚠ <b>Square on every face, where the mod this follows is not.</b> Theirs is a
+     * wide bar on a wall and a small disc on a floor - two models. That is a good idea and
+     * is not done here yet: it wants a second box per form, one for the walls and one for
+     * the floor and ceiling, and the outline has to follow it.
      */
-    FIXTURE("fixture", SoundType.GLASS, 0.3F, 2.0, 3.0, Mount.ANY, List.of(Wiring.ALWAYS));
+    FIXTURE("fixture", SoundType.GLASS, 0.3F, 3.0, 4.0, Mount.ANY, List.of(Wiring.ALWAYS));
 
     /**
      * How a form meets the block it is put against, which decides what states it keeps
@@ -131,9 +136,13 @@ public enum Shape {
     /**
      * How far in from the edges of its face this form sits, in pixels of the sixteen.
      *
-     * <p>Nought for everything that covers its face. A bulb and a fitting do not, and the
-     * same one number trims the box the model is built from and the outline you point at -
-     * so a small lamp cannot end up with a full-face hit box.
+     * <p>Nought for everything that covers its face. The spotlight, the bulb and the
+     * fitting do not, and the same one number trims the box the model is built from and
+     * the outline you point at - so a small lamp cannot end up with a full-face hit box.
+     *
+     * ⚠ <b>The spotlight was exactly that until it was looked at.</b> Its drawing is
+     * eight pixels across and its outline was the whole sixteen, so pointing anywhere near
+     * it caught it. The number here is read off the rim the master actually draws.
      */
     public double inset() {
         return inset;

@@ -72,8 +72,8 @@ and mixing the two kinds is what makes a scaffold stall.
 | **Lamp panel** | **16** | **Done.** 4px, lying down |
 | **Vertical lamp panel** | **16** | **Done.** 4px, standing |
 | **Recessed spotlight** | 16 | **Done.** Zero thickness, a round lens in a grey ring |
-| **Bulb** | **16** | **Done.** A small lamp on a face, glowing all round |
-| **Fixture** | **16** | **Done.** A shallow lit face in a rim |
+| **Bulb** | **16** | **Done.** A base and a narrow bulb standing out of it |
+| **Fixture** | **16** | **Done.** A base plate with a lit face raised out of it |
 | Rod | 16 | Strip light — needs a second state for which way it runs |
 | *Edge strip* | — | Deferred: shaping it to its neighbours needs a UI |
 | *Lamp post* | — | Deferred: three blocks that must stay consistent |
@@ -88,7 +88,16 @@ rather than leaving a field of them to be knocked out one at a time.
 
 **A form that does not reach the edges of its face carries an inset**, and the one number
 trims the box the model is built from and the outline you point at together — so a small
-lamp cannot end up with a full-face hit box. ⚠ Their masters are drawn without a border:
+lamp cannot end up with a full-face hit box. ⚠ The spotlight was exactly that until it was
+looked at: drawn eight pixels across, outlined at the full sixteen, and catching the
+pointer anywhere near it.
+
+**A fitting is two parts: a base against the surface, and the lit part raised out of it.**
+One box with a lit face on it is a tile stuck to a wall; a plate flush with the surface
+with something standing out of it is a lamp bolted to one. ⚠ Simply Light does a second
+thing here that this does not yet — a fitting is a wide bar on a wall and a small disc on
+a floor, two models rather than one turned. That wants a second box per form, and the
+outline has to follow it. ⚠ Their masters are drawn without a border:
 a one-pixel frame stretched onto a face six pixels across is a third of a pixel, which is
 a smudge rather than a frame.
 
