@@ -32,8 +32,8 @@ import org.jetbrains.annotations.Nullable;
 public class UprightStackingPlateBlock extends UprightPlateBlock {
     public static final BooleanProperty DOUBLE = BooleanProperty.create("double");
 
-    public UprightStackingPlateBlock(double depth, Properties properties) {
-        super(depth, properties);
+    public UprightStackingPlateBlock(Shape shape, Properties properties) {
+        super(shape, properties);
         // ⚠ Set here and not left to the parent: a boolean property offers true first, so
         // a default built before this line can come up already doubled.
         registerDefaultState(defaultBlockState().setValue(DOUBLE, false));

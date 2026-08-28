@@ -194,6 +194,13 @@ public final class LaternaDataGen {
                                 ? doubled(lamp.skin(true),
                                         upright ? Direction.Axis.Z : Direction.Axis.Y)
                                 : null;
+                        // ⚠ A form whose size differs by face needs a model per face,
+                        // not one turned onto them. A fitting is a bar on a wall and a disc
+                        // on a floor, and no rotation of the first is the second.
+                        ModelFile flat = lamp.shape().fit(Direction.UP)
+                                .equals(lamp.shape().fit(Direction.NORTH))
+                                ? null
+                                : fitting(lamp.shape(), lamp.skin(true), Direction.UP);
                         getVariantBuilder(block).forAllStatesExcept(state -> {
                             if (plate.whole(state)) {
                                 boolean across = upright && plate.facing(state).getAxis()
@@ -201,9 +208,12 @@ public final class LaternaDataGen {
                                 return ConfiguredModel.builder().modelFile(whole)
                                         .rotationY(across ? 90 : 0).build();
                             }
-                            int[] turn = ROTATION.get(PlateBlock.against(plate.facing(state)));
+                            Direction facing = plate.facing(state);
+                            int[] turn = ROTATION.get(PlateBlock.against(facing));
                             return ConfiguredModel.builder()
-                                    .modelFile(model)
+                                    .modelFile(flat != null
+                                            && facing.getAxis() == Direction.Axis.Y
+                                            ? flat : model)
                                     .rotationX(turn[0]).rotationY(turn[1])
                                     // ⚠ Only the flat one. Locking the texture to the
                                     // world is what keeps the spotlight's bevel pointing
@@ -225,7 +235,7 @@ public final class LaternaDataGen {
                 case LAMP -> models().cubeAll(skin, modLoc("block/" + skin));
                 case SPOTLIGHT -> plate(skin);
                 case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL -> box(shape, skin);
-                case BULB, FIXTURE -> fitting(shape, skin);
+                case BULB, FIXTURE -> fitting(shape, skin, Direction.NORTH);
             };
         }
 
@@ -246,18 +256,20 @@ public final class LaternaDataGen {
          * lamp, scaled - and the masters for these forms are drawn without a border for
          * exactly that reason.
          */
-        private ModelFile fitting(Shape shape, String skin) {
-            float[] base = switch (shape) {
-                case BULB -> new float[] { 6, 6, 0, 10, 10, 1 };
-                case FIXTURE -> new float[] { 4, 4, 0, 12, 12, 1 };
-                default -> throw new IllegalArgumentException(shape + " is not a fitting");
-            };
+        private ModelFile fitting(Shape shape, String skin, Direction facing) {
+            Shape.Fit fit = shape.fit(facing);
+            float wide = (float) fit.wide();
+            float tall = (float) fit.tall();
+            float deep = (float) fit.deep();
+            // The base is the whole of the fitting against the surface; what glows stands
+            // out of the middle of it, a pixel in on every side.
+            float[] base = box(wide, tall, 0, 1);
             float[] lit = switch (shape) {
-                case BULB -> new float[] { 7, 7, 1, 9, 9, 5 };
-                case FIXTURE -> new float[] { 5, 5, 1, 11, 11, 3 };
-                default -> throw new IllegalArgumentException(shape + " is not a fitting");
+                case BULB -> box(2, 2, 1, deep);
+                default -> box(wide - 2, tall - 2, 1, deep);
             };
-            BlockModelBuilder builder = models().getBuilder(skin)
+            BlockModelBuilder builder = models().getBuilder(skin
+                    + (facing.getAxis() == Direction.Axis.Y ? "_flat" : ""))
                     .parent(new ModelFile.UncheckedModelFile("block/block"))
                     .texture("face", modLoc("block/" + skin))
                     .texture("edge", modLoc("block/" + skin + Masters.Layer.EDGE.suffix()))
@@ -265,6 +277,12 @@ public final class LaternaDataGen {
             part(builder, base, "#edge", true);
             part(builder, lit, "#face", false);
             return builder;
+        }
+
+        /** A box of the given size, centred across the face and standing off it. */
+        private float[] box(float wide, float tall, float from, float to) {
+            return new float[] { (16 - wide) / 2, (16 - tall) / 2, from,
+                    (16 + wide) / 2, (16 + tall) / 2, to };
         }
 
         /** One box of a fitting, wearing one texture, with the whole of it on every face. */

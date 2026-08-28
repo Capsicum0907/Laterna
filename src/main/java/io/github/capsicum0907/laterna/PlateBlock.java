@@ -54,13 +54,9 @@ public abstract class PlateBlock extends Block implements SimpleWaterloggedBlock
 
     private final Map<Direction, VoxelShape> shapes;
 
-    protected PlateBlock(double depth, Properties properties) {
-        this(depth, 0.0, properties);
-    }
-
-    protected PlateBlock(double depth, double inset, Properties properties) {
+    protected PlateBlock(Shape shape, Properties properties) {
         super(properties);
-        this.shapes = shapes(depth, inset);
+        this.shapes = shapes(shape);
     }
 
     /** Which way this plate shines, whatever property its form keeps that in. */
@@ -152,22 +148,45 @@ public abstract class PlateBlock extends Block implements SimpleWaterloggedBlock
      * others were right, so nothing about the shape of the mistake suggested itself.
      * Derived from the direction, there is no list to get out of order.
      */
-    private static Map<Direction, VoxelShape> shapes(double depth, double inset) {
+    private static Map<Direction, VoxelShape> shapes(Shape shape) {
         Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
-        double far = 16.0 - depth;
         for (Direction facing : Direction.values()) {
             Direction against = against(facing);
+            Shape.Fit fit = shape.fit(facing);
+            Direction.Axis deep = against.getAxis();
             boolean high = against.getAxisDirection() == Direction.AxisDirection.POSITIVE;
-            Direction.Axis axis = against.getAxis();
-            shapes.put(facing, Block.box(
-                    axis == Direction.Axis.X ? (high ? far : 0) : inset,
-                    axis == Direction.Axis.Y ? (high ? far : 0) : inset,
-                    axis == Direction.Axis.Z ? (high ? far : 0) : inset,
-                    axis == Direction.Axis.X ? (high ? 16 : depth) : 16 - inset,
-                    axis == Direction.Axis.Y ? (high ? 16 : depth) : 16 - inset,
-                    axis == Direction.Axis.Z ? (high ? 16 : depth) : 16 - inset));
+            double[] low = new double[3];
+            double[] top = new double[3];
+            for (Direction.Axis axis : Direction.Axis.values()) {
+                int at = axis.ordinal();
+                if (axis == deep) {
+                    // Out of the face it sits on, from that face inwards.
+                    low[at] = high ? 16.0 - fit.deep() : 0.0;
+                    top[at] = high ? 16.0 : fit.deep();
+                } else {
+                    // Across the face, centred on it.
+                    double span = across(axis, deep, fit);
+                    low[at] = (16.0 - span) / 2.0;
+                    top[at] = low[at] + span;
+                }
+            }
+            shapes.put(facing, Block.box(low[0], low[1], low[2], top[0], top[1], top[2]));
         }
         return Map.copyOf(shapes);
+    }
+
+    /**
+     * How far a form reaches along one of the two axes across the face it is on.
+     *
+     * <p>Up the face is {@code tall} and along it is {@code wide}. On a floor or a ceiling
+     * there is no up, and a form is the same either way - which is why a fitting there is
+     * a disc rather than a bar lying in some arbitrary direction.
+     */
+    private static double across(Direction.Axis axis, Direction.Axis deep, Shape.Fit fit) {
+        if (deep == Direction.Axis.Y) {
+            return fit.wide();
+        }
+        return axis == Direction.Axis.Y ? fit.tall() : fit.wide();
     }
 
     /**

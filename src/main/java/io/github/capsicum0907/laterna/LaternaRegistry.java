@@ -49,17 +49,16 @@ public final class LaternaRegistry {
      * import blocks in order to describe itself.
      */
     private static Function<BlockBehaviour.Properties, Block> built(Lamp lamp) {
-        double depth = lamp.shape().depth();
-        return switch (lamp.shape().mount()) {
+        Shape shape = lamp.shape();
+        return switch (shape.mount()) {
             case NONE -> properties -> new LampBlock(lamp.wiring(), properties);
-            case ANY -> properties ->
-                    new FacePlateBlock(depth, lamp.shape().inset(), properties);
-            case FLAT -> lamp.shape().stacks()
-                    ? properties -> new StackingPlateBlock(depth, properties)
-                    : properties -> new FlatPlateBlock(depth, properties);
-            case UPRIGHT -> lamp.shape().stacks()
-                    ? properties -> new UprightStackingPlateBlock(depth, properties)
-                    : properties -> new UprightPlateBlock(depth, properties);
+            case ANY -> properties -> new FacePlateBlock(shape, properties);
+            case FLAT -> shape.stacks()
+                    ? properties -> new StackingPlateBlock(shape, properties)
+                    : properties -> new FlatPlateBlock(shape, properties);
+            case UPRIGHT -> shape.stacks()
+                    ? properties -> new UprightStackingPlateBlock(shape, properties)
+                    : properties -> new UprightPlateBlock(shape, properties);
         };
     }
 

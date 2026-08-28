@@ -3,6 +3,7 @@ package io.github.capsicum0907.laterna;
 import java.util.List;
 import java.util.Optional;
 
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.SoundType;
 
 /**
@@ -146,6 +147,37 @@ public enum Shape {
      */
     public double inset() {
         return inset;
+    }
+
+    /**
+     * How big this form is on a given face: across it, up it, and out of it, in pixels.
+     *
+     * <p>⚠ <b>A form may be a different size on a wall than on a floor.</b> A fitting
+     * is a wide bar where it is bolted to a wall and a small disc where it is set into a
+     * ceiling, which is how the mod this follows builds one - and there is no turning of a
+     * single box that gives both. So the size is asked for per face, and the model
+     * generator and the outline both ask the same question.
+     *
+     * <p>Everything else answers the same whichever face it is on, out of its depth and
+     * its inset, and says so once here rather than in each of them.
+     */
+    public Fit fit(Direction facing) {
+        boolean flat = facing.getAxis() == Direction.Axis.Y;
+        return switch (this) {
+            case FIXTURE -> flat ? new Fit(4.0, 4.0, 2.0) : new Fit(8.0, 4.0, 3.0);
+            case LAMP, SPOTLIGHT, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL, BULB ->
+                    new Fit(16.0 - 2 * inset, 16.0 - 2 * inset, depth);
+        };
+    }
+
+    /**
+     * How much of its cell a form takes up on one face.
+     *
+     * @param wide across the face - along the wall, or either way on a floor
+     * @param tall up the face; the same as {@code wide} on a floor or a ceiling
+     * @param deep out of the face
+     */
+    public record Fit(double wide, double tall, double deep) {
     }
 
     public Mount mount() {

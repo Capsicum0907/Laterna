@@ -30,8 +30,8 @@ import org.jetbrains.annotations.Nullable;
 public class UprightPlateBlock extends PlateBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    public UprightPlateBlock(double depth, Properties properties) {
-        super(depth, properties);
+    public UprightPlateBlock(Shape shape, Properties properties) {
+        super(shape, properties);
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(WATERLOGGED, false));

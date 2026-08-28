@@ -73,7 +73,7 @@ and mixing the two kinds is what makes a scaffold stall.
 | **Vertical lamp panel** | **16** | **Done.** 4px, standing |
 | **Recessed spotlight** | 16 | **Done.** Zero thickness, a round lens in a grey ring |
 | **Bulb** | **16** | **Done.** A base and a narrow bulb standing out of it |
-| **Fixture** | **16** | **Done.** A base plate with a lit face raised out of it |
+| **Fixture** | **16** | **Done.** A bar on a wall, a disc on a floor, lit face raised |
 | Rod | 16 | Strip light — needs a second state for which way it runs |
 | *Edge strip* | — | Deferred: shaping it to its neighbours needs a UI |
 | *Lamp post* | — | Deferred: three blocks that must stay consistent |
@@ -94,10 +94,14 @@ pointer anywhere near it.
 
 **A fitting is two parts: a base against the surface, and the lit part raised out of it.**
 One box with a lit face on it is a tile stuck to a wall; a plate flush with the surface
-with something standing out of it is a lamp bolted to one. ⚠ Simply Light does a second
-thing here that this does not yet — a fitting is a wide bar on a wall and a small disc on
-a floor, two models rather than one turned. That wants a second box per form, and the
-outline has to follow it. ⚠ Their masters are drawn without a border:
+with something standing out of it is a lamp bolted to one.
+
+**And a form may be a different size on a wall than on a floor.** The fitting is a wide
+bar where it is bolted to a wall and a small disc where it is set into a ceiling. ⚠ No
+turning of one box gives both, so the size is asked for per face — `Shape.fit(facing)` —
+and the model generator and the outline both ask that one question. Everything else
+answers the same whichever face it is on and says so in one place rather than in each of
+them. ⚠ Their masters are drawn without a border:
 a one-pixel frame stretched onto a face six pixels across is a third of a pixel, which is
 a smudge rather than a frame.
 

@@ -36,8 +36,8 @@ import org.jetbrains.annotations.Nullable;
 public class FlatPlateBlock extends PlateBlock {
     public static final EnumProperty<Half> HALF = BlockStateProperties.HALF;
 
-    public FlatPlateBlock(double depth, Properties properties) {
-        super(depth, properties);
+    public FlatPlateBlock(Shape shape, Properties properties) {
+        super(shape, properties);
         registerDefaultState(stateDefinition.any()
                 .setValue(HALF, Half.BOTTOM)
                 .setValue(WATERLOGGED, false));

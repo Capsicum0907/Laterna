@@ -46,8 +46,8 @@ import org.jetbrains.annotations.Nullable;
 public class StackingPlateBlock extends PlateBlock {
     public static final EnumProperty<SlabType> TYPE = BlockStateProperties.SLAB_TYPE;
 
-    public StackingPlateBlock(double depth, Properties properties) {
-        super(depth, properties);
+    public StackingPlateBlock(Shape shape, Properties properties) {
+        super(shape, properties);
         registerDefaultState(stateDefinition.any()
                 .setValue(TYPE, SlabType.BOTTOM)
                 .setValue(WATERLOGGED, false));

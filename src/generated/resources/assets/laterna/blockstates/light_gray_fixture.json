@@ -1,7 +1,7 @@
 {
   "variants": {
     "facing=down": {
-      "model": "laterna:block/light_gray_fixture",
+      "model": "laterna:block/light_gray_fixture_flat",
       "uvlock": true,
       "x": 270
     },
@@ -20,7 +20,7 @@
       "uvlock": true
     },
     "facing=up": {
-      "model": "laterna:block/light_gray_fixture",
+      "model": "laterna:block/light_gray_fixture_flat",
       "uvlock": true,
       "x": 90
     },

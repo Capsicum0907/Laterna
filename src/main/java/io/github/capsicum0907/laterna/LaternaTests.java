@@ -224,7 +224,7 @@ public final class LaternaTests {
                 double near = high
                         ? outline.min(against.getAxis())
                         : outline.max(against.getAxis());
-                double depth = shape.depth() / 16.0;
+                double depth = shape.fit(facing).deep() / 16.0;
                 double wanted = high ? 1.0 - depth : depth;
                 if (Math.abs(near - wanted) > 1.0E-6) {
                     throw new GameTestAssertException(shape + " facing " + facing
@@ -407,7 +407,7 @@ public final class LaternaTests {
     }
 
     /**
-     * The outline of a form follows that form's inset, on both axes across its face.
+     * The outline of a form is the size that form says it is on the face it is on.
      *
      * <p>⚠ <b>What this does not check is that the inset matches the drawing.</b> Both
      * the outline and the number it is compared against come from {@code Shape}, so a form
@@ -423,11 +423,12 @@ public final class LaternaTests {
             Direction facing = plate.facings().iterator().next();
             BlockState state = put(helper, plate, facing);
             VoxelShape outline = state.getShape(helper.getLevel(), helper.absolutePos(WHERE));
-            double wanted = (16.0 - 2 * shape.inset()) / 16.0;
+            Direction.Axis deep = PlateBlock.against(facing).getAxis();
+            Shape.Fit fit = shape.fit(facing);
             for (Direction.Axis axis : Direction.Axis.values()) {
-                if (axis == PlateBlock.against(facing).getAxis()) {
-                    continue;
-                }
+                double wanted = (axis == deep ? fit.deep()
+                        : deep == Direction.Axis.Y || axis != Direction.Axis.Y
+                                ? fit.wide() : fit.tall()) / 16.0;
                 double across = outline.max(axis) - outline.min(axis);
                 if (Math.abs(across - wanted) > 1.0E-6) {
                     throw new GameTestAssertException(shape + " is " + across
