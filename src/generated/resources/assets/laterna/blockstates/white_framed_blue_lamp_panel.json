@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "half=bottom": {
+      "model": "laterna:block/white_framed_blue_lamp_panel",
+      "x": 90
+    },
+    "half=top": {
+      "model": "laterna:block/white_framed_blue_lamp_panel",
+      "x": 270
+    }
+  }
+}

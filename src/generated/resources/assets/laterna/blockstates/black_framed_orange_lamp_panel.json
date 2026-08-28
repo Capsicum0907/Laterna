@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "half=bottom": {
+      "model": "laterna:block/black_framed_orange_lamp_panel",
+      "x": 90
+    },
+    "half=top": {
+      "model": "laterna:block/black_framed_orange_lamp_panel",
+      "x": 270
+    }
+  }
+}

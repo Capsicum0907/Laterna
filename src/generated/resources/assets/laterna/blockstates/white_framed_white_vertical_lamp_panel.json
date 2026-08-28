@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_panel",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_panel",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_panel"
+    },
+    "facing=west": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_panel",
+      "y": 90
+    }
+  }
+}

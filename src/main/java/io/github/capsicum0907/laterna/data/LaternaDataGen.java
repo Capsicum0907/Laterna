@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import io.github.capsicum0907.laterna.Frame;
 import io.github.capsicum0907.laterna.Lamp;
 import io.github.capsicum0907.laterna.LampBlock;
 import io.github.capsicum0907.laterna.Laterna;
@@ -160,13 +161,15 @@ public final class LaternaDataGen {
         protected void registerStatesAndModels() {
             Map<String, ModelFile> models = new HashMap<>();
             for (Shape shape : Shape.values()) {
-                for (DyeColor colour : DyeColor.values()) {
-                    for (boolean lit : new boolean[] { true, false }) {
-                        if (!lit && !shape.switched()) {
-                            continue;
+                for (Frame frame : shape.frames()) {
+                    for (DyeColor colour : DyeColor.values()) {
+                        for (boolean lit : new boolean[] { true, false }) {
+                            if (!lit && !shape.switched()) {
+                                continue;
+                            }
+                            String skin = Lamp.skin(shape, frame, colour, lit);
+                            models.put(skin, shaped(shape, skin));
                         }
-                        String skin = Lamp.skin(shape, colour, lit);
-                        models.put(skin, shaped(shape, skin));
                     }
                 }
             }
@@ -762,8 +765,10 @@ public final class LaternaDataGen {
         @Override
         protected void buildRecipes(RecipeOutput output) {
             for (Shape shape : Shape.values()) {
-                for (Wiring wiring : shape.wirings()) {
-                    base(output, new Lamp(shape, wiring, DyeColor.WHITE));
+                for (Frame frame : shape.frames()) {
+                    for (Wiring wiring : shape.wirings()) {
+                        base(output, new Lamp(shape, wiring, frame, DyeColor.WHITE));
+                    }
                 }
             }
             for (Lamp lamp : Lamp.all()) {
@@ -790,7 +795,7 @@ public final class LaternaDataGen {
                         .pattern("aba")
                         .pattern("bcb")
                         .pattern("aba")
-                        .define('a', Tags.Items.STONES)
+                        .define('a', framing(white.frame()))
                         .define('b', Items.GLOWSTONE)
                         .define('c', white.wiring() == Wiring.INVERTED
                                 ? Ingredient.of(Items.REDSTONE_TORCH)
@@ -806,15 +811,15 @@ public final class LaternaDataGen {
                         .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 6)
                         .pattern("bbb")
                         .pattern("aaa")
-                        .define('a', Tags.Items.STONES)
+                        .define('a', framing(white.frame()))
                         .define('b', Items.GLOWSTONE));
                 // Cut thinner, the way the game cuts a block into slabs, and by the same
                 // arithmetic: three slabs of eight are six panels of four.
                 case PANEL -> raw(output, white, ShapedRecipeBuilder
                         .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 6)
                         .pattern("aaa")
-                        .define('a', LaternaRegistry.item(
-                                new Lamp(Shape.SLAB, Wiring.ALWAYS, DyeColor.WHITE)).get()));
+                        .define('a', LaternaRegistry.item(new Lamp(Shape.SLAB,
+                                Wiring.ALWAYS, white.frame(), DyeColor.WHITE)).get()));
                 // Nothing. A form that stands on its edge is the one that lies down,
                 // turned - see turning() - and giving it a recipe of its own as well would
                 // be two ways to make one thing, drifting apart the first time either
@@ -869,13 +874,31 @@ public final class LaternaDataGen {
             lamp.shape().turned().ifPresent(other -> ShapelessRecipeBuilder
                     .shapeless(RecipeCategory.DECORATIONS, LaternaRegistry.item(lamp).get())
                     .requires(LaternaRegistry.item(
-                            new Lamp(other, lamp.wiring(), lamp.colour())).get())
+                            new Lamp(other, lamp.wiring(), lamp.frame(), lamp.colour())).get())
                     .unlockedBy("has_glowstone", has(Items.GLOWSTONE))
                     .save(output, ResourceLocation.fromNamespaceAndPath(
                             Laterna.MODID, lamp.id() + "_from_turning")));
         }
 
         /** Saved the same way whatever the pattern was, so the arms above stay patterns. */
+        /**
+         * What the frame of a lamp is built out of.
+         *
+         * <p>⚠ <b>The material is what tells the three families apart on the bench.</b>
+         * Dye is already spoken for - it says which colour - and a single item is reserved
+         * for turning a slab on its edge, so neither could also mean "and fix the frame".
+         * Building a black frame out of blackstone and a white one out of quartz needs no
+         * marker at all: the frame is made of what it looks like it is made of, and the
+         * three recipes cannot be confused with one another.
+         */
+        private Ingredient framing(Frame frame) {
+            return switch (frame) {
+                case OWN -> Ingredient.of(Tags.Items.STONES);
+                case BLACK -> Ingredient.of(Items.BLACKSTONE, Items.POLISHED_BLACKSTONE);
+                case WHITE -> Ingredient.of(Items.QUARTZ_BLOCK, Items.SMOOTH_QUARTZ);
+            };
+        }
+
         private void raw(RecipeOutput output, Lamp white, ShapedRecipeBuilder builder) {
             builder.unlockedBy("has_glowstone", has(Items.GLOWSTONE)).save(output, name(white));
         }
@@ -887,7 +910,8 @@ public final class LaternaDataGen {
                     .pattern("aaa")
                     .pattern("aba")
                     .pattern("aaa")
-                    .define('a', LaternaTags.items(lamp.shape(), lamp.wiring()))
+                    .define('a',
+                            LaternaTags.items(lamp.shape(), lamp.wiring(), lamp.frame()))
                     .define('b', DyeItem.byColor(lamp.colour()))
                     .unlockedBy("has_glowstone", has(Items.GLOWSTONE))
                     .save(output, name(lamp));
@@ -908,7 +932,7 @@ public final class LaternaDataGen {
         @Override
         protected void addTags(HolderLookup.Provider registries) {
             for (Lamp lamp : Lamp.all()) {
-                tag(LaternaTags.blocks(lamp.shape(), lamp.wiring()))
+                tag(LaternaTags.blocks(lamp.shape(), lamp.wiring(), lamp.frame()))
                         .add(LaternaRegistry.block(lamp).get());
             }
         }
@@ -925,8 +949,11 @@ public final class LaternaDataGen {
         @Override
         protected void addTags(HolderLookup.Provider registries) {
             for (Shape shape : Shape.values()) {
-                for (Wiring wiring : shape.wirings()) {
-                    copy(LaternaTags.blocks(shape, wiring), LaternaTags.items(shape, wiring));
+                for (Frame frame : shape.frames()) {
+                    for (Wiring wiring : shape.wirings()) {
+                        copy(LaternaTags.blocks(shape, wiring, frame),
+                                LaternaTags.items(shape, wiring, frame));
+                    }
                 }
             }
         }

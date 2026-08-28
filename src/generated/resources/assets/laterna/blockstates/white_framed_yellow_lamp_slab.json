@@ -1,0 +1,15 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "laterna:block/white_framed_yellow_lamp_slab",
+      "x": 90
+    },
+    "type=double": {
+      "model": "laterna:block/white_framed_yellow_lamp_slab_double"
+    },
+    "type=top": {
+      "model": "laterna:block/white_framed_yellow_lamp_slab",
+      "x": 270
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "values": [
+    "laterna:white_framed_white_lamp",
+    "laterna:white_framed_orange_lamp",
+    "laterna:white_framed_magenta_lamp",
+    "laterna:white_framed_light_blue_lamp",
+    "laterna:white_framed_yellow_lamp",
+    "laterna:white_framed_lime_lamp",
+    "laterna:white_framed_pink_lamp",
+    "laterna:white_framed_gray_lamp",
+    "laterna:white_framed_light_gray_lamp",
+    "laterna:white_framed_cyan_lamp",
+    "laterna:white_framed_purple_lamp",
+    "laterna:white_framed_blue_lamp",
+    "laterna:white_framed_brown_lamp",
+    "laterna:white_framed_green_lamp",
+    "laterna:white_framed_red_lamp",
+    "laterna:white_framed_black_lamp"
+  ]
+}

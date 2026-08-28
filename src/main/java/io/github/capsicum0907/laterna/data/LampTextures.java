@@ -14,6 +14,7 @@ import java.util.zip.Deflater;
 
 import com.google.common.hash.Hashing;
 
+import io.github.capsicum0907.laterna.Frame;
 import io.github.capsicum0907.laterna.Lamp;
 import io.github.capsicum0907.laterna.Laterna;
 import io.github.capsicum0907.laterna.Shape;
@@ -47,8 +48,10 @@ public class LampTextures implements DataProvider {
      * What a layer of a form is called: the lamp's own name for the layer that carries
      * the colour, and the form's name for one that does not.
      */
-    public static String name(Shape shape, Masters.Layer layer, DyeColor colour, boolean lit) {
-        return (layer.tinted() ? Lamp.skin(shape, colour, lit) : shape.id()) + layer.suffix();
+    public static String name(Shape shape, Masters.Layer layer, Frame frame, DyeColor colour,
+            boolean lit) {
+        return (layer.tinted() ? Lamp.skin(shape, frame, colour, lit) : shape.id())
+                + layer.suffix();
     }
 
     /** The names this provider will write, for anything that has to know in advance. */
@@ -58,11 +61,13 @@ public class LampTextures implements DataProvider {
             for (Masters.Layer layer : Masters.layers(shape)) {
                 for (boolean lit : states(shape)) {
                     if (!layer.tinted()) {
-                        names.add(name(shape, layer, DyeColor.WHITE, lit));
+                        names.add(name(shape, layer, Frame.OWN, DyeColor.WHITE, lit));
                         continue;
                     }
-                    for (DyeColor colour : DyeColor.values()) {
-                        names.add(name(shape, layer, colour, lit));
+                    for (Frame frame : shape.frames()) {
+                        for (DyeColor colour : DyeColor.values()) {
+                            names.add(name(shape, layer, frame, colour, lit));
+                        }
                     }
                 }
             }
@@ -89,19 +94,25 @@ public class LampTextures implements DataProvider {
         for (Shape shape : Shape.values()) {
             for (Masters.Layer layer : Masters.layers(shape)) {
                 for (boolean lit : states(shape)) {
-                    Master master = Masters.of(shape, layer, lit);
                     if (!layer.tinted()) {
-                        draw(output, writing, master, Masters.plainColour(),
-                                name(shape, layer, DyeColor.WHITE, lit));
+                        draw(output, writing, Masters.of(shape, layer, lit, Frame.OWN),
+                                Masters.plainColour(), Masters.plainColour(),
+                                name(shape, layer, Frame.OWN, DyeColor.WHITE, lit));
                         continue;
                     }
-                    for (DyeColor colour : DyeColor.values()) {
-                        draw(output, writing, master,
-                                colour.getTextureDiffuseColor() & 0xFFFFFF,
-                                name(shape, layer, colour, lit));
+                    for (Frame frame : shape.frames()) {
+                        Master master = Masters.of(shape, layer, lit, frame);
+                        // ⚠ The second colour is what a pixel part way onto another
+                        // layer is mixed towards - the ring under a spotlight's lens, or a
+                        // frame that has been fixed to black or white rather than left to
+                        // follow the lamp. One channel, two uses.
+                        int plain = frame.colour().orElse(Masters.plainColour());
+                        for (DyeColor colour : DyeColor.values()) {
+                            draw(output, writing, master,
+                                    colour.getTextureDiffuseColor() & 0xFFFFFF, plain,
+                                    name(shape, layer, frame, colour, lit));
+                        }
                     }
-                    // The second colour is what a softened edge is softened onto, which
-                    // is always the layer underneath; see Master#tinted.
                 }
             }
         }
@@ -109,8 +120,8 @@ public class LampTextures implements DataProvider {
     }
 
     private void draw(CachedOutput output, List<CompletableFuture<?>> writing, Master master,
-            int colour, String name) {
-        int[][] pixels = master.tinted(colour, Masters.plainColour());
+            int colour, int plain, String name) {
+        int[][] pixels = master.tinted(colour, plain);
         Path target = textures.file(
                 ResourceLocation.fromNamespaceAndPath(Laterna.MODID, name), "png");
         writing.add(CompletableFuture.runAsync(() -> write(output, pixels, target),

@@ -32,8 +32,10 @@ public final class LaternaTests {
     private static final BlockPos WHERE = new BlockPos(4, 1, 4);
     private static final BlockPos SOURCE = WHERE.north();
 
-    private static final Lamp NORMAL = new Lamp(Shape.LAMP, Wiring.NORMAL, DyeColor.WHITE);
-    private static final Lamp INVERTED = new Lamp(Shape.LAMP, Wiring.INVERTED, DyeColor.WHITE);
+    private static final Lamp NORMAL =
+            new Lamp(Shape.LAMP, Wiring.NORMAL, Frame.OWN, DyeColor.WHITE);
+    private static final Lamp INVERTED =
+            new Lamp(Shape.LAMP, Wiring.INVERTED, Frame.OWN, DyeColor.WHITE);
     /** Every form that clings to a face, which is every form the plate tests are about. */
     private static final Shape[] PLATES = { Shape.SPOTLIGHT, Shape.SLAB, Shape.VERTICAL_SLAB,
             Shape.PANEL, Shape.VERTICAL_PANEL, Shape.BULB, Shape.FIXTURE };
@@ -124,7 +126,7 @@ public final class LaternaTests {
         for (DyeColor colour : DyeColor.values()) {
             BlockPos at = new BlockPos(colour.getId() % 8, 1 + colour.getId() / 8, 0);
             helper.setBlock(at, LaternaRegistry.block(
-                    new Lamp(Shape.LAMP, Wiring.INVERTED, colour)).get());
+                    new Lamp(Shape.LAMP, Wiring.INVERTED, Frame.OWN, colour)).get());
         }
         helper.succeedWhen(() -> {
             for (DyeColor colour : DyeColor.values()) {
@@ -452,7 +454,7 @@ public final class LaternaTests {
     @GameTest(template = TestStructures.FLOOR)
     public static void aRodRunsTheLengthOfItsCell(GameTestHelper helper) {
         RodBlock rod = (RodBlock) LaternaRegistry.block(
-                new Lamp(Shape.ROD, Wiring.ALWAYS, DyeColor.WHITE)).get();
+                new Lamp(Shape.ROD, Wiring.ALWAYS, Frame.OWN, DyeColor.WHITE)).get();
         double thin = (16.0 - 2 * Shape.ROD.inset()) / 16.0;
         for (Direction.Axis along : Direction.Axis.values()) {
             helper.setBlock(WHERE, rod.defaultBlockState().setValue(RodBlock.AXIS, along));
@@ -478,7 +480,7 @@ public final class LaternaTests {
     public static void aRodClingsToNothing(GameTestHelper helper) {
         helper.setBlock(WHERE.below(), Blocks.STONE);
         helper.setBlock(WHERE, LaternaRegistry.block(
-                new Lamp(Shape.ROD, Wiring.ALWAYS, DyeColor.WHITE)).get());
+                new Lamp(Shape.ROD, Wiring.ALWAYS, Frame.OWN, DyeColor.WHITE)).get());
         helper.setBlock(WHERE.below(), Blocks.AIR);
         if (helper.getBlockState(WHERE).isAir()) {
             throw new GameTestAssertException("the rod fell, and it was holding on to nothing");
@@ -488,7 +490,7 @@ public final class LaternaTests {
 
     private static PlateBlock plate(Shape shape) {
         return (PlateBlock) LaternaRegistry.block(
-                new Lamp(shape, Wiring.ALWAYS, DyeColor.WHITE)).get();
+                new Lamp(shape, Wiring.ALWAYS, Frame.OWN, DyeColor.WHITE)).get();
     }
 
     /** A spot of its own for each form and face, so one test can hold all of them. */

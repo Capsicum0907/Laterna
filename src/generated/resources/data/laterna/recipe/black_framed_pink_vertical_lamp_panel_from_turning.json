@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "laterna:black_framed_pink_lamp_panel"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "laterna:black_framed_pink_vertical_lamp_panel"
+  }
+}

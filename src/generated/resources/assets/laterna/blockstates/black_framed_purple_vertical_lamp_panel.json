@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "laterna:block/black_framed_purple_vertical_lamp_panel",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "laterna:block/black_framed_purple_vertical_lamp_panel",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "laterna:block/black_framed_purple_vertical_lamp_panel"
+    },
+    "facing=west": {
+      "model": "laterna:block/black_framed_purple_vertical_lamp_panel",
+      "y": 90
+    }
+  }
+}

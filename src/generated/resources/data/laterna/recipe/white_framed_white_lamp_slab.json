@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": [
+      {
+        "item": "minecraft:quartz_block"
+      },
+      {
+        "item": "minecraft:smooth_quartz"
+      }
+    ],
+    "b": {
+      "item": "minecraft:glowstone"
+    }
+  },
+  "pattern": [
+    "bbb",
+    "aaa"
+  ],
+  "result": {
+    "count": 6,
+    "id": "laterna:white_framed_white_lamp_slab"
+  }
+}

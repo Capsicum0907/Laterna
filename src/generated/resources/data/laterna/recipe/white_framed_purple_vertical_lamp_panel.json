@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": {
+      "tag": "laterna:white_framed_vertical_lamp_panels"
+    },
+    "b": {
+      "item": "minecraft:purple_dye"
+    }
+  },
+  "pattern": [
+    "aaa",
+    "aba",
+    "aaa"
+  ],
+  "result": {
+    "count": 8,
+    "id": "laterna:white_framed_purple_vertical_lamp_panel"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#edge"
+        },
+        "east": {
+          "cullface": "east",
+          "texture": "#edge"
+        },
+        "north": {
+          "cullface": "north",
+          "texture": "#face"
+        },
+        "south": {
+          "texture": "#face"
+        },
+        "up": {
+          "cullface": "up",
+          "texture": "#edge"
+        },
+        "west": {
+          "cullface": "west",
+          "texture": "#edge"
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        4
+      ]
+    }
+  ],
+  "textures": {
+    "edge": "laterna:block/black_framed_orange_lamp_panel_edge",
+    "face": "laterna:block/black_framed_orange_lamp_panel",
+    "particle": "laterna:block/black_framed_orange_lamp_panel"
+  }
+}

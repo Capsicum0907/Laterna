@@ -228,6 +228,22 @@ public enum Shape {
      * reaching a whole block out of quarters is a block of layers, which is a different
      * thing.
      */
+    /**
+     * The frame colours this form comes in.
+     *
+     * <p>⚠ <b>Only the forms whose border is the lamp's own colour.</b> What edges a
+     * spotlight, a bulb, a fitting or a cased lamp is a grey fitting or a case - already
+     * not the lamp's colour - so there is nothing there to fix, and offering the choice
+     * would be three identical blocks.
+     */
+    public List<Frame> frames() {
+        return switch (this) {
+            case LAMP, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL ->
+                    List.of(Frame.OWN, Frame.BLACK, Frame.WHITE);
+            case SPOTLIGHT, BULB, FIXTURE, ROD, CASED -> List.of(Frame.OWN);
+        };
+    }
+
     public boolean stacks() {
         return switch (this) {
             case SLAB, VERTICAL_SLAB -> true;

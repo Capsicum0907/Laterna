@@ -4,7 +4,7 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 *Laterna* is Latin for a lantern.
 
-> **Status: every form there is going to be — 176 blocks.** Nineteen game tests
+> **Status: every form there is going to be, each framed three ways — 368 blocks.** Nineteen game tests
 > cover what they claim, except where a test cannot reach: see the note under the
 > spotlight.
 
@@ -18,8 +18,8 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 ## Design
 
-**One product is the source of everything.** A lamp is a `Shape`, a `Wiring` and a
-`DyeColor`, and nothing else. Registration, block models, textures, loot tables, recipes,
+**One product is the source of everything.** A lamp is a `Shape`, a `Wiring`, a `Frame`
+and a `DyeColor`, and nothing else. Registration, block models, textures, loot tables, recipes,
 language and tags are all derived from that single product at data-generation
 time. Adding a shape is one entry in an enum; adding a colour is not possible,
 because the sixteen come from the game.
@@ -220,6 +220,18 @@ blockstate. A game test can assert the block faces up; it cannot assert the plat
 drawn on the floor rather than the ceiling. Invert the `getOpposite()` and every test
 still passes with every light on the wrong surface. That one is checked by looking.
 
+### The frame
+
+A lamp's border is its own colour darkened, which is what keeps sixteen colours looking
+like sixteen of one thing. Fixed to black or to white it becomes an outline that does not
+move with the lamp, so a wall of eight colours can share one. ⚠ Like the wiring, a frame
+colour does not survive being carried as an item, so each is its own block: ninety-six
+framed blocks become two hundred and eighty-eight.
+
+⚠ **Only the forms that have a frame.** What edges a spotlight, a bulb, a fitting, a rod or
+a cased lamp is a grey fitting or a case — already not the lamp's colour — so there is
+nothing there to fix.
+
 ### Recipes
 
 Each shape has one recipe of its own, in white. The cube is glowstone in a frame of stone
@@ -230,6 +242,14 @@ and cheap, because eight come out. The slab is a row of glowstone over a row of 
 
 The panel is cut from the slab, the way the game cuts a block into slabs and by the same
 arithmetic: three slabs of eight pixels are six panels of four.
+
+⚠ **The three frames are told apart by what the frame is made of** — stone, blackstone,
+quartz — and by nothing else. Dye is already spoken for, since it says which colour, and a
+single item is reserved for turning a slab on its edge, so neither could also mean "and fix
+the frame". Building each frame out of what it looks like it is made of needs no marker at
+all, and none of the three recipes can be confused with another: `#c:stones` holds no
+blackstone and no quartz. Leaving them identical and letting a recipe-picker mod sort it
+out was the alternative, and it would have made this mod need that one.
 
 The vertical forms have no recipe of their own at all — one of either turns into one of
 its twin, in every colour and both ways. ⚠ **That is why nothing else in the mod is a
@@ -274,12 +294,10 @@ gradlew runData           # regenerate models, textures, recipes and language
 - [x] **4** — bulb, fitting and rod. ⚠ The rod turned out not to be a plate at all: it
       sits against no face, runs the length of its cell along an axis, and is built like
       the game's own chain. It is the one form outside `PlateBlock`
-- [ ] **5** — a frame that is not the lamp's own colour: the cube, the slab and the panel
-      again with the border fixed black, and again fixed white. Asked for on 2026-08-29.
-      The master already keeps the frame and the face as separate numbers, so this is a
-      second colour handed to the tint rather than a second set of shapes — but it is a
-      third axis of the product, and how it reaches the recipes and the creative tab has
-      to be decided before any of it is written
+- [x] **5** — a frame that is not the lamp's own colour: black and white, on every form
+      that has a frame. It cost no new drawing — the master already mixes a pixel towards
+      a second colour, which is how a spotlight's lens softens onto its ring, and a fixed
+      frame is that same channel with the frame colour handed alongside
 - [ ] **6** — each shape checked by game tests as it lands, rather than by eye
 
 ## Related

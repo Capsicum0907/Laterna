@@ -2,6 +2,7 @@ package io.github.capsicum0907.laterna.data;
 
 import java.util.List;
 
+import io.github.capsicum0907.laterna.Frame;
 import io.github.capsicum0907.laterna.Shape;
 
 /**
@@ -118,34 +119,34 @@ public final class Masters {
      * @param lit whether it is shining; forms that are always lit are only asked for true
      * @return the grayscale picture, ready to be given a colour
      */
-    public static Master of(Shape shape, Layer layer, boolean lit) {
+    public static Master of(Shape shape, Layer layer, boolean lit, Frame frame) {
+        boolean fixed = frame.colour().isPresent();
         return switch (shape) {
-            case LAMP -> face(lit);
+            case LAMP -> face(lit, 1, fixed);
             // ⚠ A flat colour, with none of the falloff the other faces have. The
             // bar's faces are two pixels by sixteen, and a glow drawn round on a square
             // texture comes out of that as a long white ellipse - which is what it looked
             // like. Nothing shaped survives being stretched that far.
             case ROD -> flat();
-            // ⚠ The core is a lamp, not a plain block of light - it is the cube's own
-            // face, drawn with a two-pixel frame so that shrunk onto the core's eight
-            // pixels the frame is still a pixel. The case around it is clearer than a
-            // bulb's shell: at a bulb's size a milky film reads as glass, but stretched
-            // over a whole block the same film is fog, and the lamp inside disappears.
-            case CASED -> layer.equals(Layer.HALO) ? pane() : face(true, 2);
+            // ⚠ The core is the cube's face without its frame: the case around it is
+            // the frame. Drawing one on the core as well gives a lamp inside a lamp. The
+            // case is also clearer than a bulb's shell - at a bulb's size a milky film
+            // reads as glass, but stretched over a whole block the same film is fog.
+            case CASED -> layer.equals(Layer.HALO) ? pane() : glow();
             case SPOTLIGHT -> layer.equals(Layer.RING) ? ring() : lens();
             // ⚠ Frameless, because these are shown small. The face of a cube is drawn
             // at sixteen pixels and its one-pixel border reads; stretched onto a face six
             // pixels across the same border is a third of a pixel, which is a smudge. A
             // plain glow has nothing to lose at that size.
-            case BULB -> layer.equals(Layer.EDGE) ? edge()
+            case BULB -> layer.equals(Layer.EDGE) ? edge(false)
                     : layer.equals(Layer.HALO) ? halo() : glow();
-            case FIXTURE -> layer.equals(Layer.EDGE) ? edge() : glow();
+            case FIXTURE -> layer.equals(Layer.EDGE) ? edge(false) : glow();
             // The slab and the panel wear the cube's lit face on the two broad sides, and
             // a rim of their own on the four cut ones. They get files of their own rather
             // than borrowing the cube's, so that a resource pack can retexture a panel
             // without touching every lamp in the world.
             case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL ->
-                    layer.equals(Layer.EDGE) ? edge() : face(lit);
+                    layer.equals(Layer.EDGE) ? edge(fixed) : face(lit, 1, fixed);
         };
     }
 
@@ -155,16 +156,14 @@ public final class Masters {
      * <p>The frame is what stops sixteen lamps side by side reading as one wall: a lit
      * face alone has no edge, and a row of them merges.
      */
-    private static Master face(boolean lit) {
-        return face(lit, 1);
-    }
+
 
     /**
      * @param border how many pixels of frame, for a face that will be shown shrunk
      *     ⚠ a one-pixel frame stretched onto an eight-pixel face is half a pixel, which
      *     is a smudge; drawn two thick it lands back on a pixel boundary.
      */
-    private static Master face(boolean lit, int border) {
+    private static Master face(boolean lit, int border, boolean fixed) {
         float frame = lit ? FRAME_LIT : FRAME_UNLIT;
         float centre = lit ? FACE_LIT : FACE_UNLIT;
         float falloff = lit ? FALLOFF_LIT : FALLOFF_UNLIT;
@@ -176,6 +175,11 @@ public final class Masters {
                 master.alpha()[y][x] = 1.0F;
                 if (x < border || y < border || x > last - border || y > last - border) {
                     master.level()[y][x] = frame;
+                    // ⚠ A frame fixed to black or white is not a shade of the lamp: it
+                    // is painted with the colour handed alongside, through the same channel
+                    // the spotlight's lens uses to soften onto its ring. Nothing new had to
+                    // be drawn for it.
+                    master.plain()[y][x] = fixed ? 1.0F : 0.0F;
                 } else {
                     master.level()[y][x] = centre - falloff * squared(x, y);
                 }
@@ -320,12 +324,14 @@ public final class Masters {
      * <p>A shade above the frame, so the cut edge reads as part of a lit thing rather
      * than as the dark border around one.
      */
-    private static Master edge() {
+    private static Master edge(boolean fixed) {
         Master master = Master.blank();
         for (int y = 0; y < Master.SIZE; y++) {
             for (int x = 0; x < Master.SIZE; x++) {
                 master.alpha()[y][x] = 1.0F;
                 master.level()[y][x] = EDGE_FACE;
+                // The cut side of a slab is its frame seen edge-on, and follows it.
+                master.plain()[y][x] = fixed ? 1.0F : 0.0F;
             }
         }
         return master;

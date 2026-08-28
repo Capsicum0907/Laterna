@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "laterna:black_framed_cyan_lamp_slab"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "laterna:black_framed_cyan_vertical_lamp_slab"
+  }
+}

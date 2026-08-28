@@ -1,0 +1,33 @@
+{
+  "variants": {
+    "double=false,facing=east": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_slab",
+      "y": 270
+    },
+    "double=false,facing=north": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_slab",
+      "y": 180
+    },
+    "double=false,facing=south": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_slab"
+    },
+    "double=false,facing=west": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_slab",
+      "y": 90
+    },
+    "double=true,facing=east": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_slab_double",
+      "y": 90
+    },
+    "double=true,facing=north": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_slab_double"
+    },
+    "double=true,facing=south": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_slab_double"
+    },
+    "double=true,facing=west": {
+      "model": "laterna:block/white_framed_white_vertical_lamp_slab_double",
+      "y": 90
+    }
+  }
+}

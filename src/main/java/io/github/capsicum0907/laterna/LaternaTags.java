@@ -26,11 +26,14 @@ public final class LaternaTags {
 
     static {
         for (Shape shape : Shape.values()) {
-            for (Wiring wiring : shape.wirings()) {
-                String path = Lamp.tag(shape, wiring);
-                ResourceLocation name = ResourceLocation.fromNamespaceAndPath(Laterna.MODID, path);
-                BLOCK_TAGS.put(path, TagKey.create(Registries.BLOCK, name));
-                ITEM_TAGS.put(path, TagKey.create(Registries.ITEM, name));
+            for (Frame frame : shape.frames()) {
+                for (Wiring wiring : shape.wirings()) {
+                    String path = Lamp.tag(shape, wiring, frame);
+                    ResourceLocation name =
+                            ResourceLocation.fromNamespaceAndPath(Laterna.MODID, path);
+                    BLOCK_TAGS.put(path, TagKey.create(Registries.BLOCK, name));
+                    ITEM_TAGS.put(path, TagKey.create(Registries.ITEM, name));
+                }
             }
         }
     }
@@ -38,12 +41,12 @@ public final class LaternaTags {
     private LaternaTags() {
     }
 
-    public static TagKey<Block> blocks(Shape shape, Wiring wiring) {
-        return BLOCK_TAGS.get(Lamp.tag(shape, wiring));
+    public static TagKey<Block> blocks(Shape shape, Wiring wiring, Frame frame) {
+        return BLOCK_TAGS.get(Lamp.tag(shape, wiring, frame));
     }
 
-    public static TagKey<Item> items(Shape shape, Wiring wiring) {
-        return ITEM_TAGS.get(Lamp.tag(shape, wiring));
+    public static TagKey<Item> items(Shape shape, Wiring wiring, Frame frame) {
+        return ITEM_TAGS.get(Lamp.tag(shape, wiring, frame));
     }
 
     /** Every pair there is, for the generators that have to walk all of them. */

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "laterna:block/black_framed_blue_lamp_off"
+    },
+    "lit=true": {
+      "model": "laterna:block/black_framed_blue_lamp_on"
+    }
+  }
+}

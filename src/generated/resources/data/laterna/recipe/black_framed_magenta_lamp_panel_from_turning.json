@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "laterna:black_framed_magenta_vertical_lamp_panel"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "laterna:black_framed_magenta_lamp_panel"
+  }
+}

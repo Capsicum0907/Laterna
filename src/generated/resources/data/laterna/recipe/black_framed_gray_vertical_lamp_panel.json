@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": {
+      "tag": "laterna:black_framed_vertical_lamp_panels"
+    },
+    "b": {
+      "item": "minecraft:gray_dye"
+    }
+  },
+  "pattern": [
+    "aaa",
+    "aba",
+    "aaa"
+  ],
+  "result": {
+    "count": 8,
+    "id": "laterna:black_framed_gray_vertical_lamp_panel"
+  }
+}

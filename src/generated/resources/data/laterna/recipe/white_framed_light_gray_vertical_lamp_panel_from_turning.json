@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "laterna:white_framed_light_gray_lamp_panel"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "laterna:white_framed_light_gray_vertical_lamp_panel"
+  }
+}

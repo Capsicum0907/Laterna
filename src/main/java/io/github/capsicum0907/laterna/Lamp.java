@@ -15,7 +15,7 @@ import net.minecraft.world.item.DyeColor;
  * colour names once per form; none of that is here, because none of it is a decision -
  * it is the product, spelled out by hand.
  */
-public record Lamp(Shape shape, Wiring wiring, DyeColor colour) {
+public record Lamp(Shape shape, Wiring wiring, Frame frame, DyeColor colour) {
     private static final List<Lamp> ALL = product();
 
     /** Every lamp there is, in the order the creative tab shows them: form, wiring, colour. */
@@ -26,9 +26,11 @@ public record Lamp(Shape shape, Wiring wiring, DyeColor colour) {
     private static List<Lamp> product() {
         List<Lamp> lamps = new ArrayList<>();
         for (Shape shape : Shape.values()) {
-            for (Wiring wiring : shape.wirings()) {
-                for (DyeColor colour : DyeColor.values()) {
-                    lamps.add(new Lamp(shape, wiring, colour));
+            for (Frame frame : shape.frames()) {
+                for (Wiring wiring : shape.wirings()) {
+                    for (DyeColor colour : DyeColor.values()) {
+                        lamps.add(new Lamp(shape, wiring, frame, colour));
+                    }
                 }
             }
         }
@@ -37,7 +39,7 @@ public record Lamp(Shape shape, Wiring wiring, DyeColor colour) {
 
     /** What the block and its item are registered as: {@code inverted_light_blue_lamp}. */
     public String id() {
-        return wiring.prefix() + colour.getName() + "_" + shape.id();
+        return frame.prefix() + wiring.prefix() + colour.getName() + "_" + shape.id();
     }
 
     /**
@@ -56,13 +58,13 @@ public record Lamp(Shape shape, Wiring wiring, DyeColor colour) {
      * that is the whole of what "they look identical" means - so the skin is keyed on
      * the form and the colour only, and the two blocks point at the same two files.
      */
-    public static String skin(Shape shape, DyeColor colour, boolean lit) {
+    public static String skin(Shape shape, Frame frame, DyeColor colour, boolean lit) {
         String state = shape.switched() ? (lit ? "_on" : "_off") : "";
-        return colour.getName() + "_" + shape.id() + state;
+        return frame.prefix() + colour.getName() + "_" + shape.id() + state;
     }
 
     public String skin(boolean lit) {
-        return skin(shape, colour, lit);
+        return skin(shape, frame, colour, lit);
     }
 
     /** Whether this lamp has a {@code LIT} state for redstone to flip. */
@@ -75,8 +77,8 @@ public record Lamp(Shape shape, Wiring wiring, DyeColor colour) {
      * recipes take in: dyeing a lamp gives a lamp, and dyeing an inverted one gives an
      * inverted one, without either recipe naming a colour.
      */
-    public static String tag(Shape shape, Wiring wiring) {
-        return wiring.prefix() + shape.id() + "s";
+    public static String tag(Shape shape, Wiring wiring, Frame frame) {
+        return frame.prefix() + wiring.prefix() + shape.id() + "s";
     }
 
     /**
@@ -88,7 +90,8 @@ public record Lamp(Shape shape, Wiring wiring, DyeColor colour) {
      * this is the whole of what that switch was for.
      */
     public String displayName() {
-        return wiring.namePrefix() + titleCase(colour.getName()) + " " + titleCase(shape.id());
+        return frame.namePrefix() + wiring.namePrefix()
+                + titleCase(colour.getName()) + " " + titleCase(shape.id());
     }
 
     /** {@code light_blue} to {@code Light Blue}. */

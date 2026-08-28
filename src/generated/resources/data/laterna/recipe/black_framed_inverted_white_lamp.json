@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": [
+      {
+        "item": "minecraft:blackstone"
+      },
+      {
+        "item": "minecraft:polished_blackstone"
+      }
+    ],
+    "b": {
+      "item": "minecraft:glowstone"
+    },
+    "c": {
+      "item": "minecraft:redstone_torch"
+    }
+  },
+  "pattern": [
+    "aba",
+    "bcb",
+    "aba"
+  ],
+  "result": {
+    "count": 4,
+    "id": "laterna:black_framed_inverted_white_lamp"
+  }
+}
