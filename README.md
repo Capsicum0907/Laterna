@@ -4,10 +4,10 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 *Laterna* is Latin for a lantern.
 
-> **Status: the cube, the recessed spotlight, and the slab and panel each in two
-> mountings — 112 blocks.** Everything else in the table below is still to come. Eleven
-> game tests cover what they claim, except where a test cannot reach: see the note under
-> the spotlight.
+> **Status: the cube, the recessed spotlight, the slab and panel each in two mountings,
+> and the bulb and the fitting — 144 blocks.** The rod and the two deferred forms are
+> still to come. Sixteen game tests cover what they claim, except where a test cannot
+> reach: see the note under the spotlight.
 
 ## Target
 
@@ -72,13 +72,25 @@ and mixing the two kinds is what makes a scaffold stall.
 | **Lamp panel** | **16** | **Done.** 4px, lying down |
 | **Vertical lamp panel** | **16** | **Done.** 4px, standing |
 | **Recessed spotlight** | 16 | **Done.** Zero thickness, a round lens in a grey ring |
-| Bulb | 16 | Small fitting, always lit |
-| Fixture | 16 | Wall/ceiling/floor fitting |
-| Rod | 16 | Strip light |
+| **Bulb** | **16** | **Done.** A small lamp on a face, glowing all round |
+| **Fixture** | **16** | **Done.** A shallow lit face in a rim |
+| Rod | 16 | Strip light — needs a second state for which way it runs |
 | *Edge strip* | — | Deferred: shaping it to its neighbours needs a UI |
 | *Lamp post* | — | Deferred: three blocks that must stay consistent |
 
 That is **128 blocks** from eight enum entries.
+
+**What is mounted on a face falls with that face.** A recessed light is a hole in a wall
+and a bulb is bolted to one; with the wall gone there is nothing holding either, so they
+drop as items. A slab or a panel is a thing in its own right and stays put. ⚠ The reason
+is practical rather than physical — taking a wall down should take its lights with it,
+rather than leaving a field of them to be knocked out one at a time.
+
+**A form that does not reach the edges of its face carries an inset**, and the one number
+trims the box the model is built from and the outline you point at together — so a small
+lamp cannot end up with a full-face hit box. ⚠ Their masters are drawn without a border:
+a one-pixel frame stretched onto a face six pixels across is a third of a pixel, which is
+a smudge rather than a frame.
 
 **How a lamp is mounted is a different block, not a setting.** Everything that clings to
 a face is a `PlateBlock` — it sits against one face of its own cell, holds water, and
@@ -208,7 +220,9 @@ gradlew runData           # regenerate models, textures, recipes and language
       with a subclass per mounting, the boxes derived from the direction rather than
       listed, a single item on the bench turning one mounting into the other, and two
       slabs stacking into a whole block that still looks like a slab, lying or standing
-- [ ] **4** — bulb, fixture, rod
+- [ ] **4** — bulb and fitting done; the rod is left. ⚠ A strip light needs a second
+      state saying which way it runs across its face, which is a different piece of work
+      from another inset box
 - [ ] **5** — a frame that is not the lamp's own colour: the cube, the slab and the panel
       again with the border fixed black, and again fixed white. Asked for on 2026-08-29.
       The master already keeps the frame and the face as separate numbers, so this is a
