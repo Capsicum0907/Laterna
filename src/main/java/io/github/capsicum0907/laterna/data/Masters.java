@@ -84,7 +84,7 @@ public final class Masters {
 
     public static List<Layer> layers(Shape shape) {
         return switch (shape) {
-            case LAMP -> List.of(Layer.BODY);
+            case LAMP, ROD -> List.of(Layer.BODY);
             case SPOTLIGHT -> List.of(Layer.BODY, Layer.RING);
             case BULB, FIXTURE -> List.of(Layer.BODY, Layer.EDGE);
             case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL -> List.of(Layer.BODY, Layer.EDGE);
@@ -110,6 +110,8 @@ public final class Masters {
     public static Master of(Shape shape, Layer layer, boolean lit) {
         return switch (shape) {
             case LAMP -> face(lit);
+            // A bar seen from every side at once; a border on it would be a stripe.
+            case ROD -> glow();
             case SPOTLIGHT -> layer.equals(Layer.RING) ? ring() : lens();
             // ⚠ Frameless, because these are shown small. The face of a cube is drawn
             // at sixteen pixels and its one-pixel border reads; stretched onto a face six

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "laterna:block/pink_rod",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "laterna:block/pink_rod"
+    },
+    "axis=z": {
+      "model": "laterna:block/pink_rod",
+      "x": 90
+    }
+  }
+}

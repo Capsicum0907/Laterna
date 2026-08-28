@@ -90,7 +90,18 @@ public enum Shape {
      * is not done here yet: it wants a second box per form, one for the walls and one for
      * the floor and ceiling, and the outline has to follow it.
      */
-    FIXTURE("fixture", SoundType.GLASS, 0.3F, 3.0, 4.0, Mount.ANY, List.of(Wiring.ALWAYS));
+    FIXTURE("fixture", SoundType.GLASS, 0.3F, 3.0, 4.0, Mount.ANY, List.of(Wiring.ALWAYS)),
+
+    /**
+     * A thin bar of light running the length of its cell.
+     *
+     * ⚠ <b>The only form that sits against no face at all.</b> It runs through the
+     * middle from one side to the other, so what it keeps is an axis rather than a facing,
+     * and a row of them reads as one continuous line - which is the only reason to have a
+     * strip light rather than more fittings. Its inset is how thin it is across; its depth
+     * is the whole cell, because that is how long it is.
+     */
+    ROD("rod", SoundType.GLASS, 0.3F, 16.0, 7.0, Mount.AXIS, List.of(Wiring.ALWAYS));
 
     /**
      * How a form meets the block it is put against, which decides what states it keeps
@@ -107,7 +118,9 @@ public enum Shape {
         /** Lying down, top or bottom, placed by vanilla's rule for a slab. */
         FLAT,
         /** Standing on its edge against one of the four walls. */
-        UPRIGHT
+        UPRIGHT,
+        /** Against no face: running through the cell along one axis, like a chain. */
+        AXIS
     }
 
     private final String id;
@@ -174,6 +187,9 @@ public enum Shape {
             case FIXTURE -> flat ? new Fit(4.0, 4.0, 2.0) : new Fit(8.0, 4.0, 3.0);
             case LAMP, SPOTLIGHT, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL, BULB ->
                     new Fit(16.0 - 2 * inset, 16.0 - 2 * inset, depth);
+            // ⚠ Asking a rod which face it is on has no answer, and quietly making one
+            // up would put a rod-shaped hole in whatever asked.
+            case ROD -> throw new IllegalStateException("a rod sits against no face");
         };
     }
 
@@ -207,7 +223,7 @@ public enum Shape {
     public boolean stacks() {
         return switch (this) {
             case SLAB, VERTICAL_SLAB -> true;
-            case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE -> false;
+            case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD -> false;
         };
     }
 
@@ -221,7 +237,7 @@ public enum Shape {
      */
     public Optional<Shape> turned() {
         return switch (this) {
-            case LAMP, SPOTLIGHT, BULB, FIXTURE -> Optional.empty();
+            case LAMP, SPOTLIGHT, BULB, FIXTURE, ROD -> Optional.empty();
             case SLAB -> Optional.of(VERTICAL_SLAB);
             case VERTICAL_SLAB -> Optional.of(SLAB);
             case PANEL -> Optional.of(VERTICAL_PANEL);

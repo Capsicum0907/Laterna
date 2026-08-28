@@ -4,10 +4,9 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 *Laterna* is Latin for a lantern.
 
-> **Status: the cube, the recessed spotlight, the slab and panel each in two mountings,
-> and the bulb and the fitting — 144 blocks.** The rod and the two deferred forms are
-> still to come. Sixteen game tests cover what they claim, except where a test cannot
-> reach: see the note under the spotlight.
+> **Status: every form but the two deferred ones — 160 blocks.** Nineteen game tests
+> cover what they claim, except where a test cannot reach: see the note under the
+> spotlight.
 
 ## Target
 
@@ -74,7 +73,7 @@ and mixing the two kinds is what makes a scaffold stall.
 | **Recessed spotlight** | 16 | **Done.** Zero thickness, a round lens in a grey ring |
 | **Bulb** | **16** | **Done.** A base and a narrow bulb standing out of it |
 | **Fixture** | **16** | **Done.** A bar on a wall, a disc on a floor |
-| Rod | 16 | Strip light — needs a second state for which way it runs |
+| **Rod** | **16** | **Done.** A thin bar running the length of its cell |
 | *Edge strip* | — | Deferred: shaping it to its neighbours needs a UI |
 | *Lamp post* | — | Deferred: three blocks that must stay consistent |
 
@@ -112,6 +111,11 @@ answers the same whichever face it is on and says so in one place rather than in
 them. ⚠ Their masters are drawn without a border:
 a one-pixel frame stretched onto a face six pixels across is a third of a pixel, which is
 a smudge rather than a frame.
+
+⚠ **And one form is mounted on nothing.** A rod runs through the middle of its cell from
+one side to the other, so what it keeps is an axis rather than a facing — it is built like
+the game's own chain, is the only form outside `PlateBlock`, and is the only one that does
+not fall when what is beside it goes, because there is no face it was mounted on to lose.
 
 **How a lamp is mounted is a different block, not a setting.** Everything that clings to
 a face is a `PlateBlock` — it sits against one face of its own cell, holds water, and
@@ -241,9 +245,9 @@ gradlew runData           # regenerate models, textures, recipes and language
       with a subclass per mounting, the boxes derived from the direction rather than
       listed, a single item on the bench turning one mounting into the other, and two
       slabs stacking into a whole block that still looks like a slab, lying or standing
-- [ ] **4** — bulb and fitting done; the rod is left. ⚠ A strip light needs a second
-      state saying which way it runs across its face, which is a different piece of work
-      from another inset box
+- [x] **4** — bulb, fitting and rod. ⚠ The rod turned out not to be a plate at all: it
+      sits against no face, runs the length of its cell along an axis, and is built like
+      the game's own chain. It is the one form outside `PlateBlock`
 - [ ] **5** — a frame that is not the lamp's own colour: the cube, the slab and the panel
       again with the border fixed black, and again fixed white. Asked for on 2026-08-29.
       The master already keeps the frame and the face as separate numbers, so this is a

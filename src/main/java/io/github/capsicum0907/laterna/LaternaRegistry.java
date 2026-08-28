@@ -56,6 +56,7 @@ public final class LaternaRegistry {
             case FLAT -> shape.stacks()
                     ? properties -> new StackingPlateBlock(shape, properties)
                     : properties -> new FlatPlateBlock(shape, properties);
+            case AXIS -> properties -> new RodBlock(shape.inset(), properties);
             case UPRIGHT -> shape.stacks()
                     ? properties -> new UprightStackingPlateBlock(shape, properties)
                     : properties -> new UprightPlateBlock(shape, properties);
@@ -95,6 +96,7 @@ public final class LaternaRegistry {
             // StackingPlateBlock.
             case FLAT, UPRIGHT ->
                     lamp.shape().stacks() ? properties : properties.noOcclusion();
+            case AXIS -> properties.noOcclusion();
         };
     }
 

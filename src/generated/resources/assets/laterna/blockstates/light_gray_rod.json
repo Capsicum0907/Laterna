@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "laterna:block/light_gray_rod",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "laterna:block/light_gray_rod"
+    },
+    "axis=z": {
+      "model": "laterna:block/light_gray_rod",
+      "x": 90
+    }
+  }
+}

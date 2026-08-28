@@ -188,7 +188,7 @@ public final class LaternaTests {
                 case ANY -> List.of(Direction.values());
                 case FLAT -> List.of(Direction.UP, Direction.DOWN);
                 case UPRIGHT -> Direction.Plane.HORIZONTAL.stream().toList();
-                case NONE -> throw new GameTestAssertException(shape + " is not a plate");
+                case NONE, AXIS -> throw new GameTestAssertException(shape + " is not a plate");
             };
             if (!Set.copyOf(facings).equals(Set.copyOf(wanted))) {
                 throw new GameTestAssertException(
@@ -436,6 +436,52 @@ public final class LaternaTests {
                 }
             }
             clear(helper, facing);
+        }
+        helper.succeed();
+    }
+
+    /**
+     * A rod runs the whole length of its cell along the axis it was given, and is thin
+     * across it.
+     *
+     * <p>⚠ <b>Full length is the point of the form.</b> A bar that stopped short would
+     * leave a gap at every block boundary, and a row of them would read as dashes rather
+     * than as one line - which is the only reason to have a strip light rather than more
+     * fittings.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void aRodRunsTheLengthOfItsCell(GameTestHelper helper) {
+        RodBlock rod = (RodBlock) LaternaRegistry.block(
+                new Lamp(Shape.ROD, Wiring.ALWAYS, DyeColor.WHITE)).get();
+        double thin = (16.0 - 2 * Shape.ROD.inset()) / 16.0;
+        for (Direction.Axis along : Direction.Axis.values()) {
+            helper.setBlock(WHERE, rod.defaultBlockState().setValue(RodBlock.AXIS, along));
+            BlockState state = helper.getBlockState(WHERE);
+            if (state.getLightEmission(helper.getLevel(), helper.absolutePos(WHERE)) != 15) {
+                throw new GameTestAssertException("a rod along " + along + " gives no light");
+            }
+            VoxelShape outline = state.getShape(helper.getLevel(), helper.absolutePos(WHERE));
+            for (Direction.Axis axis : Direction.Axis.values()) {
+                double span = outline.max(axis) - outline.min(axis);
+                double wanted = axis == along ? 1.0 : thin;
+                if (Math.abs(span - wanted) > 1.0E-6) {
+                    throw new GameTestAssertException("a rod along " + along + " spans "
+                            + span + " on " + axis + ", wanted " + wanted);
+                }
+            }
+        }
+        helper.succeed();
+    }
+
+    /** ⚠ <b>And nothing takes a rod down</b>, because it was mounted on nothing. */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void aRodClingsToNothing(GameTestHelper helper) {
+        helper.setBlock(WHERE.below(), Blocks.STONE);
+        helper.setBlock(WHERE, LaternaRegistry.block(
+                new Lamp(Shape.ROD, Wiring.ALWAYS, DyeColor.WHITE)).get());
+        helper.setBlock(WHERE.below(), Blocks.AIR);
+        if (helper.getBlockState(WHERE).isAir()) {
+            throw new GameTestAssertException("the rod fell, and it was holding on to nothing");
         }
         helper.succeed();
     }

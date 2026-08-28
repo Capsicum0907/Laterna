@@ -13,6 +13,7 @@ import io.github.capsicum0907.laterna.LaternaRegistry;
 import io.github.capsicum0907.laterna.LaternaTags;
 import io.github.capsicum0907.laterna.Shape;
 import io.github.capsicum0907.laterna.PlateBlock;
+import io.github.capsicum0907.laterna.RodBlock;
 import io.github.capsicum0907.laterna.Shape.Mount;
 import io.github.capsicum0907.laterna.Wiring;
 
@@ -182,6 +183,17 @@ public final class LaternaDataGen {
                     // keeps is its own business - the plate is asked which way it faces
                     // and the answer is turned onto that face, so a fourth kind of
                     // mounting would arrive here needing nothing.
+                    // ⚠ A rod is not a plate: it has no face to be turned onto, only an
+                    // axis to lie along. Standing up is the model as authored; the other
+                    // two are it turned, which is what vanilla does with a log.
+                    case AXIS -> getVariantBuilder(block)
+                            .partialState().with(RodBlock.AXIS, Direction.Axis.Y)
+                            .modelForState().modelFile(model).addModel()
+                            .partialState().with(RodBlock.AXIS, Direction.Axis.Z)
+                            .modelForState().modelFile(model).rotationX(90).addModel()
+                            .partialState().with(RodBlock.AXIS, Direction.Axis.X)
+                            .modelForState().modelFile(model).rotationX(90).rotationY(90)
+                            .addModel();
                     case ANY, FLAT, UPRIGHT -> {
                         PlateBlock plate = (PlateBlock) block;
                         // ⚠ A pair of lying slabs is the same cube whichever way it
@@ -236,6 +248,7 @@ public final class LaternaDataGen {
                 case SPOTLIGHT -> plate(skin);
                 case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL -> box(shape, skin);
                 case BULB, FIXTURE -> fitting(shape, skin, Direction.NORTH);
+                case ROD -> rod(shape, skin);
             };
         }
 
@@ -279,6 +292,31 @@ public final class LaternaDataGen {
             }
             part(builder, lit, "#face", base == null);
             return builder;
+        }
+
+        /**
+         * A thin bar running the whole height of the cell, which is the length of a rod.
+         *
+         * <p>Authored standing up, because that is the one orientation the axis property
+         * names without a rotation. The other two are that model turned, out of the table
+         * below - the same table vanilla's own rodlamp-shaped blocks use.
+         */
+        private ModelFile rod(Shape shape, String skin) {
+            float thin = (float) shape.inset();
+            return models().getBuilder(skin)
+                    .parent(new ModelFile.UncheckedModelFile("block/block"))
+                    .texture("face", modLoc("block/" + skin))
+                    .texture("particle", modLoc("block/" + skin))
+                    .element()
+                        .from(thin, 0, thin).to(16 - thin, 16, 16 - thin)
+                        .allFaces((direction, face) -> {
+                            face.texture("#face");
+                            face.uvs(0, 0, 16, 16);
+                            if (direction.getAxis() == Direction.Axis.Y) {
+                                face.cullface(direction);
+                            }
+                        })
+                    .end();
         }
 
         /** A box of the given size, centred across the face and standing off it. */
@@ -422,7 +460,7 @@ public final class LaternaDataGen {
         private void item(Lamp lamp, ModelFile model) {
             switch (lamp.shape()) {
                 // A box has thickness and reads perfectly well held at an angle.
-                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL, BULB, FIXTURE ->
+                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL, BULB, FIXTURE, ROD ->
                         itemModels().withExistingParent(lamp.id(), model.getLocation());
                 // ⚠ A slab that lies down has to be authored lying down. The block
                 // model of every plate stands against the north face so that one rotation
@@ -486,7 +524,7 @@ public final class LaternaDataGen {
                         case VERTICAL_SLAB -> pair(block,
                                 StatePropertiesPredicate.Builder.properties()
                                         .hasProperty(UprightStackingPlateBlock.DOUBLE, true));
-                        case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE ->
+                        case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD ->
                                 createSingleItemTable(block);
                     });
                 }
@@ -597,6 +635,15 @@ public final class LaternaDataGen {
                 // changes.
                 case VERTICAL_SLAB, VERTICAL_PANEL -> {
                 }
+                // Stood on end rather than laid in a row, which is what tells this apart
+                // from every other pattern here as well as being the shape of the thing.
+                case ROD -> raw(output, white, ShapedRecipeBuilder
+                        .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 8)
+                        .pattern("a")
+                        .pattern("b")
+                        .pattern("a")
+                        .define('a', Tags.Items.NUGGETS_IRON)
+                        .define('b', Items.GLOWSTONE));
                 // A little glass on a stand, and eight of them from it.
                 case BULB -> raw(output, white, ShapedRecipeBuilder
                         .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 8)
