@@ -19,9 +19,11 @@ import io.github.capsicum0907.laterna.Shape;
  * <em>one</em> file for all sixteen colours rather than sixteen composites, and it is
  * what lets the lens be drawn at full brightness while the fitting around it is not.
  *
- * <p>⚠ <b>Nothing here is anti-aliased.</b> A circle sixteen pixels across is a staircase
- * and is supposed to be; softening the edge with part-transparent pixels gives a blur at
- * the size these are actually seen.
+     * <p>⚠ <b>Softening is done in colour, never in alpha.</b> The render type these are
+ * drawn with keeps or discards a pixel and does not blend, so a part-transparent edge
+ * comes back as a fatter hard one. Where an edge has a layer of its own behind it, mixing
+ * towards that layer gives the smooth circle instead; where it borders the world, the edge
+ * stays hard, as every round thing in the game does.
  *
  * <p>⚠ <b>The colours these are tinted with are the game's dye values</b>
  * ({@code DyeColor#getTextureDiffuseColor}), which are the pure dyes and are brighter
@@ -36,18 +38,31 @@ public final class Masters {
     private static final float FACE_UNLIT = 0.34F;
     private static final float FALLOFF_UNLIT = 0.05F;
 
-    /** Where the lens ends and the ring begins, and where the ring ends, in pixels. */
-    private static final float LENS = 5.6F;
-    private static final float RIM = 7.5F;
+    /**
+     * How big the fitting is, in pixels of the sixteen.
+     *
+     * <p>⚠ <b>Smaller than it was.</b> The first pass filled almost the whole face, which
+     * read as a coloured block with a grey border rather than as a fitting set into a
+     * surface. Ten pixels across leaves the surface visibly around it, which is what makes
+     * it look recessed.
+     *
+     * <p>⚠ <b>The rim is 5.2 and not 5.6 for a reason that is pure rasterisation.</b> At
+     * 5.6 the circle grows a two-pixel nub at each of the four compass points and reads as
+     * a cog; 5.2 is the nearest radius whose outline is a clean circle. Radii were compared
+     * by drawing them, not chosen.
+     */
+    private static final float LENS = 3.6F;
+    private static final float RIM = 5.2F;
 
     private static final float LENS_CENTRE = 0.72F;
     private static final float LENS_EDGE = 0.30F;
 
     /** The fitting: level 0.5 is its own grey untouched, and the bevel is a step each way. */
     private static final int RING_GREY = 0x4A4E52;
-    private static final float BEVEL_LIT = 0.62F;
-    private static final float BEVEL_DARK = 0.38F;
+    private static final float BEVEL_LIT = 0.66F;
+    private static final float BEVEL_DARK = 0.34F;
     private static final float BEVEL_EDGE = 0.30F;
+    private static final float BEVEL_DEPTH = 1.3F;
 
     private Masters() {
     }
@@ -120,30 +135,45 @@ public final class Masters {
     }
 
     /**
-     * The lens: a disc, brightest in the middle, and nothing outside it.
+     * The lens: a disc, brightest in the middle, with a softened edge.
      *
      * <p>Well above the halfway mark everywhere, so every colour is carried some way
      * towards white - but not as far as the cube's face goes, or the darker dyes stop
      * being told apart.
+     *
+     * <p>⭐ <b>The edge is softened onto the ring, not into transparency.</b> A disc eight
+     * pixels across drawn with hard pixels is a staircase, and the render type these are
+     * drawn with turns a soft alpha back into a hard edge anyway. But the lens never
+     * borders the world - the ring is a solid disc behind it - so a part-covered pixel can
+     * simply be mixed towards the grey, which reads as a smooth circle and stays fully
+     * opaque. That is the whole trick, and it is why the ring is a disc and not an annulus.
      */
     private static Master lens() {
         Master master = Master.blank();
         for (int y = 0; y < Master.SIZE; y++) {
             for (int x = 0; x < Master.SIZE; x++) {
-                float radius = radius(x, y);
-                if (radius > LENS) {
+                float covered = coverage(x, y, LENS);
+                if (covered <= 0.0F) {
                     continue;
                 }
-                float across = radius / LENS;
+                float across = Math.min(1.0F, radius(x, y) / LENS);
                 master.alpha()[y][x] = 1.0F;
                 master.level()[y][x] = LENS_CENTRE - LENS_EDGE * across * across;
+                master.plain()[y][x] = 1.0F - covered;
             }
         }
         return master;
     }
 
     /**
-     * The fitting: a ring two pixels thick, lighter towards the top left.
+     * The fitting: a solid grey disc, bevelled around its rim.
+     *
+     * <p>Solid rather than a ring with a hole in it, so that the lens has something to
+     * soften onto - see {@link #lens}. The middle of it is never seen.
+     *
+     * <p>⚠ <b>Its own outline is hard, and has to be.</b> This edge borders the block
+     * behind, so softening it means alpha, and alpha is what the render type discards.
+     * A hard circle is also what every round thing in the game is.
      *
      * <p>The bevel is the only thing that says this is a rim set into a surface rather
      * than a painted circle, and it is why the blockstate keeps {@code uvlock} on - a
@@ -153,13 +183,17 @@ public final class Masters {
         Master master = Master.blank();
         for (int y = 0; y < Master.SIZE; y++) {
             for (int x = 0; x < Master.SIZE; x++) {
-                float radius = radius(x, y);
-                if (radius <= LENS || radius > RIM) {
+                if (coverage(x, y, RIM) < 0.5F) {
                     continue;
                 }
-                float half = (Master.SIZE - 1) / 2.0F;
-                float lean = -((x - half) + (y - half)) / (radius * 2.0F);
                 master.alpha()[y][x] = 1.0F;
+                float radius = radius(x, y);
+                if (radius < RIM - BEVEL_DEPTH) {
+                    master.level()[y][x] = 0.5F;
+                    continue;
+                }
+                float half = Master.SIZE / 2.0F;
+                float lean = -((x + 0.5F - half) + (y + 0.5F - half)) / (radius * 2.0F);
                 master.level()[y][x] = lean > BEVEL_EDGE ? BEVEL_LIT
                         : lean < -BEVEL_EDGE ? BEVEL_DARK : 0.5F;
             }
@@ -173,6 +207,23 @@ public final class Masters {
         float dx = x + 0.5F - half;
         float dy = y + 0.5F - half;
         return (float) Math.sqrt(dx * dx + dy * dy);
+    }
+
+    /** How much of a pixel falls inside a circle, sampled on a grid within it. */
+    private static float coverage(int x, int y, float radius) {
+        int grid = 4;
+        float half = Master.SIZE / 2.0F;
+        int inside = 0;
+        for (int j = 0; j < grid; j++) {
+            for (int i = 0; i < grid; i++) {
+                float dx = x + (i + 0.5F) / grid - half;
+                float dy = y + (j + 0.5F) / grid - half;
+                if (dx * dx + dy * dy <= radius * radius) {
+                    inside++;
+                }
+            }
+        }
+        return (float) inside / (grid * grid);
     }
 
     /** The same distance as a fraction of the half-width, squared, for the cube's falloff. */

@@ -12,6 +12,7 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -169,6 +170,39 @@ public final class LaternaTests {
         }
         if (state.getShape(helper.getLevel(), absolute).isEmpty()) {
             throw new GameTestAssertException("a light nobody can point at cannot be broken");
+        }
+        helper.succeed();
+    }
+
+    /**
+     * ⚠ <b>The outline sits on the face the plate is drawn on, for all six.</b>
+     *
+     * <p>This is the test that was missing. The six shapes used to be a list written out
+     * by hand, copied from another mod with east and west swapped in the copying, and the
+     * outline of every east- or west-facing light was a block away from the light. Five
+     * of the six were right, which is why nothing looked wrong until one was pointed at.
+     *
+     * <p>It cannot see where the model was drawn - but the model's rotation and this
+     * shape now come from the same {@link SpotlightBlock#against}, so a mistake there
+     * moves both together instead of pulling them apart.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void spotlightOutlineIsWhereThePlateIs(GameTestHelper helper) {
+        for (Direction facing : Direction.values()) {
+            helper.setBlock(WHERE, LaternaRegistry.block(SPOTLIGHT).get().defaultBlockState()
+                    .setValue(SpotlightBlock.FACING, facing));
+            Direction against = SpotlightBlock.against(facing);
+            VoxelShape shape = helper.getBlockState(WHERE)
+                    .getShape(helper.getLevel(), helper.absolutePos(WHERE));
+            boolean high = against.getAxisDirection() == Direction.AxisDirection.POSITIVE;
+            double near = high ? shape.min(against.getAxis()) : shape.max(against.getAxis());
+            double thickness = SpotlightBlock.DEPTH / 16.0;
+            double wanted = high ? 1.0 - thickness : thickness;
+            if (Math.abs(near - wanted) > 1.0E-6) {
+                throw new GameTestAssertException("a light facing " + facing
+                        + " should hug its " + against + " face, but its outline reaches "
+                        + near);
+            }
         }
         helper.succeed();
     }

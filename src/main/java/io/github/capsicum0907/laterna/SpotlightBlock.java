@@ -51,7 +51,7 @@ public class SpotlightBlock extends Block implements SimpleWaterloggedBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     /** Deep enough to point at, shallow enough not to be a step. */
-    private static final double DEPTH = 1.0;
+    static final double DEPTH = 1.0;
 
     private static final Map<Direction, VoxelShape> SHAPES = shapes();
 
@@ -62,16 +62,37 @@ public class SpotlightBlock extends Block implements SimpleWaterloggedBlock {
                 .setValue(WATERLOGGED, false));
     }
 
+    /**
+     * A slab of the cell hugging the face the plate is drawn on, worked out rather than
+     * listed.
+     *
+     * <p>⚠ <b>Listing the six by hand is how this went wrong the first time.</b> The
+     * boxes were transcribed from another mod and east and west were swapped in the
+     * copying, which put the outline of every east- or west-facing light on the far side
+     * of its own block - a whole block away from the thing you were pointing at. The five
+     * others were right, so nothing about the shape of the mistake suggested itself.
+     * Derived from the direction, there is no list to get out of order.
+     */
     private static Map<Direction, VoxelShape> shapes() {
         Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
         double far = 16.0 - DEPTH;
-        shapes.put(Direction.UP, Block.box(0, 0, 0, 16, DEPTH, 16));
-        shapes.put(Direction.DOWN, Block.box(0, far, 0, 16, 16, 16));
-        shapes.put(Direction.NORTH, Block.box(0, 0, far, 16, 16, 16));
-        shapes.put(Direction.SOUTH, Block.box(0, 0, 0, 16, 16, DEPTH));
-        shapes.put(Direction.EAST, Block.box(far, 0, 0, 16, 16, 16));
-        shapes.put(Direction.WEST, Block.box(0, 0, 0, DEPTH, 16, 16));
+        for (Direction facing : Direction.values()) {
+            Direction against = facing.getOpposite();
+            boolean high = against.getAxisDirection() == Direction.AxisDirection.POSITIVE;
+            double x = high && against.getAxis() == Direction.Axis.X ? far : 0;
+            double y = high && against.getAxis() == Direction.Axis.Y ? far : 0;
+            double z = high && against.getAxis() == Direction.Axis.Z ? far : 0;
+            shapes.put(facing, Block.box(x, y, z,
+                    against.getAxis() == Direction.Axis.X && !high ? DEPTH : 16,
+                    against.getAxis() == Direction.Axis.Y && !high ? DEPTH : 16,
+                    against.getAxis() == Direction.Axis.Z && !high ? DEPTH : 16));
+        }
         return Map.copyOf(shapes);
+    }
+
+    /** Which face of its own cell the plate of a lamp facing this way is drawn on. */
+    public static Direction against(Direction facing) {
+        return facing.getOpposite();
     }
 
     @Override

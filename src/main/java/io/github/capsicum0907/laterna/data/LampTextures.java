@@ -100,6 +100,8 @@ public class LampTextures implements DataProvider {
                                 colour.getTextureDiffuseColor() & 0xFFFFFF,
                                 name(shape, layer, colour, lit));
                     }
+                    // The second colour is what a softened edge is softened onto, which
+                    // is always the layer underneath; see Master#tinted.
                 }
             }
         }
@@ -108,7 +110,7 @@ public class LampTextures implements DataProvider {
 
     private void draw(CachedOutput output, List<CompletableFuture<?>> writing, Master master,
             int colour, String name) {
-        int[][] pixels = master.tinted(colour);
+        int[][] pixels = master.tinted(colour, Masters.plainColour());
         Path target = textures.file(
                 ResourceLocation.fromNamespaceAndPath(Laterna.MODID, name), "png");
         writing.add(CompletableFuture.runAsync(() -> write(output, pixels, target),

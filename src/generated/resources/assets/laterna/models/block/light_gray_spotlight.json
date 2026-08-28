@@ -4,37 +4,6 @@
     {
       "faces": {
         "north": {
-          "texture": "#lens",
-          "uv": [
-            16.0,
-            0.0,
-            0.0,
-            16.0
-          ]
-        },
-        "south": {
-          "texture": "#lens"
-        }
-      },
-      "from": [
-        0,
-        0,
-        0.1
-      ],
-      "neoforge_data": {
-        "block_light": 15,
-        "sky_light": 15
-      },
-      "shade": false,
-      "to": [
-        16,
-        16,
-        0.1
-      ]
-    },
-    {
-      "faces": {
-        "north": {
           "texture": "#ring",
           "uv": [
             16.0,
@@ -50,8 +19,39 @@
       "from": [
         0,
         0,
+        0.1
+      ],
+      "shade": false,
+      "to": [
+        16,
+        16,
+        0.1
+      ]
+    },
+    {
+      "faces": {
+        "north": {
+          "texture": "#lens",
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#lens"
+        }
+      },
+      "from": [
+        0,
+        0,
         0.11
       ],
+      "neoforge_data": {
+        "block_light": 15,
+        "sky_light": 15
+      },
       "shade": false,
       "to": [
         16,

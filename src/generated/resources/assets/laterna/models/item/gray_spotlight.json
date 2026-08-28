@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "laterna:block/gray_spotlight",
-    "layer1": "laterna:block/spotlight_ring"
+    "layer0": "laterna:block/spotlight_ring",
+    "layer1": "laterna:block/gray_spotlight"
   }
 }

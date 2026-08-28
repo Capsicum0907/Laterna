@@ -128,7 +128,14 @@ public final class LaternaDataGen {
                 Direction.UP, new int[] { 270, 0 },
                 Direction.DOWN, new int[] { 90, 0 });
 
-        /** How far off the face the plate stands, and the ring a shade further still. */
+        /**
+         * How far off the face the fitting stands, and the lens a shade further still.
+         *
+         * <p>⚠ <b>The order matters now.</b> The ring is a solid disc rather than a ring
+         * with a hole in it, because the lens softens its edge onto it - so the ring is
+         * the one at the back, and putting them the other way round hides the lens
+         * entirely.
+         */
         private static final float PLATE = 0.1F;
         private static final float OVER = 0.11F;
 
@@ -158,7 +165,7 @@ public final class LaternaDataGen {
                             .modelForState().modelFile(models.get(lamp.skin(false))).addModel();
                     case SPOTLIGHT -> {
                         for (Direction facing : Direction.values()) {
-                            int[] turn = ROTATION.get(facing.getOpposite());
+                            int[] turn = ROTATION.get(SpotlightBlock.against(facing));
                             getVariantBuilder(block)
                                     .partialState().with(SpotlightBlock.FACING, facing)
                                     .modelForState().modelFile(model)
@@ -203,15 +210,15 @@ public final class LaternaDataGen {
                     .element()
                         .from(0, 0, PLATE).to(16, 16, PLATE)
                         .shade(false)
-                        .emissivity(15, 15)
-                        .face(Direction.NORTH).texture("#lens").uvs(16, 0, 0, 16).end()
-                        .face(Direction.SOUTH).texture("#lens").uvs(0, 0, 16, 16).end()
+                        .face(Direction.NORTH).texture("#ring").uvs(16, 0, 0, 16).end()
+                        .face(Direction.SOUTH).texture("#ring").uvs(0, 0, 16, 16).end()
                     .end()
                     .element()
                         .from(0, 0, OVER).to(16, 16, OVER)
                         .shade(false)
-                        .face(Direction.NORTH).texture("#ring").uvs(16, 0, 0, 16).end()
-                        .face(Direction.SOUTH).texture("#ring").uvs(0, 0, 16, 16).end()
+                        .emissivity(15, 15)
+                        .face(Direction.NORTH).texture("#lens").uvs(16, 0, 0, 16).end()
+                        .face(Direction.SOUTH).texture("#lens").uvs(0, 0, 16, 16).end()
                     .end();
         }
 
@@ -226,10 +233,12 @@ public final class LaternaDataGen {
         private void item(Lamp lamp, ModelFile model) {
             switch (lamp.shape()) {
                 case LAMP -> itemModels().withExistingParent(lamp.id(), model.getLocation());
+                // The ring is the base and the lens goes over it, the same way round as
+                // the two elements of the block model.
                 case SPOTLIGHT -> itemModels().getBuilder(lamp.id())
                         .parent(new ModelFile.UncheckedModelFile("item/generated"))
-                        .texture("layer0", modLoc("block/" + lamp.skin(true)))
-                        .texture("layer1", modLoc("block/" + Shape.SPOTLIGHT.id() + "_ring"));
+                        .texture("layer0", modLoc("block/" + Shape.SPOTLIGHT.id() + "_ring"))
+                        .texture("layer1", modLoc("block/" + lamp.skin(true)));
             }
         }
     }

@@ -89,9 +89,17 @@ Three things follow from having no thickness:
 
 - **The collision shape is not the model.** A `VoxelShape` of zero thickness is a
   block that cannot be selected or broken. The shape is one pixel deep; only the
-  drawing is flat.
+  drawing is flat. ⚠ The six shapes are *derived from the direction*, never listed:
+  the first pass listed them, transcribed east and west the wrong way round, and put
+  the outline of every east- or west-facing light a whole block from the light. Five
+  of six were right, which is why it looked fine until one was pointed at.
 - **Round comes from the alpha channel**, so the model declares
   `"render_type": "minecraft:cutout"`. Without it the transparent corners are black.
+  ⚠ And cutout keeps or discards a pixel rather than blending it, so a softened edge
+  cannot be made of alpha. The lens is softened onto the ring in *colour* instead —
+  which is why the ring is a solid disc behind the lens rather than an annulus around
+  it. The rim's own outline stays hard, as every round thing in the game does, at the
+  one radius whose rasterisation is a clean circle rather than a cog.
 - **The lens is drawn at full brightness** — `"neoforge_data": {"block_light": 15,
   "sky_light": 15}` on that element, and deliberately not on the ring, so the fitting
   reads as metal and the lens as light. (NeoForge renamed this to `light_emission`
