@@ -37,6 +37,10 @@ public final class Masters {
     /** The cut side of a slab: brighter than the frame, duller than the face. */
     private static final float EDGE_FACE = 0.46F;
 
+    /** The shell around a bulb: whiter than the body it covers, and mostly not there. */
+    private static final float HALO_LEVEL = 0.86F;
+    private static final float HALO_ALPHA = 0.45F;
+
     private static final float FRAME_UNLIT = 0.20F;
     private static final float FACE_UNLIT = 0.34F;
     private static final float FALLOFF_UNLIT = 0.05F;
@@ -80,13 +84,15 @@ public final class Masters {
         public static final Layer BODY = new Layer("", true);
         public static final Layer RING = new Layer("_ring", false);
         public static final Layer EDGE = new Layer("_edge", true);
+        public static final Layer HALO = new Layer("_halo", true);
     }
 
     public static List<Layer> layers(Shape shape) {
         return switch (shape) {
             case LAMP, ROD -> List.of(Layer.BODY);
+            case BULB -> List.of(Layer.BODY, Layer.EDGE, Layer.HALO);
             case SPOTLIGHT -> List.of(Layer.BODY, Layer.RING);
-            case BULB, FIXTURE -> List.of(Layer.BODY, Layer.EDGE);
+            case FIXTURE -> List.of(Layer.BODY, Layer.EDGE);
             case SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL -> List.of(Layer.BODY, Layer.EDGE);
         };
     }
@@ -117,7 +123,9 @@ public final class Masters {
             // at sixteen pixels and its one-pixel border reads; stretched onto a face six
             // pixels across the same border is a third of a pixel, which is a smudge. A
             // plain glow has nothing to lose at that size.
-            case BULB, FIXTURE -> layer.equals(Layer.EDGE) ? edge() : glow();
+            case BULB -> layer.equals(Layer.EDGE) ? edge()
+                    : layer.equals(Layer.HALO) ? halo() : glow();
+            case FIXTURE -> layer.equals(Layer.EDGE) ? edge() : glow();
             // The slab and the panel wear the cube's lit face on the two broad sides, and
             // a rim of their own on the four cut ones. They get files of their own rather
             // than borrowing the cube's, so that a resource pack can retexture a panel
@@ -215,6 +223,26 @@ public final class Masters {
                 float lean = -((x + 0.5F - half) + (y + 0.5F - half)) / (radius * 2.0F);
                 master.level()[y][x] = lean > BEVEL_EDGE ? BEVEL_LIT
                         : lean < -BEVEL_EDGE ? BEVEL_DARK : 0.5F;
+            }
+        }
+        return master;
+    }
+
+    /**
+     * The envelope around a bulb: the same light, mostly see-through.
+     *
+     * <p>⚠ <b>Drawn as a second skin rather than a brighter core.</b> A bulb in the mod
+     * this follows is an opaque coloured body inside a translucent shell a little larger
+     * than it - two boxes and two render types, not one. Painting the body brighter would
+     * not do it: what reads is the shell standing off the body, so that the body is seen
+     * through something.
+     */
+    private static Master halo() {
+        Master master = Master.blank();
+        for (int y = 0; y < Master.SIZE; y++) {
+            for (int x = 0; x < Master.SIZE; x++) {
+                master.alpha()[y][x] = HALO_ALPHA;
+                master.level()[y][x] = HALO_LEVEL;
             }
         }
         return master;

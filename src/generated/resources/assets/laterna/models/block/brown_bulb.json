@@ -1,147 +1,20 @@
 {
-  "parent": "minecraft:block/block",
-  "elements": [
-    {
-      "faces": {
-        "down": {
-          "texture": "#edge",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        },
-        "east": {
-          "texture": "#edge",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        },
-        "north": {
-          "cullface": "north",
-          "texture": "#edge",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        },
-        "south": {
-          "texture": "#edge",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        },
-        "up": {
-          "texture": "#edge",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        },
-        "west": {
-          "texture": "#edge",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        }
-      },
-      "from": [
-        6,
-        6,
-        0
-      ],
-      "to": [
-        10,
-        10,
-        1
-      ]
+  "children": {
+    "body": {
+      "parent": "laterna:block/brown_bulb_body",
+      "render_type": "minecraft:solid"
     },
-    {
-      "faces": {
-        "down": {
-          "texture": "#face",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        },
-        "east": {
-          "texture": "#face",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        },
-        "north": {
-          "texture": "#face",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        },
-        "south": {
-          "texture": "#face",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        },
-        "up": {
-          "texture": "#face",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        },
-        "west": {
-          "texture": "#face",
-          "uv": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ]
-        }
-      },
-      "from": [
-        7,
-        7,
-        1
-      ],
-      "to": [
-        9,
-        9,
-        5
-      ]
+    "shell": {
+      "parent": "laterna:block/brown_bulb_shell",
+      "render_type": "minecraft:translucent"
     }
+  },
+  "item_render_order": [
+    "body",
+    "shell"
   ],
+  "loader": "neoforge:composite",
   "textures": {
-    "edge": "laterna:block/brown_bulb_edge",
-    "face": "laterna:block/brown_bulb",
     "particle": "laterna:block/brown_bulb"
   }
 }

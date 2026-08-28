@@ -1,6 +1,7 @@
-// 1.21.1	2026-08-29T04:26:19.8490771	Lamp Textures: laterna
+// 1.21.1	2026-08-29T04:44:50.4756953	Lamp Textures: laterna
 9393b558db0a5d7d87a3ae50082e3ed73dc22e37 assets/laterna/textures/block/black_bulb.png
 a3c8a48583e06855d36b077f52bab48f28bfabd4 assets/laterna/textures/block/black_bulb_edge.png
+c59b16083dc94dca254edddfd31872b867a56bd6 assets/laterna/textures/block/black_bulb_halo.png
 9393b558db0a5d7d87a3ae50082e3ed73dc22e37 assets/laterna/textures/block/black_fixture.png
 a3c8a48583e06855d36b077f52bab48f28bfabd4 assets/laterna/textures/block/black_fixture_edge.png
 d56f5d007bd9168923871cda8c1b0e3a3cd6dcf5 assets/laterna/textures/block/black_lamp_off.png
@@ -17,6 +18,7 @@ b2ad8e3b59cf062d7f0f42e1c1842cedaf058434 assets/laterna/textures/block/black_ver
 a3c8a48583e06855d36b077f52bab48f28bfabd4 assets/laterna/textures/block/black_vertical_lamp_slab_edge.png
 16fb34e6d79def47cb978b69b4ac6aff3f51555c assets/laterna/textures/block/blue_bulb.png
 2f8c52f4caf1220271fee1b9b24d430174e31663 assets/laterna/textures/block/blue_bulb_edge.png
+8b4547924777347b6b23c973597d6a96f46018dd assets/laterna/textures/block/blue_bulb_halo.png
 16fb34e6d79def47cb978b69b4ac6aff3f51555c assets/laterna/textures/block/blue_fixture.png
 2f8c52f4caf1220271fee1b9b24d430174e31663 assets/laterna/textures/block/blue_fixture_edge.png
 15927d828ec87eb562cbe4ea5414d8edb3211683 assets/laterna/textures/block/blue_lamp_off.png
@@ -33,6 +35,7 @@ e49d30a412c05265b30d9d3fd86579530e7b7406 assets/laterna/textures/block/blue_vert
 2f8c52f4caf1220271fee1b9b24d430174e31663 assets/laterna/textures/block/blue_vertical_lamp_slab_edge.png
 e2dd24e1e487fcb64ea30ff2d74e679e13cee871 assets/laterna/textures/block/brown_bulb.png
 9a22a594e11169e5f7e5ccf194f7053323123c44 assets/laterna/textures/block/brown_bulb_edge.png
+380beba8a63cf2df73ebdfa299f780b9ffa5fabf assets/laterna/textures/block/brown_bulb_halo.png
 e2dd24e1e487fcb64ea30ff2d74e679e13cee871 assets/laterna/textures/block/brown_fixture.png
 9a22a594e11169e5f7e5ccf194f7053323123c44 assets/laterna/textures/block/brown_fixture_edge.png
 a8a0383a6c83820c505d60468166d344ed0c355e assets/laterna/textures/block/brown_lamp_off.png
@@ -49,6 +52,7 @@ e2dd24e1e487fcb64ea30ff2d74e679e13cee871 assets/laterna/textures/block/brown_rod
 9a22a594e11169e5f7e5ccf194f7053323123c44 assets/laterna/textures/block/brown_vertical_lamp_slab_edge.png
 b8a6b9a08ef8bf3e7e293fc81f19feab37569e1f assets/laterna/textures/block/cyan_bulb.png
 92175026150e343a537351cbed0ee8db7ea8eb5a assets/laterna/textures/block/cyan_bulb_edge.png
+2d217fc0bdb8dc5e8b8a97a6e91bc989f341e068 assets/laterna/textures/block/cyan_bulb_halo.png
 b8a6b9a08ef8bf3e7e293fc81f19feab37569e1f assets/laterna/textures/block/cyan_fixture.png
 92175026150e343a537351cbed0ee8db7ea8eb5a assets/laterna/textures/block/cyan_fixture_edge.png
 0e992befbdee53500f6fa9a6bbee8ca05b8291b7 assets/laterna/textures/block/cyan_lamp_off.png
@@ -65,6 +69,7 @@ b8a6b9a08ef8bf3e7e293fc81f19feab37569e1f assets/laterna/textures/block/cyan_rod.
 92175026150e343a537351cbed0ee8db7ea8eb5a assets/laterna/textures/block/cyan_vertical_lamp_slab_edge.png
 dbc170cf9e4f76218060f607d5b781ac02d9ceae assets/laterna/textures/block/gray_bulb.png
 762dbe7bd3f3f766b3561306168dee84e14ff8aa assets/laterna/textures/block/gray_bulb_edge.png
+9434a890c0b97a40816ac07bc0e2bd99f8b5071f assets/laterna/textures/block/gray_bulb_halo.png
 dbc170cf9e4f76218060f607d5b781ac02d9ceae assets/laterna/textures/block/gray_fixture.png
 762dbe7bd3f3f766b3561306168dee84e14ff8aa assets/laterna/textures/block/gray_fixture_edge.png
 b9e89cf376e07ba6b1ac1c9c173b06d685c01a88 assets/laterna/textures/block/gray_lamp_off.png
@@ -81,6 +86,7 @@ e5713c6e832fd542892ae2a4d4f8ee019a199597 assets/laterna/textures/block/gray_spot
 762dbe7bd3f3f766b3561306168dee84e14ff8aa assets/laterna/textures/block/gray_vertical_lamp_slab_edge.png
 d755803d71233ed372ed9c40ba28aabff2e3e558 assets/laterna/textures/block/green_bulb.png
 f81981e94ef0ab39ead091815564902a95d0916e assets/laterna/textures/block/green_bulb_edge.png
+4de4c32254b1dbef0830bfeeb078d5617fff4c48 assets/laterna/textures/block/green_bulb_halo.png
 d755803d71233ed372ed9c40ba28aabff2e3e558 assets/laterna/textures/block/green_fixture.png
 f81981e94ef0ab39ead091815564902a95d0916e assets/laterna/textures/block/green_fixture_edge.png
 a930910c04460d939d0180deeccefdc1be8c88ff assets/laterna/textures/block/green_lamp_off.png
@@ -97,6 +103,7 @@ f125f2606df8c186f84d74d22c09723f6c7c0c02 assets/laterna/textures/block/green_ver
 f81981e94ef0ab39ead091815564902a95d0916e assets/laterna/textures/block/green_vertical_lamp_slab_edge.png
 ca3c0ae23b9bc97b16142bab01dfb372d682747f assets/laterna/textures/block/light_blue_bulb.png
 ce57a03bdf58c169c189bc1556f063275e8e0d51 assets/laterna/textures/block/light_blue_bulb_edge.png
+dd04bd781d99919988a6d93e08c67c647c132094 assets/laterna/textures/block/light_blue_bulb_halo.png
 ca3c0ae23b9bc97b16142bab01dfb372d682747f assets/laterna/textures/block/light_blue_fixture.png
 ce57a03bdf58c169c189bc1556f063275e8e0d51 assets/laterna/textures/block/light_blue_fixture_edge.png
 8aa24888d6391e7ab3a69c2fd48e104018d17c62 assets/laterna/textures/block/light_blue_lamp_off.png
@@ -113,6 +120,7 @@ ce57a03bdf58c169c189bc1556f063275e8e0d51 assets/laterna/textures/block/light_blu
 ce57a03bdf58c169c189bc1556f063275e8e0d51 assets/laterna/textures/block/light_blue_vertical_lamp_slab_edge.png
 edb03a1ac81ce3b21cf5f3e33454ba405cde526f assets/laterna/textures/block/light_gray_bulb.png
 c7258b00f46c7b2f578ef67e79a54aa5537aabc4 assets/laterna/textures/block/light_gray_bulb_edge.png
+9cb0e7ea63b31b3612df399cc0d4898d46d69fc3 assets/laterna/textures/block/light_gray_bulb_halo.png
 edb03a1ac81ce3b21cf5f3e33454ba405cde526f assets/laterna/textures/block/light_gray_fixture.png
 c7258b00f46c7b2f578ef67e79a54aa5537aabc4 assets/laterna/textures/block/light_gray_fixture_edge.png
 9b28e2cc3d6c5f1acfc163cf3ef7d63ccfb70dcc assets/laterna/textures/block/light_gray_lamp_off.png
@@ -129,6 +137,7 @@ c7258b00f46c7b2f578ef67e79a54aa5537aabc4 assets/laterna/textures/block/light_gra
 c7258b00f46c7b2f578ef67e79a54aa5537aabc4 assets/laterna/textures/block/light_gray_vertical_lamp_slab_edge.png
 b76190fe06a0276f9fc8acc52b2e8080b66965b3 assets/laterna/textures/block/lime_bulb.png
 b819729b634a954489fd3ea90a8a45fdcf52e5aa assets/laterna/textures/block/lime_bulb_edge.png
+49aee1fb3db5afe4967dbf2e3d5202535a9f58b7 assets/laterna/textures/block/lime_bulb_halo.png
 b76190fe06a0276f9fc8acc52b2e8080b66965b3 assets/laterna/textures/block/lime_fixture.png
 b819729b634a954489fd3ea90a8a45fdcf52e5aa assets/laterna/textures/block/lime_fixture_edge.png
 ebf9f0255d6d092328d51a0712f29058693803db assets/laterna/textures/block/lime_lamp_off.png
@@ -145,6 +154,7 @@ b819729b634a954489fd3ea90a8a45fdcf52e5aa assets/laterna/textures/block/lime_vert
 b819729b634a954489fd3ea90a8a45fdcf52e5aa assets/laterna/textures/block/lime_vertical_lamp_slab_edge.png
 ea1e5e44c7f2f1622e02ccfd892f970f771a4d1e assets/laterna/textures/block/magenta_bulb.png
 3b7457a3ae583a347663eea8184f05bbfcd7942b assets/laterna/textures/block/magenta_bulb_edge.png
+4f4f5cc13cce7ba53a3eea0f67d8cde8dd6d3e45 assets/laterna/textures/block/magenta_bulb_halo.png
 ea1e5e44c7f2f1622e02ccfd892f970f771a4d1e assets/laterna/textures/block/magenta_fixture.png
 3b7457a3ae583a347663eea8184f05bbfcd7942b assets/laterna/textures/block/magenta_fixture_edge.png
 ad925db79ac3cef5be570728af526e9cd2383aa4 assets/laterna/textures/block/magenta_lamp_off.png
@@ -161,6 +171,7 @@ ea1e5e44c7f2f1622e02ccfd892f970f771a4d1e assets/laterna/textures/block/magenta_r
 3b7457a3ae583a347663eea8184f05bbfcd7942b assets/laterna/textures/block/magenta_vertical_lamp_slab_edge.png
 5b49d8211453e21842b0f370fe0d5986f2a50bdd assets/laterna/textures/block/orange_bulb.png
 8b2fd3abe95bc28df714b4df1e538d6e72377e9c assets/laterna/textures/block/orange_bulb_edge.png
+c11a80e7abe6170b3d7a54b4d1f0fb981158ca8e assets/laterna/textures/block/orange_bulb_halo.png
 5b49d8211453e21842b0f370fe0d5986f2a50bdd assets/laterna/textures/block/orange_fixture.png
 8b2fd3abe95bc28df714b4df1e538d6e72377e9c assets/laterna/textures/block/orange_fixture_edge.png
 9a727ef9ff71973b8648963c8d281c2e906621ba assets/laterna/textures/block/orange_lamp_off.png
@@ -177,6 +188,7 @@ ea1e5e44c7f2f1622e02ccfd892f970f771a4d1e assets/laterna/textures/block/magenta_r
 8b2fd3abe95bc28df714b4df1e538d6e72377e9c assets/laterna/textures/block/orange_vertical_lamp_slab_edge.png
 d9985668f267ef719d6141b4ef3be668acf268ef assets/laterna/textures/block/pink_bulb.png
 9e044fbf9572ae49b18a519e904043adf911d8df assets/laterna/textures/block/pink_bulb_edge.png
+3d735d9143ee3f046032c4f145b40d9b7f044581 assets/laterna/textures/block/pink_bulb_halo.png
 d9985668f267ef719d6141b4ef3be668acf268ef assets/laterna/textures/block/pink_fixture.png
 9e044fbf9572ae49b18a519e904043adf911d8df assets/laterna/textures/block/pink_fixture_edge.png
 39da57b8be6b00a4bc5ebceb4f776e08afb701e2 assets/laterna/textures/block/pink_lamp_off.png
@@ -193,6 +205,7 @@ c54dccaaf373f5e25d23d74bd26be73f9982373d assets/laterna/textures/block/pink_vert
 9e044fbf9572ae49b18a519e904043adf911d8df assets/laterna/textures/block/pink_vertical_lamp_slab_edge.png
 439c8898cf0ab76821e079a710dc61a16c2c9040 assets/laterna/textures/block/purple_bulb.png
 285cc6b308306283b8da50d83745f15f1edd282e assets/laterna/textures/block/purple_bulb_edge.png
+9da27983784d4d0cfd8939a20bc044302d8be7f7 assets/laterna/textures/block/purple_bulb_halo.png
 439c8898cf0ab76821e079a710dc61a16c2c9040 assets/laterna/textures/block/purple_fixture.png
 285cc6b308306283b8da50d83745f15f1edd282e assets/laterna/textures/block/purple_fixture_edge.png
 c0fc296401576ef637d07c6fc8f41b1215bdc56e assets/laterna/textures/block/purple_lamp_off.png
@@ -209,6 +222,7 @@ d3e2104e70c2c9a5b18d830a21a30fb0229867d6 assets/laterna/textures/block/purple_ve
 285cc6b308306283b8da50d83745f15f1edd282e assets/laterna/textures/block/purple_vertical_lamp_slab_edge.png
 e4ce9579aa4053209745f006d77761b4446aa1fc assets/laterna/textures/block/red_bulb.png
 50264b72c8d383adf291489981c57ba8c9c57894 assets/laterna/textures/block/red_bulb_edge.png
+93885840d235ff9bc8fa442d4eb5daef1aa01677 assets/laterna/textures/block/red_bulb_halo.png
 e4ce9579aa4053209745f006d77761b4446aa1fc assets/laterna/textures/block/red_fixture.png
 50264b72c8d383adf291489981c57ba8c9c57894 assets/laterna/textures/block/red_fixture_edge.png
 bfd1987e328a32c4e6ef842d76859032367b2dd7 assets/laterna/textures/block/red_lamp_off.png
@@ -226,6 +240,7 @@ e4ce9579aa4053209745f006d77761b4446aa1fc assets/laterna/textures/block/red_rod.p
 acfd129952bfe517644068b7721436ed7a4a6bce assets/laterna/textures/block/spotlight_ring.png
 9506f8c0809a27906bda4d6f40efdf092c0e3d62 assets/laterna/textures/block/white_bulb.png
 0246e4d888da1273fcffb8220718778053df13b6 assets/laterna/textures/block/white_bulb_edge.png
+37d3e50b2d5c46a7116d2a72a7631d79182eb5ba assets/laterna/textures/block/white_bulb_halo.png
 9506f8c0809a27906bda4d6f40efdf092c0e3d62 assets/laterna/textures/block/white_fixture.png
 0246e4d888da1273fcffb8220718778053df13b6 assets/laterna/textures/block/white_fixture_edge.png
 0238165a3335b27a155c3586322863b3c69519e0 assets/laterna/textures/block/white_lamp_off.png
@@ -242,6 +257,7 @@ acfd129952bfe517644068b7721436ed7a4a6bce assets/laterna/textures/block/spotlight
 0246e4d888da1273fcffb8220718778053df13b6 assets/laterna/textures/block/white_vertical_lamp_slab_edge.png
 4cee1329563e933f4b4ddbec833346e1896bdcbf assets/laterna/textures/block/yellow_bulb.png
 d0b9b71a42e60188197243a3093304613a28f07a assets/laterna/textures/block/yellow_bulb_edge.png
+8e82c51a9b3e31c285ee374c4e48749d73a51ee2 assets/laterna/textures/block/yellow_bulb_halo.png
 4cee1329563e933f4b4ddbec833346e1896bdcbf assets/laterna/textures/block/yellow_fixture.png
 d0b9b71a42e60188197243a3093304613a28f07a assets/laterna/textures/block/yellow_fixture_edge.png
 336a0e70d7a4a6f8bfa3e49a42c243ff222887f5 assets/laterna/textures/block/yellow_lamp_off.png

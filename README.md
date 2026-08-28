@@ -96,13 +96,20 @@ with a lit face on it is a tile stuck to a wall; a plate flush with the surface 
 something standing out of it is a lamp bolted to one. At four by four there is room for
 both, because the base and the stem are different sizes rather than one inset in the other.
 
-⚠ **The collar goes behind the light, and finding that took four passes.** A rim inside
-the face left too little lamp — eight by four minus a pixel each way is six by two, a third
-of it. A plate around the face kept the light but made the outline ten by six, which is not
-the shape being matched. Dropping the collar altogether matched the outline and lost the
-fitting. The arrangement that costs neither is the one Simply Light uses: the same eight by
-four, one pixel of it dark and against the surface, the rest lamp. **The depth is the third
-place an edge can go**, and the first three passes only ever looked across the face.
+⚠ **The housing is the five faces that are not the light, and finding that took five
+passes.** A rim inside the face left too little lamp — eight by four minus a pixel each way
+is six by two, a third of it. A plate around the face kept the light but made the outline
+ten by six. Dropping the housing matched the outline and lost the fitting. A dark band
+behind the light was invisible from in front and left the sides shining. What it actually
+is: **one box, lit on the one face that points away from the wall and dark on the other
+five** — seen from below, a ceiling fitting shows a lit underside and dark sides, which is
+what makes it a lamp in a case rather than a glowing brick.
+
+**A bulb is a body inside a shell.** A dark base, a coloured body standing out of it, and
+a translucent shell a shade larger over the body — the same nesting vanilla's beacon uses,
+though the beacon reaches it with a cutout texture rather than a translucent one. ⚠ One
+model cannot be part solid and part see-through, because the render type belongs to the
+whole of it, so the two are separate models joined by the game's composite loader.
 
 **And a form may be a different size on a wall than on a floor.** The fitting is a wide
 bar where it is bolted to a wall and a small disc where it is set into a ceiling. ⚠ No
