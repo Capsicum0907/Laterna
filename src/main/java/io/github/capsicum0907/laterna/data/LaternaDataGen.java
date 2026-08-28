@@ -98,6 +98,7 @@ public final class LaternaDataGen {
         generator.addProvider(event.includeClient(), new LampTextures(output));
         generator.addProvider(event.includeClient(), new Models(output, helper));
         generator.addProvider(event.includeClient(), new Language(output));
+        generator.addProvider(event.includeClient(), new ModIcon());
 
         generator.addProvider(event.includeServer(), new Loot(output, lookup));
         generator.addProvider(event.includeServer(), new Recipes(output, lookup));

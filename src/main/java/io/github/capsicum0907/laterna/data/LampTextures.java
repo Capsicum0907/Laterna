@@ -1,16 +1,11 @@
 package io.github.capsicum0907.laterna.data;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.zip.CRC32;
-import java.util.zip.Deflater;
 
 import com.google.common.hash.Hashing;
 
@@ -131,59 +126,10 @@ public class LampTextures implements DataProvider {
     @SuppressWarnings("deprecation") // Hashing.sha1 is what CachedOutput expects
     private static void write(CachedOutput output, int[][] pixels, Path target) {
         try {
-            byte[] bytes = png(pixels);
+            byte[] bytes = Png.encode(pixels);
             output.writeIfNeeded(target, bytes, Hashing.sha1().hashBytes(bytes));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    // --- png -------------------------------------------------------------------------
-
-    /** Eight-bit RGBA, one filter byte of nought per row, which is all this needs. */
-    private static byte[] png(int[][] pixels) throws IOException {
-        int size = pixels.length;
-        ByteBuffer raw = ByteBuffer.allocate(size * (size * 4 + 1));
-        for (int[] row : pixels) {
-            raw.put((byte) 0);
-            for (int pixel : row) {
-                raw.put((byte) (pixel >> 16)).put((byte) (pixel >> 8)).put((byte) pixel)
-                        .put((byte) (pixel >>> 24));
-            }
-        }
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        out.write(new byte[] { (byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n' });
-        chunk(out, "IHDR", ByteBuffer.allocate(13)
-                .putInt(size).putInt(size)
-                .put((byte) 8).put((byte) 6).put((byte) 0).put((byte) 0).put((byte) 0).array());
-        chunk(out, "IDAT", deflate(raw.array()));
-        chunk(out, "IEND", new byte[0]);
-        return out.toByteArray();
-    }
-
-    private static byte[] deflate(byte[] data) {
-        Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
-        deflater.setInput(data);
-        deflater.finish();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] buffer = new byte[8192];
-        while (!deflater.finished()) {
-            out.write(buffer, 0, deflater.deflate(buffer));
-        }
-        deflater.end();
-        return out.toByteArray();
-    }
-
-    private static void chunk(ByteArrayOutputStream out, String kind, byte[] data)
-            throws IOException {
-        byte[] name = kind.getBytes(StandardCharsets.US_ASCII);
-        out.write(ByteBuffer.allocate(4).putInt(data.length).array());
-        out.write(name);
-        out.write(data);
-        CRC32 crc = new CRC32();
-        crc.update(name);
-        crc.update(data);
-        out.write(ByteBuffer.allocate(4).putInt((int) crc.getValue()).array());
     }
 }
