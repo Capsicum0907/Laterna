@@ -309,7 +309,7 @@ none of the others: [Fodina](https://github.com/Capsicum0907/Fodina),
 [Cella](https://github.com/Capsicum0907/Cella),
 [Acervus](https://github.com/Capsicum0907/Acervus),
 [Fornax](https://github.com/Capsicum0907/Fornax),
-[Accumulator](https://github.com/Capsicum0907/Accumulator).
+[Caldarium](https://github.com/Capsicum0907/Caldarium).
 
 Cella already generates its textures from code rather than storing them; this mod
 takes the same approach.
