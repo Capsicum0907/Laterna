@@ -46,6 +46,21 @@ public final class Masters {
     private static final float PANE_LEVEL = 0.62F;
     private static final float PANE_ALPHA = 0.24F;
 
+    /**
+     * Glass with the light in it.
+     *
+     * <p>⚠ <b>Thinner than it looks like it should be.</b> The case of a cased lamp is
+     * a quarter opaque for a reason written down there - stretched over a whole block a
+     * milky film is fog. This is a whole block of the stuff and nothing behind it, so it
+     * can carry a little more and still be a window; much more and a room walled with it
+     * has no outside.
+     */
+    private static final float GLASS_LEVEL = 0.80F;
+    private static final float GLASS_ALPHA = 0.32F;
+
+    /** Its border: solid, and duller than the light it holds, so it reads as the frame. */
+    private static final float GLASS_FRAME = 0.58F;
+
     private static final float FRAME_UNLIT = 0.20F;
     private static final float FACE_UNLIT = 0.34F;
     private static final float FALLOFF_UNLIT = 0.05F;
@@ -99,7 +114,7 @@ public final class Masters {
 
     public static List<Layer> layers(Shape shape) {
         return switch (shape) {
-            case LAMP, ROD -> List.of(Layer.BODY);
+            case LAMP, ROD, GLASS -> List.of(Layer.BODY);
             case SHADE -> List.of(Layer.PLAIN);
             case CASED -> List.of(Layer.BODY, Layer.HALO);
             case BULB -> List.of(Layer.BODY, Layer.EDGE, Layer.HALO);
@@ -134,6 +149,7 @@ public final class Masters {
             // for is the item in your hand, and there is one item whichever way it is
             // wired. Asked for the lit state as well it would hand back the same file.
             case SHADE -> face(false, 1, false);
+            case GLASS -> glass(frame != Frame.NONE);
             // ⚠ A flat colour, with none of the falloff the other faces have. The
             // bar's faces are two pixels by sixteen, and a glow drawn round on a square
             // texture comes out of that as a long white ellipse - which is what it looked
@@ -305,6 +321,37 @@ public final class Masters {
             for (int x = 0; x < Master.SIZE; x++) {
                 master.alpha()[y][x] = 1.0F;
                 master.level()[y][x] = FACE_LIT;
+            }
+        }
+        return master;
+    }
+
+    /**
+     * A pane of glass with the light inside it: see-through, brightest in the middle, in
+     * a solid border or in none.
+     *
+     * <p>⚠ <b>Part-transparent pixels only survive because this one is drawn
+     * translucent.</b> Every other tinted layer here is cutout, which keeps or discards a
+     * pixel and never blends - which is why softening is done in colour throughout the
+     * rest of this file. Glass is the case where the alpha is the point, so its model
+     * asks for the render type that respects it.
+     *
+     * <p>The border is solid where there is one, so that a wall of framed panes is a grid
+     * and a wall of frameless ones is a sheet. That is the whole difference between them,
+     * and it is one branch.
+     */
+    private static Master glass(boolean framed) {
+        Master master = Master.blank();
+        int last = Master.SIZE - 1;
+        for (int y = 0; y < Master.SIZE; y++) {
+            for (int x = 0; x < Master.SIZE; x++) {
+                if (framed && (x == 0 || y == 0 || x == last || y == last)) {
+                    master.alpha()[y][x] = 1.0F;
+                    master.level()[y][x] = GLASS_FRAME;
+                    continue;
+                }
+                master.alpha()[y][x] = GLASS_ALPHA;
+                master.level()[y][x] = GLASS_LEVEL - FALLOFF_LIT * squared(x, y);
             }
         }
         return master;

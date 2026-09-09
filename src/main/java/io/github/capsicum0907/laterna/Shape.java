@@ -3,6 +3,7 @@ package io.github.capsicum0907.laterna;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.DyeColor;
@@ -115,6 +116,25 @@ public enum Shape {
     CASED("cased_lamp", SoundType.GLASS, 0.3F, 16.0, 4.0, Mount.NONE, List.of(Wiring.ALWAYS)),
 
     /**
+     * Glass with the light in the glass, rather than a lamp behind glass.
+     *
+     * <p>The cased lamp is a core inside a cover and reads as a lamp in a case; this is
+     * the cover on its own, glowing, filling its cell. So it is the one form here that is
+     * a building material first: a window that is its own light, a floor you can see
+     * through and stand on in the dark.
+     *
+     * <p><b>The only form that comes in seventeen.</b> Vanilla has glass and sixteen
+     * stained glasses, and this follows it - the clear one is not a colour that was left
+     * out, it is what the others are made from.
+     *
+     * <p>⚠ <b>And the only one offered without a frame.</b> A lamp's border is what stops
+     * a wall of them reading as one wall, which is a thing worth having; a window's border
+     * is the thing you are looking through, and a wall of frameless glass being one sheet
+     * is the whole point of it. {@link Frame#NONE} is offered here and nowhere else.
+     */
+    GLASS("glowing_glass", SoundType.GLASS, 0.3F, 16.0, Mount.NONE, List.of(Wiring.ALWAYS)),
+
+    /**
      * The one form that is not a lamp: it takes light out of the air around it rather
      * than putting any in.
      *
@@ -171,6 +191,10 @@ public enum Shape {
     /** The game's sixteen, which is what most forms come in. */
     private static final List<Optional<DyeColor>> DYES =
             Arrays.stream(DyeColor.values()).map(Optional::of).toList();
+
+    /** The same, with the colourless one in front of them, which is what glass comes in. */
+    private static final List<Optional<DyeColor>> CLEAR_AND_DYES =
+            Stream.concat(Stream.of(Optional.<DyeColor>empty()), DYES.stream()).toList();
 
     Shape(String id, SoundType sound, float strength, double depth, Mount mount,
             List<Wiring> wirings) {
@@ -231,6 +255,7 @@ public enum Shape {
             case ROD -> throw new IllegalStateException("a rod sits against no face");
             case CASED -> throw new IllegalStateException("a cased lamp fills its cell");
             case SHADE -> throw new IllegalStateException("a shade fills its cell");
+            case GLASS -> throw new IllegalStateException("glowing glass fills its cell");
         };
     }
 
@@ -274,6 +299,9 @@ public enum Shape {
             case LAMP, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL ->
                     List.of(Frame.OWN, Frame.BLACK, Frame.WHITE);
             case SPOTLIGHT, BULB, FIXTURE, ROD, CASED, SHADE -> List.of(Frame.OWN);
+            // A border on a window is the thing you are looking through, so this is
+            // the one form where not drawing it is a form of its own.
+            case GLASS -> List.of(Frame.OWN, Frame.NONE);
         };
     }
 
@@ -295,6 +323,9 @@ public enum Shape {
                     ROD, CASED -> DYES;
             // Invisible, so there is nothing for a colour to be.
             case SHADE -> List.of(Optional.empty());
+            // ⚠ Seventeen, and the clear one first: it is not a colour that was left
+            // out, it is the one the other sixteen are dyed from.
+            case GLASS -> CLEAR_AND_DYES;
         };
     }
 
@@ -312,7 +343,7 @@ public enum Shape {
         return switch (this) {
             case LAMP, SPOTLIGHT, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL, BULB, FIXTURE,
                     ROD, CASED -> Optional.of(DyeColor.WHITE);
-            case SHADE -> Optional.empty();
+            case SHADE, GLASS -> Optional.empty();
         };
     }
 
@@ -326,7 +357,14 @@ public enum Shape {
      * painted whatever the default happened to be and nobody would be told.
      */
     public DyeColor plain() {
-        throw new IllegalStateException(this + " comes in colours only");
+        return switch (this) {
+            // Clear glass is white glass with nothing added, which is what the game's own
+            // dyeing recipes say about it.
+            case GLASS -> DyeColor.WHITE;
+            case LAMP, SPOTLIGHT, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL, BULB, FIXTURE,
+                    ROD, CASED, SHADE ->
+                    throw new IllegalStateException(this + " has no colourless form to draw");
+        };
     }
 
     /**
@@ -343,8 +381,8 @@ public enum Shape {
     public boolean stacks() {
         return switch (this) {
             case SLAB, VERTICAL_SLAB -> true;
-            case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD, CASED, SHADE ->
-                    false;
+            case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD, CASED, SHADE,
+                    GLASS -> false;
         };
     }
 
@@ -358,7 +396,8 @@ public enum Shape {
      */
     public Optional<Shape> turned() {
         return switch (this) {
-            case LAMP, SPOTLIGHT, BULB, FIXTURE, ROD, CASED, SHADE -> Optional.empty();
+            case LAMP, SPOTLIGHT, BULB, FIXTURE, ROD, CASED, SHADE, GLASS ->
+                    Optional.empty();
             case SLAB -> Optional.of(VERTICAL_SLAB);
             case VERTICAL_SLAB -> Optional.of(SLAB);
             case PANEL -> Optional.of(VERTICAL_PANEL);

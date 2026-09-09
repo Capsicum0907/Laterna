@@ -267,6 +267,7 @@ public final class LaternaDataGen {
                 case ROD -> rod(shape, skin);
                 case CASED -> cased(shape, skin);
                 case SHADE -> invisible(shape);
+                case GLASS -> pane(skin);
             };
         }
 
@@ -280,6 +281,18 @@ public final class LaternaDataGen {
          * picture of nothing. The builder is fetched by name and the second call gets the
          * first one back, so both states point at the one file.
          */
+        /**
+         * A whole block of glass, drawn translucent.
+         *
+         * <p>⚠ <b>The render type is the point of it.</b> Everything else tinted in this
+         * mod is cutout, which keeps or discards a pixel and never blends; the glass is
+         * the one whose alpha has to survive to the screen.
+         */
+        private ModelFile pane(String skin) {
+            return models().cubeAll(skin, modLoc("block/" + skin))
+                    .renderType("minecraft:translucent");
+        }
+
         private ModelFile invisible(Shape shape) {
             return models().getBuilder(shape.id())
                     .texture("particle", modLoc("block/" + shape.id()));
@@ -663,7 +676,7 @@ public final class LaternaDataGen {
         private void item(Lamp lamp, ModelFile model) {
             switch (lamp.shape()) {
                 // A box has thickness and reads perfectly well held at an angle.
-                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL, FIXTURE, ROD, CASED ->
+                case LAMP, VERTICAL_SLAB, VERTICAL_PANEL, FIXTURE, ROD, CASED, GLASS ->
                         itemModels().withExistingParent(lamp.id(), model.getLocation());
                 case BULB -> itemModels().withExistingParent(lamp.id(),
                         bulb(lamp.skin(true) + "_held", lamp.skin(true),
@@ -739,8 +752,12 @@ public final class LaternaDataGen {
                         case VERTICAL_SLAB -> pair(block,
                                 StatePropertiesPredicate.Builder.properties()
                                         .hasProperty(UprightStackingPlateBlock.DOUBLE, true));
+                        // ⚠ Including the glass, which the game's own does not: vanilla
+                        // glass is a building material you are meant to lose, and this is
+                        // a lamp you can see through. Every other form here drops itself
+                        // and a light that shattered would be the odd one out.
                         case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD, CASED,
-                                SHADE -> createSingleItemTable(block);
+                                SHADE, GLASS -> createSingleItemTable(block);
                     });
                 }
             }
@@ -883,6 +900,26 @@ public final class LaternaDataGen {
                 // in the game absorbs light, so the material is the one that stands for
                 // darkening things - and a recipe that shared the lamp's own ingredients
                 // could not have been told apart from it on the bench.
+                // ⚠ Glowstone dust, and not the block. A ring of glass around a block of
+                // glowstone is already the cased lamp, and two shaped recipes with the
+                // same pattern and the same ingredients are one recipe that hands back
+                // whichever the game happened to load first.
+                //
+                // ⚠ And panes rather than blocks for the frameless one, because the frame
+                // is what the recipe has to be about. Dye says which colour and a single
+                // item is reserved for turning, so neither could also mean "and take the
+                // border off" - the same reasoning that builds a black frame out of
+                // blackstone.
+                case GLASS -> made(output, white, ShapedRecipeBuilder
+                        .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 8)
+                        .pattern("aaa")
+                        .pattern("aba")
+                        .pattern("aaa")
+                        .define('a', white.frame() == Frame.NONE
+                                ? Ingredient.of(Tags.Items.GLASS_PANES)
+                                : Ingredient.of(Tags.Items.GLASS_BLOCKS))
+                        .define('b', Items.GLOWSTONE_DUST),
+                        Items.GLOWSTONE_DUST);
                 case SHADE -> made(output, white, ShapedRecipeBuilder
                         .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 4)
                         .pattern("aba")
@@ -939,6 +976,10 @@ public final class LaternaDataGen {
                 case OWN -> Ingredient.of(Tags.Items.STONES);
                 case BLACK -> Ingredient.of(Items.BLACKSTONE, Items.POLISHED_BLACKSTONE);
                 case WHITE -> Ingredient.of(Items.QUARTZ_BLOCK, Items.SMOOTH_QUARTZ);
+                // ⚠ Nothing, and asked for by mistake if it is ever asked for at all.
+                // Only the glass is offered without a border, and it says which of its
+                // two it is building out of glass rather than out of a framing material.
+                case NONE -> throw new IllegalStateException("a frameless form has no frame");
             };
         }
 

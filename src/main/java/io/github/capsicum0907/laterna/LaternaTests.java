@@ -9,6 +9,7 @@ import java.util.Set;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -37,6 +38,8 @@ public final class LaternaTests {
             new Lamp(Shape.LAMP, Wiring.NORMAL, Frame.OWN, DyeColor.WHITE);
     private static final Lamp INVERTED =
             new Lamp(Shape.LAMP, Wiring.INVERTED, Frame.OWN, DyeColor.WHITE);
+    private static final Lamp CLEAR_GLASS =
+            new Lamp(Shape.GLASS, Wiring.ALWAYS, Frame.OWN, Optional.empty());
     private static final Lamp SHADE =
             new Lamp(Shape.SHADE, Wiring.NORMAL, Frame.OWN, Optional.empty());
     private static final Lamp SHADE_INVERTED =
@@ -512,6 +515,75 @@ public final class LaternaTests {
         if (state.getValue(LampBlock.LIT) != expected) {
             throw new GameTestAssertException(
                     "lamp at " + pos + " should be " + (expected ? "lit" : "dark"));
+        }
+    }
+
+    /**
+     * All thirty-four, framed and not, because the product is the claim.
+     *
+     * <p>The clear one is in here too, and it is the one that would go missing quietly:
+     * it is the only block in the mod whose name has no colour in it and no prefix either,
+     * so a colourless variant that fell out of the product would leave the other sixteen
+     * looking perfectly correct.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void everyGlassIsALight(GameTestHelper helper) {
+        for (Frame frame : Shape.GLASS.frames()) {
+            for (Optional<DyeColor> colour : Shape.GLASS.colours()) {
+                Lamp glass = new Lamp(Shape.GLASS, Wiring.ALWAYS, frame, colour);
+                helper.setBlock(WHERE, LaternaRegistry.block(glass).get());
+                int given = helper.getBlockState(WHERE)
+                        .getLightEmission(helper.getLevel(), helper.absolutePos(WHERE));
+                if (given != 15) {
+                    throw new GameTestAssertException(glass.id() + " gives off " + given);
+                }
+            }
+        }
+        helper.succeed();
+    }
+
+    /** And the light reaches the air, which the one above deliberately does not wait for. */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void glassLightsTheRoom(GameTestHelper helper) {
+        helper.setBlock(WHERE, LaternaRegistry.block(CLEAR_GLASS).get());
+        helper.succeedWhen(() -> brightness(helper, WHERE.above(), 14));
+    }
+
+    /**
+     * It is a window, and being a window is four separate answers.
+     *
+     * <p>⚠ <b>Not checked by looking at the light.</b> The obvious test - light beside it
+     * arrives undiminished - cannot be written: the glass gives off fifteen itself, so its
+     * own cell reads fifteen whatever its opacity is, and the assertion would hold with
+     * the block declared a solid wall. What can be checked is what it answers, and the
+     * answers are asked of the game's own glass rather than written down here, so this
+     * keeps agreeing with vanilla rather than with a copy of vanilla made once.
+     *
+     * <p>Left to the defaults a block that fills its cell says yes to all of these and is
+     * a solid block that happens to be drawn see-through: you would suffocate in it, it
+     * would carry a redstone signal, and it would black out the screen.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void glassAnswersEverythingTheGameOwnGlassAnswers(GameTestHelper helper) {
+        BlockState ours = LaternaRegistry.block(CLEAR_GLASS).get().defaultBlockState();
+        BlockState theirs = Blocks.GLASS.defaultBlockState();
+        helper.setBlock(WHERE, ours);
+        BlockPos at = helper.absolutePos(WHERE);
+        ServerLevel level = helper.getLevel();
+        same(helper, "occludes", ours.canOcclude(), theirs.canOcclude());
+        same(helper, "conducts redstone",
+                ours.isRedstoneConductor(level, at), theirs.isRedstoneConductor(level, at));
+        same(helper, "suffocates",
+                ours.isSuffocating(level, at), theirs.isSuffocating(level, at));
+        same(helper, "blocks the view",
+                ours.isViewBlocking(level, at), theirs.isViewBlocking(level, at));
+        helper.succeed();
+    }
+
+    private static void same(GameTestHelper helper, String what, boolean ours, boolean theirs) {
+        if (ours != theirs) {
+            throw new GameTestAssertException("glowing glass " + what + " = " + ours
+                    + ", the game's own glass says " + theirs);
         }
     }
 

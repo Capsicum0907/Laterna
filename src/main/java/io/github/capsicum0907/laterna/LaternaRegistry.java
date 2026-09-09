@@ -5,12 +5,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -60,11 +63,13 @@ public final class LaternaRegistry {
             // there is nothing for redstone to flip.
             // ⚠ And one switched cube is not a lamp: a shade wires up exactly as a lamp
             // does and spends the state on opacity instead of on brightness.
-            case NONE -> shape == Shape.SHADE
-                    ? properties -> new ShadeBlock(lamp.wiring(), properties)
-                    : shape.switched()
-                            ? properties -> new LampBlock(lamp.wiring(), properties)
-                            : Block::new;
+            case NONE -> switch (shape) {
+                case SHADE -> properties -> new ShadeBlock(lamp.wiring(), properties);
+                case GLASS -> GlowingGlassBlock::new;
+                default -> shape.switched()
+                        ? properties -> new LampBlock(lamp.wiring(), properties)
+                        : Block::new;
+            };
             case ANY -> properties -> new FacePlateBlock(shape, properties);
             case FLAT -> shape.stacks()
                     ? properties -> new StackingPlateBlock(shape, properties)
@@ -102,6 +107,16 @@ public final class LaternaRegistry {
             case NONE -> switch (lamp.shape()) {
                 case CASED -> properties.noOcclusion();
                 case SHADE -> properties.noOcclusion().noCollission();
+                // ⚠ Everything the game says about its own glass, and for the same
+                // reasons: it is not a wall to light, not a wall to redstone, you do not
+                // suffocate in it, you can see out of it, and nothing spawns on it. Left
+                // to the defaults a see-through block is a solid one that happens to be
+                // drawn see-through.
+                case GLASS -> properties.noOcclusion()
+                        .isValidSpawn(LaternaRegistry::never)
+                        .isRedstoneConductor(LaternaRegistry::never)
+                        .isSuffocating(LaternaRegistry::never)
+                        .isViewBlocking(LaternaRegistry::never);
                 default -> properties;
             };
             // A plate is not a cube and must not hide the face behind it. Recessed also
@@ -121,6 +136,17 @@ public final class LaternaRegistry {
                     lamp.shape().stacks() ? properties : properties.noOcclusion();
             case AXIS -> properties.noOcclusion();
         };
+    }
+
+    /** The game's own answer for glass, which it keeps to itself. */
+    private static boolean never(BlockState state, BlockGetter level, BlockPos pos) {
+        return false;
+    }
+
+    /** The same, for the one of these that is asked about an entity as well. */
+    private static boolean never(BlockState state, BlockGetter level, BlockPos pos,
+            EntityType<?> entity) {
+        return false;
     }
 
     /**

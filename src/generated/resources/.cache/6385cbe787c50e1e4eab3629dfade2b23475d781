@@ -1,4 +1,4 @@
-// 1.21.1	2026-09-10T02:20:32.3761863	Tags for minecraft:item mod id laterna
+// 1.21.1	2026-09-10T02:26:02.9664866	Tags for minecraft:item mod id laterna
 6e8abd39f2c38923839ad64e192507376b03266e data/laterna/tags/item/black_framed_inverted_lamps.json
 5a9085cef8de15627310c3b82863974c5ecb51ce data/laterna/tags/item/black_framed_lamps.json
 e5df8bdf26ea0552524c27bd5cb4e032469f53b0 data/laterna/tags/item/black_framed_lamp_panels.json
@@ -8,6 +8,8 @@ e5df8bdf26ea0552524c27bd5cb4e032469f53b0 data/laterna/tags/item/black_framed_lam
 2168dfddeb3612381e2db0f5e75b46da8815e858 data/laterna/tags/item/bulbs.json
 f0a782533ef4815313cf7c3291e286f6bc515e2a data/laterna/tags/item/cased_lamps.json
 867a45a62b68e8790a86bc0ff96ee5b3966388a8 data/laterna/tags/item/fixtures.json
+95cb8ad2523ea371e48795ed9618e77b83a4e2ec data/laterna/tags/item/frameless_glowing_glasses.json
+0b35b722cdcb0a1add904d43852d92e33427bbaf data/laterna/tags/item/glowing_glasses.json
 630b396660158a4437467eeb2b73cdbf7116f8ac data/laterna/tags/item/inverted_lamps.json
 5c6eb452fb9dd240e595d8917fd70f6b7a53e56f data/laterna/tags/item/inverted_shades.json
 5f8bcef9770db299bd52ab8f9d0bedd60fa1f145 data/laterna/tags/item/lamps.json

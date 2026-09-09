@@ -1,12 +1,13 @@
 # Laterna
 
-Lamps, in the sixteen dye colours, in several shapes.
+Lamps, in the sixteen dye colours, in several shapes - and glass that is its own light,
+and one block that takes light away.
 
 *Laterna* is Latin for a lantern.
 
-> **Status: every lamp there is going to be, each framed three ways — 368 blocks — and one
-> block that is not a lamp.** Twenty-three game tests cover what they claim, except where a
-> test cannot reach: see the note under the spotlight.
+> **Status: every lamp there is going to be, each framed three ways — 368 blocks — plus
+> thirty-four glowing glasses and two shades: 404.** Twenty-six game tests cover what they
+> claim, except where a test cannot reach: see the notes under the spotlight and the glass.
 
 ## Target
 
@@ -75,6 +76,7 @@ and mixing the two kinds is what makes a scaffold stall.
 | **Fixture** | **16** | **Done.** A bar on a wall, a disc on a floor |
 | **Rod** | **16** | **Done.** A thin bar running the length of its cell |
 | **Cased lamp** | **16** | **Done.** An opaque core inside a clear case, filling its cell |
+| **Glowing glass** | **34** | **Done.** Seventeen — clear and sixteen — framed and frameless |
 | **Shade** | **2** | **Done.** Not a lamp: it takes light away. Redstone, normal + inverted |
 | ~~*Edge strip*~~ | — | **Not planned.** Asked for and turned down on 2026-08-29 |
 | ~~*Lamp post*~~ | — | **Not planned.** Same |
@@ -221,6 +223,60 @@ blockstate. A game test can assert the block faces up; it cannot assert the plat
 drawn on the floor rather than the ceiling. Invert the `getOpposite()` and every test
 still passes with every light on the wrong surface. That one is checked by looking.
 
+### Glowing glass is the case without the lamp in it
+
+The cased lamp is a core inside a cover and reads as a lamp behind glass. Take the core
+out and light the cover and it is not a lamp any more, it is a **material**: a window that
+is its own light, a floor you can see through and stand on in the dark. That is the one
+form here that is a building block first.
+
+**Seventeen, not sixteen.** Vanilla has glass and sixteen stained glasses, and this follows
+it — the clear one is not a colour that was left out, it is what the other sixteen are dyed
+from. That is `Shape.base()` returning the colourless one rather than white, and it is why
+colour had to become a per-form axis: `Shape.colours()`, asked the same way a form is
+already asked which frames and which wirings it has.
+
+**And the only form offered without a frame.** A lamp's border is what stops a wall of
+them reading as one wall, which is worth having. A window's border *is* the thing you are
+looking through, and a wall of frameless glass being one sheet is the whole point of it.
+`Frame.NONE` is an absence rather than a third colour, it is offered here and nowhere else,
+and it costs one branch in the master: draw the border, or do not.
+
+⚠ **This is the one tinted layer drawn translucent, and the one whose alpha survives.**
+Everything else here is `cutout`, which keeps or discards a pixel and never blends — which
+is why softening is done in colour throughout the rest of the mod. Glass is the case where
+the alpha is the point, so its model asks for the render type that respects it. Its film is
+a little thicker than the cased lamp's cover, which has a lamp behind it to be seen through;
+much thicker and a room walled with this has no outside.
+
+**Two panes of the same glass hide the face between them,** which is what makes a frameless
+wall a sheet rather than a stack of boxes with their insides drawn. That is the whole of
+`GlowingGlassBlock` — the game already does it for its own glass. ⚠ Against the *same*
+block only, as vanilla has it: blue beside white shows both faces, because there are two
+panes there and you can see that there are.
+
+⚠ **Being a window is four separate answers, and the defaults say no to all of them.** A
+block that fills its cell occludes, conducts redstone, suffocates and blocks the view
+unless it says otherwise — a see-through block left alone is a solid one that happens to be
+drawn see-through. The game keeps its answers for glass to itself, so they are written out
+here, and the test asks *vanilla's* glass rather than a copy of its answers.
+
+⚠ **What could not be tested is the obvious thing.** "Light beside it arrives
+undiminished" cannot be asserted: the glass gives off fifteen itself, so its own cell reads
+fifteen whatever its opacity is, and that test would pass with the block declared a solid
+wall. The opacity of a thing that is also a light is not observable from the light.
+
+**It drops itself, which the game's own glass does not.** Vanilla glass is a building
+material you are meant to lose; this is a lamp you can see through, every other form here
+drops itself, and a light that shattered would be the odd one out.
+
+**Its recipe is glass around glowstone *dust*.** ⚠ Not the block — a ring of glass around a
+block of glowstone is already the cased lamp, and two shaped recipes with the same pattern
+and the same ingredients are one recipe that hands back whichever loaded first. The
+frameless one is the same ring built of panes instead of blocks, for the reason the frames
+are told apart by their material: dye already says which colour and a single item is
+reserved for turning, so neither could also mean "and take the border off".
+
 ### The shade takes light away, and cannot do it by being a light
 
 **There is no such thing as a negative light source.** Brightness is an unsigned four-bit
@@ -355,7 +411,11 @@ gradlew runData           # regenerate models, textures, recipes and language
       no colour in its name. Colour became a per-form axis to make room for it — a form is
       asked which colours it comes in, exactly as it is already asked about frames and
       wirings — and the light a block gives off stopped being read off its wiring
-- [ ] **7** — each shape checked by game tests as it lands, rather than by eye
+- [x] **7** — glowing glass: the case of a cased lamp with the lamp taken out, in
+      seventeen — clear and the sixteen dyed from it — and the first form offered without
+      a frame. The first translucent tinted layer in the mod, and the first block that has
+      to answer the four questions that make something a window
+- [ ] **8** — each shape checked by game tests as it lands, rather than by eye
 
 ## Related
 

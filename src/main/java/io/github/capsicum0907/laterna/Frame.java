@@ -24,7 +24,16 @@ public enum Frame {
     /** Fixed black, whatever colour the lamp is. */
     BLACK("black_framed_", "Black-framed ", 0x191919),
     /** Fixed white. */
-    WHITE("white_framed_", "White-framed ", 0xE9ECEC);
+    WHITE("white_framed_", "White-framed ", 0xE9ECEC),
+    /**
+     * No border at all.
+     *
+     * <p>⚠ <b>An absence and not a third colour.</b> The other two paint the border
+     * something the lamp is not; this one does not draw it, so a wall of these is one
+     * sheet rather than a grid. That is only worth having on a form whose border is what
+     * you are looking through - which is why no lamp offers it and the glass does.
+     */
+    NONE("frameless_", "Frameless ");
 
     private final String prefix;
     private final String namePrefix;

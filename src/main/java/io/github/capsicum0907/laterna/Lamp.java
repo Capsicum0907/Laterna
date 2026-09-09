@@ -104,7 +104,10 @@ public record Lamp(Shape shape, Wiring wiring, Frame frame, Optional<DyeColor> c
      * inverted one, without either recipe naming a colour.
      */
     public static String tag(Shape shape, Wiring wiring, Frame frame) {
-        return frame.prefix() + wiring.prefix() + shape.id() + "s";
+        String id = shape.id();
+        // ⚠ Glass is already plural-looking. Left to add an "s" like everything else it
+        // came out as glowing_glasss, which nothing would have complained about.
+        return frame.prefix() + wiring.prefix() + id + (id.endsWith("s") ? "es" : "s");
     }
 
     /**
