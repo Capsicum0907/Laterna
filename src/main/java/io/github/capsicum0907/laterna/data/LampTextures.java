@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.common.hash.Hashing;
@@ -43,8 +44,8 @@ public class LampTextures implements DataProvider {
      * What a layer of a form is called: the lamp's own name for the layer that carries
      * the colour, and the form's name for one that does not.
      */
-    public static String name(Shape shape, Masters.Layer layer, Frame frame, DyeColor colour,
-            boolean lit) {
+    public static String name(Shape shape, Masters.Layer layer, Frame frame,
+            Optional<DyeColor> colour, boolean lit) {
         return (layer.tinted() ? Lamp.skin(shape, frame, colour, lit) : shape.id())
                 + layer.suffix();
     }
@@ -56,11 +57,11 @@ public class LampTextures implements DataProvider {
             for (Masters.Layer layer : Masters.layers(shape)) {
                 for (boolean lit : states(shape)) {
                     if (!layer.tinted()) {
-                        names.add(name(shape, layer, Frame.OWN, DyeColor.WHITE, lit));
+                        names.add(name(shape, layer, Frame.OWN, Optional.empty(), lit));
                         continue;
                     }
                     for (Frame frame : shape.frames()) {
-                        for (DyeColor colour : DyeColor.values()) {
+                        for (Optional<DyeColor> colour : shape.colours()) {
                             names.add(name(shape, layer, frame, colour, lit));
                         }
                     }
@@ -92,7 +93,7 @@ public class LampTextures implements DataProvider {
                     if (!layer.tinted()) {
                         draw(output, writing, Masters.of(shape, layer, lit, Frame.OWN),
                                 Masters.plainColour(), Masters.plainColour(),
-                                name(shape, layer, Frame.OWN, DyeColor.WHITE, lit));
+                                name(shape, layer, Frame.OWN, Optional.empty(), lit));
                         continue;
                     }
                     for (Frame frame : shape.frames()) {
@@ -102,9 +103,8 @@ public class LampTextures implements DataProvider {
                         // frame that has been fixed to black or white rather than left to
                         // follow the lamp. One channel, two uses.
                         int plain = frame.colour().orElse(Masters.plainColour());
-                        for (DyeColor colour : DyeColor.values()) {
-                            draw(output, writing, master,
-                                    colour.getTextureDiffuseColor() & 0xFFFFFF, plain,
+                        for (Optional<DyeColor> colour : shape.colours()) {
+                            draw(output, writing, master, tint(shape, colour), plain,
                                     name(shape, layer, frame, colour, lit));
                         }
                     }
@@ -112,6 +112,18 @@ public class LampTextures implements DataProvider {
             }
         }
         return CompletableFuture.allOf(writing.toArray(CompletableFuture[]::new));
+    }
+
+    /**
+     * The colour a tinted layer is painted with.
+     *
+     * <p>⚠ <b>A colourless form still has to be drawn in something.</b> Having no
+     * colour in its name is not having no picture, so the form is asked what to stand
+     * in - and asked loudly, because a form that grew a colourless variant without
+     * answering that question would otherwise be painted an arbitrary black.
+     */
+    private static int tint(Shape shape, Optional<DyeColor> colour) {
+        return colour.orElseGet(shape::plain).getTextureDiffuseColor() & 0xFFFFFF;
     }
 
     private void draw(CachedOutput output, List<CompletableFuture<?>> writing, Master master,

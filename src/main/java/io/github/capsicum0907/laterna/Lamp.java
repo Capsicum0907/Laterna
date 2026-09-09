@@ -2,6 +2,7 @@ package io.github.capsicum0907.laterna;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import net.minecraft.world.item.DyeColor;
 
@@ -15,8 +16,20 @@ import net.minecraft.world.item.DyeColor;
  * colour names once per form; none of that is here, because none of it is a decision -
  * it is the product, spelled out by hand.
  */
-public record Lamp(Shape shape, Wiring wiring, Frame frame, DyeColor colour) {
+public record Lamp(Shape shape, Wiring wiring, Frame frame, Optional<DyeColor> colour) {
     private static final List<Lamp> ALL = product();
+
+    /**
+     * The same lamp, named by a colour it certainly has.
+     *
+     * <p>Most forms are sixteen of a thing and every one of them has a colour, so
+     * asking each caller to wrap it would put an {@code Optional} in front of a
+     * question that is not open. The canonical constructor is the one that takes the
+     * option, and it is the one the product uses.
+     */
+    public Lamp(Shape shape, Wiring wiring, Frame frame, DyeColor colour) {
+        this(shape, wiring, frame, Optional.of(colour));
+    }
 
     /** Every lamp there is, in the order the creative tab shows them: form, wiring, colour. */
     public static List<Lamp> all() {
@@ -28,7 +41,7 @@ public record Lamp(Shape shape, Wiring wiring, Frame frame, DyeColor colour) {
         for (Shape shape : Shape.values()) {
             for (Frame frame : shape.frames()) {
                 for (Wiring wiring : shape.wirings()) {
-                    for (DyeColor colour : DyeColor.values()) {
+                    for (Optional<DyeColor> colour : shape.colours()) {
                         lamps.add(new Lamp(shape, wiring, frame, colour));
                     }
                 }
@@ -39,7 +52,19 @@ public record Lamp(Shape shape, Wiring wiring, Frame frame, DyeColor colour) {
 
     /** What the block and its item are registered as: {@code inverted_light_blue_lamp}. */
     public String id() {
-        return frame.prefix() + wiring.prefix() + colour.getName() + "_" + shape.id();
+        return frame.prefix() + wiring.prefix() + named(colour) + shape.id();
+    }
+
+    /**
+     * The colour's part of a name, with the underscore that joins it on, or nothing.
+     *
+     * <p>One place, because the id, the texture's name and the tag are all built the
+     * same way and a colourless form has to fall out of all three identically. Written
+     * separately in each, {@code glowing_glass} would have come out as
+     * {@code _glowing_glass} in whichever one was missed.
+     */
+    private static String named(Optional<DyeColor> colour) {
+        return colour.map(dye -> dye.getName() + "_").orElse("");
     }
 
     /**
@@ -58,9 +83,10 @@ public record Lamp(Shape shape, Wiring wiring, Frame frame, DyeColor colour) {
      * that is the whole of what "they look identical" means - so the skin is keyed on
      * the form and the colour only, and the two blocks point at the same two files.
      */
-    public static String skin(Shape shape, Frame frame, DyeColor colour, boolean lit) {
+    public static String skin(Shape shape, Frame frame, Optional<DyeColor> colour,
+            boolean lit) {
         String state = shape.switched() ? (lit ? "_on" : "_off") : "";
-        return frame.prefix() + colour.getName() + "_" + shape.id() + state;
+        return frame.prefix() + named(colour) + shape.id() + state;
     }
 
     public String skin(boolean lit) {
@@ -91,7 +117,8 @@ public record Lamp(Shape shape, Wiring wiring, Frame frame, DyeColor colour) {
      */
     public String displayName() {
         return frame.namePrefix() + wiring.namePrefix()
-                + titleCase(colour.getName()) + " " + titleCase(shape.id());
+                + colour.map(dye -> titleCase(dye.getName()) + " ").orElse("")
+                + titleCase(shape.id());
     }
 
     /** {@code light_blue} to {@code Light Blue}. */

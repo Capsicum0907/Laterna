@@ -8,9 +8,11 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -77,7 +79,9 @@ public final class LaternaRegistry {
      */
     private static BlockBehaviour.Properties properties(Lamp lamp) {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
-                .mapColor(lamp.colour().getMapColor())
+                // A form with no colour in its name has none on a map either, which is
+                // what the game already says about glass.
+                .mapColor(lamp.colour().map(DyeColor::getMapColor).orElse(MapColor.NONE))
                 .strength(lamp.shape().strength())
                 .sound(lamp.shape().sound())
                 .lightLevel(lamp.switched()

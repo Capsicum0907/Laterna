@@ -3,6 +3,7 @@ package io.github.capsicum0907.laterna.data;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -163,7 +164,7 @@ public final class LaternaDataGen {
             Map<String, ModelFile> models = new HashMap<>();
             for (Shape shape : Shape.values()) {
                 for (Frame frame : shape.frames()) {
-                    for (DyeColor colour : DyeColor.values()) {
+                    for (Optional<DyeColor> colour : shape.colours()) {
                         for (boolean lit : new boolean[] { true, false }) {
                             if (!lit && !shape.switched()) {
                                 continue;
@@ -768,12 +769,12 @@ public final class LaternaDataGen {
             for (Shape shape : Shape.values()) {
                 for (Frame frame : shape.frames()) {
                     for (Wiring wiring : shape.wirings()) {
-                        base(output, new Lamp(shape, wiring, frame, DyeColor.WHITE));
+                        base(output, new Lamp(shape, wiring, frame, shape.base()));
                     }
                 }
             }
             for (Lamp lamp : Lamp.all()) {
-                if (lamp.colour() != DyeColor.WHITE) {
+                if (!lamp.colour().equals(lamp.shape().base())) {
                     dyeing(output, lamp);
                 }
                 turning(output, lamp);
@@ -820,7 +821,7 @@ public final class LaternaDataGen {
                         .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 6)
                         .pattern("aaa")
                         .define('a', LaternaRegistry.item(new Lamp(Shape.SLAB,
-                                Wiring.ALWAYS, white.frame(), DyeColor.WHITE)).get()));
+                                Wiring.ALWAYS, white.frame(), Shape.SLAB.base())).get()));
                 // Nothing. A form that stands on its edge is the one that lies down,
                 // turned - see turning() - and giving it a recipe of its own as well would
                 // be two ways to make one thing, drifting apart the first time either
@@ -913,7 +914,7 @@ public final class LaternaDataGen {
                     .pattern("aaa")
                     .define('a',
                             LaternaTags.items(lamp.shape(), lamp.wiring(), lamp.frame()))
-                    .define('b', DyeItem.byColor(lamp.colour()))
+                    .define('b', DyeItem.byColor(lamp.colour().orElseThrow()))
                     .unlockedBy("has_glowstone", has(Items.GLOWSTONE))
                     .save(output, name(lamp));
         }

@@ -1,9 +1,11 @@
 package io.github.capsicum0907.laterna;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.SoundType;
 
 /**
@@ -140,6 +142,10 @@ public enum Shape {
     private final Mount mount;
     private final List<Wiring> wirings;
 
+    /** The game's sixteen, which is what most forms come in. */
+    private static final List<Optional<DyeColor>> DYES =
+            Arrays.stream(DyeColor.values()).map(Optional::of).toList();
+
     Shape(String id, SoundType sound, float strength, double depth, Mount mount,
             List<Wiring> wirings) {
         this(id, sound, strength, depth, 0.0, mount, wirings);
@@ -242,6 +248,55 @@ public enum Shape {
                     List.of(Frame.OWN, Frame.BLACK, Frame.WHITE);
             case SPOTLIGHT, BULB, FIXTURE, ROD, CASED -> List.of(Frame.OWN);
         };
+    }
+
+    /**
+     * The colours this form comes in.
+     *
+     * <p><b>The fourth axis, asked for the same way the other two are.</b> A form says
+     * which frames and which wirings it has; this is the same question about colour, and
+     * it is here rather than in {@link Lamp#all()} so that a form which is not sixteen of
+     * anything costs a line in this enum and nothing anywhere else.
+     *
+     * <p>An empty value is a form with no colour in its name at all - not a colour that
+     * has not been chosen. Everything downstream reads it as "leave the colour out": out
+     * of the id, out of the name, out of the texture's name.
+     */
+    public List<Optional<DyeColor>> colours() {
+        return switch (this) {
+            case LAMP, SPOTLIGHT, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL, BULB, FIXTURE,
+                    ROD, CASED -> DYES;
+        };
+    }
+
+    /**
+     * The one colour of this form that is made out of materials; every other colour is
+     * that one with a dye.
+     *
+     * <p>⚠ <b>An empty value here does not mean "no base".</b> It means the colourless
+     * one is the base - the same reading {@link #colours()} gives an empty value - so a
+     * form whose plain variant is the thing you craft says so by returning empty. Testing
+     * this against a lamp's own colour is therefore {@code equals} on two options and
+     * never a comparison of dyes.
+     */
+    public Optional<DyeColor> base() {
+        return switch (this) {
+            case LAMP, SPOTLIGHT, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL, BULB, FIXTURE,
+                    ROD, CASED -> Optional.of(DyeColor.WHITE);
+        };
+    }
+
+    /**
+     * The dye a colourless variant of this form is drawn in.
+     *
+     * <p>⚠ <b>Having no colour in its name is not having no picture.</b> The masters are
+     * grayscale and every one of them is given a colour before it is written out, so a
+     * form with a colourless variant has to say which - and a form without one has no
+     * answer to give rather than a default, or the first form to grow one would be
+     * painted whatever the default happened to be and nobody would be told.
+     */
+    public DyeColor plain() {
+        throw new IllegalStateException(this + " comes in colours only");
     }
 
     public boolean stacks() {
