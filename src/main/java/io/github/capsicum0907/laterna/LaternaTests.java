@@ -591,6 +591,15 @@ public final class LaternaTests {
      * The whole of what a shade is, in one assertion: a cell that the light next to it
      * does not get into.
      *
+     * <p>⚠ <b>Daylight is the same lever and is not tested here.</b> The sky column asks
+     * {@code ChunkSkyLightSources.isEdgeOccluded}, which reads {@code getLightBlock} - the
+     * value asserted below - so there is nothing separate to switch on. Writing the
+     * assertion anyway is not possible on this stage: the floor of the template is at
+     * {@code y=1}, which is where {@code WHERE} is, so every position these tests use is
+     * inside it and reads nought daylight before anything is placed. The template's sides
+     * are open as well, so a single block overhead never gives nought in the air below it
+     * - it takes a roof. Checked by reading, and by looking.
+     *
      * <p>Glowstone beside it would put fourteen here. It puts nought, because the cell
      * takes the brightest of its neighbours less its own opacity and the opacity is the
      * whole fifteen. Nothing was filled and nothing ticks.

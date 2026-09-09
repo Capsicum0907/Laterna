@@ -19,11 +19,15 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * is the switch on the wall; an inverted one is dark until one does, which is the material
  * you build a windowless room out of.
  *
- * <p><b>The two overrides below have to move together.</b> Block light dies on opacity
- * and sky light dies on opacity <em>and</em> on the straight-down column the game keeps
- * separately, so a shade that reported one and not the other would stop the light from
- * the sides while daylight fell through it at full strength - which looks like nothing
- * being wrong until you put one under the sky.
+ * <p>⚠ <b>Opacity is the only lever, and the obvious second one is not one.</b> Sky light
+ * is kept as a straight-down column of its own, gated on {@code propagatesSkylightDown},
+ * so this block was written overriding that as well - and the override did nothing. In
+ * 1.21.1 the column asks {@code ChunkSkyLightSources.isEdgeOccluded}, which reads
+ * {@code getLightBlock} and never asks about propagation, and the two remaining callers
+ * of {@code propagatesSkylightDown} are the <em>default</em> {@code getLightBlock} - which
+ * a block overriding it never reaches - and whether netherrack under it can be bonemealed.
+ * Overriding it here bought no darkness at all and one silent rule about bone meal.
+ * Establishing that took breaking it on purpose and watching every test still pass.
  */
 public class ShadeBlock extends LampBlock {
     public ShadeBlock(Wiring wiring, Properties properties) {
@@ -47,12 +51,6 @@ public class ShadeBlock extends LampBlock {
     @Override
     protected int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
         return state.getValue(LIT) ? LightEngine.MAX_LEVEL : 0;
-    }
-
-    /** @see #getLightBlock the other half, which this has to agree with */
-    @Override
-    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
-        return !state.getValue(LIT);
     }
 
     @Override

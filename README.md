@@ -302,11 +302,23 @@ that read the level or the position would be computed once at startup against an
 world and then never asked again — it would compile, run, and do nothing. The test that
 switches a shade off and waits for the light to come back is the one that would catch it.
 
-⚠ **Sky light has a second path, and the two answers have to agree.** Blocking it is not
-only opacity: the game keeps a straight-down column of full daylight, gated on
-`propagatesSkylightDown`. A shade that reported one and not the other would stop light from
-the sides while daylight fell through it at full strength, which looks like nothing being
-wrong until you put one under the sky. The two flip together on `LIT`.
+⚠ **Sky light looks like it needs a second lever, and does not.** The game keeps a
+straight-down column of full daylight, gated on `propagatesSkylightDown`, so this block was
+written overriding that as well — and the override did nothing. In 1.21.1 the column asks
+`ChunkSkyLightSources.isEdgeOccluded`, which reads `getLightBlock` and never asks about
+propagation; the only two callers left of `propagatesSkylightDown` are the *default*
+`getLightBlock` — which a block overriding it never reaches — and whether netherrack under
+it can be bonemealed. So the override bought no darkness and one silent rule about bone
+meal, and it is gone. **Establishing that took breaking it on purpose and watching all
+twenty-six tests still pass**, which is the only way that kind of dead lever shows itself.
+
+⚠ **And the daylight half has no test, because the stage cannot host one.** The floor of
+the test template is at `y=1`, which is exactly where the tests put their blocks, so every
+position they use is inside the floor and reads nought daylight before anything is placed
+— the reading that first appeared to prove the point was taken before the light had
+settled. The template's sides are open as well, so one block overhead never gives nought in
+the air beneath it; that takes a roof. Same lever, checked by reading `isEdgeOccluded` and
+by looking.
 
 **It is wired exactly as a lamp is, and it is not a lamp.** `ShadeBlock` is a `LampBlock`,
 so both wirings, being placed already in the right state and answering a neighbour change
