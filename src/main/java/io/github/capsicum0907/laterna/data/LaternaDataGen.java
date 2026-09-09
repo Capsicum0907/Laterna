@@ -33,7 +33,9 @@ import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -264,7 +266,23 @@ public final class LaternaDataGen {
                 case BULB, FIXTURE -> fitting(shape, skin, Direction.NORTH);
                 case ROD -> rod(shape, skin);
                 case CASED -> cased(shape, skin);
+                case SHADE -> invisible(shape);
             };
+        }
+
+        /**
+         * A model with nothing in it, which is what the game asks for when a block is not
+         * drawn: no parent and no elements, and a particle texture so that breaking one
+         * and walking on one still have something to throw.
+         *
+         * <p>⚠ <b>Named for the form and not for the skin it was asked with.</b> A shade
+         * is switched, so it is asked for twice - once lit and once not - and there is one
+         * picture of nothing. The builder is fetched by name and the second call gets the
+         * first one back, so both states point at the one file.
+         */
+        private ModelFile invisible(Shape shape) {
+            return models().getBuilder(shape.id())
+                    .texture("particle", modLoc("block/" + shape.id()));
         }
 
         /**
@@ -667,6 +685,12 @@ public final class LaternaDataGen {
                         .parent(new ModelFile.UncheckedModelFile("item/generated"))
                         .texture("layer0", modLoc("block/" + Shape.SPOTLIGHT.id() + "_ring"))
                         .texture("layer1", modLoc("block/" + lamp.skin(true)));
+                // ⚠ A block that is drawn as nothing still has to be held. Its own model
+                // is empty by design, so the item is the one flat picture the form has,
+                // the same way a plate with no thickness is given one.
+                case SHADE -> itemModels().getBuilder(lamp.id())
+                        .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                        .texture("layer0", modLoc("block/" + Shape.SHADE.id()));
             }
         }
     }
@@ -715,8 +739,8 @@ public final class LaternaDataGen {
                         case VERTICAL_SLAB -> pair(block,
                                 StatePropertiesPredicate.Builder.properties()
                                         .hasProperty(UprightStackingPlateBlock.DOUBLE, true));
-                        case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD, CASED ->
-                                createSingleItemTable(block);
+                        case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD, CASED,
+                                SHADE -> createSingleItemTable(block);
                     });
                 }
             }
@@ -853,6 +877,23 @@ public final class LaternaDataGen {
                         .define('a', Tags.Items.STONES)
                         .define('b', Items.GLOWSTONE));
                 // A lens in a cross of iron, which is the ring of the spotlight opened out.
+                // ⚠ The lamp with the light taken out of it, and it has to read as
+                // that: the same stone frame and the same redstone in the middle telling
+                // the two wirings apart, with an ink sac where the glowstone was. Nothing
+                // in the game absorbs light, so the material is the one that stands for
+                // darkening things - and a recipe that shared the lamp's own ingredients
+                // could not have been told apart from it on the bench.
+                case SHADE -> made(output, white, ShapedRecipeBuilder
+                        .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 4)
+                        .pattern("aba")
+                        .pattern("bcb")
+                        .pattern("aba")
+                        .define('a', framing(white.frame()))
+                        .define('b', Items.INK_SAC)
+                        .define('c', white.wiring() == Wiring.INVERTED
+                                ? Ingredient.of(Items.REDSTONE_TORCH)
+                                : Ingredient.of(Tags.Items.DUSTS_REDSTONE)),
+                        Items.INK_SAC);
                 case FIXTURE -> raw(output, white, ShapedRecipeBuilder
                         .shaped(RecipeCategory.DECORATIONS, LaternaRegistry.item(white).get(), 8)
                         .pattern(" a ")
@@ -902,7 +943,21 @@ public final class LaternaDataGen {
         }
 
         private void raw(RecipeOutput output, Lamp white, ShapedRecipeBuilder builder) {
-            builder.unlockedBy("has_glowstone", has(Items.GLOWSTONE)).save(output, name(white));
+            made(output, white, builder, Items.GLOWSTONE);
+        }
+
+        /**
+         * Saved the same way whatever the pattern was, so the arms above stay patterns.
+         *
+         * <p>⚠ <b>What unlocks a recipe is what it is made of.</b> Every form was made of
+         * glowstone until the shade, which is made of the opposite; leaving the trigger
+         * where it was would have hidden the one recipe in the mod that a player holding
+         * glowstone has no reason to have found.
+         */
+        private void made(RecipeOutput output, Lamp lamp, ShapedRecipeBuilder builder,
+                Item material) {
+            builder.unlockedBy("has_" + BuiltInRegistries.ITEM.getKey(material).getPath(),
+                    has(material)).save(output, name(lamp));
         }
 
         /** Eight of a kind around one dye, the way the game dyes glass. */

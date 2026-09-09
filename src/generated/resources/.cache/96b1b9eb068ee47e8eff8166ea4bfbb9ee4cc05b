@@ -1,4 +1,4 @@
-// 1.21.1	2026-08-29T08:17:56.1660176	Lamp Textures: laterna
+// 1.21.1	2026-09-10T02:20:32.3497584	Lamp Textures: laterna
 9393b558db0a5d7d87a3ae50082e3ed73dc22e37 assets/laterna/textures/block/black_bulb.png
 a3c8a48583e06855d36b077f52bab48f28bfabd4 assets/laterna/textures/block/black_bulb_edge.png
 c59b16083dc94dca254edddfd31872b867a56bd6 assets/laterna/textures/block/black_bulb_halo.png
@@ -425,6 +425,7 @@ bfd1987e328a32c4e6ef842d76859032367b2dd7 assets/laterna/textures/block/red_lamp_
 50264b72c8d383adf291489981c57ba8c9c57894 assets/laterna/textures/block/red_vertical_lamp_panel_edge.png
 7980397c81342d6b7522ec1849fd85869150643d assets/laterna/textures/block/red_vertical_lamp_slab.png
 50264b72c8d383adf291489981c57ba8c9c57894 assets/laterna/textures/block/red_vertical_lamp_slab_edge.png
+45b0db6cabc7a97e48272299ee29409b791f10e1 assets/laterna/textures/block/shade.png
 acfd129952bfe517644068b7721436ed7a4a6bce assets/laterna/textures/block/spotlight_ring.png
 9506f8c0809a27906bda4d6f40efdf092c0e3d62 assets/laterna/textures/block/white_bulb.png
 0246e4d888da1273fcffb8220718778053df13b6 assets/laterna/textures/block/white_bulb_edge.png

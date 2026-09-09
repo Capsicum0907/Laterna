@@ -1,4 +1,4 @@
-// 1.21.1	2026-08-29T08:17:56.1944931	Block States: laterna
+// 1.21.1	2026-09-10T02:20:32.3671214	Block States: laterna
 163b05f018f779c6cf98a36f0ae96ae682309db1 assets/laterna/blockstates/black_bulb.json
 53a2ea587348ccf4fc990d940c4095296ab209a1 assets/laterna/blockstates/black_cased_lamp.json
 82ff556d0d2378c3329730272cb542085d029681 assets/laterna/blockstates/black_fixture.json
@@ -169,6 +169,7 @@ d8e14a384ecde12c9a03922e1172149d4cbba894 assets/laterna/blockstates/inverted_ora
 3984a1404892ca45c07cddaeafa25df5bc28f503 assets/laterna/blockstates/inverted_pink_lamp.json
 9d1fe533159dac84ab14da6525021fe7e55e95ba assets/laterna/blockstates/inverted_purple_lamp.json
 a95128ead88efa51631fecd483a0d062c4b5daa1 assets/laterna/blockstates/inverted_red_lamp.json
+dfacbe37447959a747026311d3f702310b9123e8 assets/laterna/blockstates/inverted_shade.json
 ce6ef5532ed39ecdbc817349d575c6d703e850dc assets/laterna/blockstates/inverted_white_lamp.json
 188a30ca9f0f1841fdd4490c951852c7e0d3a80a assets/laterna/blockstates/inverted_yellow_lamp.json
 812f6c4344410807dcb5d446e351b4f0434bd6a8 assets/laterna/blockstates/light_blue_bulb.json
@@ -251,6 +252,7 @@ deefc57a777a666627270ac003fde50568f2b3e3 assets/laterna/blockstates/red_lamp_sla
 bdfdf20b4701fed2821a41cb391e929a2de6ad15 assets/laterna/blockstates/red_spotlight.json
 0529e497b513f1a944d98a6f3ce8a0d9587f5578 assets/laterna/blockstates/red_vertical_lamp_panel.json
 5bd5e46393c8ba76f64d08860a1608e02b94cab8 assets/laterna/blockstates/red_vertical_lamp_slab.json
+dfacbe37447959a747026311d3f702310b9123e8 assets/laterna/blockstates/shade.json
 1d33809fa587f2ae48eb5022a1186a3ba34b174b assets/laterna/blockstates/white_bulb.json
 0c3e0bbb1f28166c0841e30872e47ad60665920a assets/laterna/blockstates/white_cased_lamp.json
 5550f80a56da4db36bde02e32673581ec572bfd0 assets/laterna/blockstates/white_fixture.json
@@ -789,6 +791,7 @@ c588a5bcadd668cdc56768fde500ef14e274070a assets/laterna/models/block/red_spotlig
 1516a96d1174ef6a748e74a8bb7d839882d21024 assets/laterna/models/block/red_vertical_lamp_panel.json
 96c496d85fee321c0524947a24d993a835b3bc3a assets/laterna/models/block/red_vertical_lamp_slab.json
 469bb94e97dea6f6cd35dc599bbd38198c5ce2ed assets/laterna/models/block/red_vertical_lamp_slab_double.json
+6f68bb059f9579948227ffbc2a2c514f22d06f9b assets/laterna/models/block/shade.json
 226432a19309ce72f16755db52ca9397e7da89fc assets/laterna/models/block/white_bulb.json
 c8df083f2d1afda388be81ebca6f821cb4a078c7 assets/laterna/models/block/white_bulb_body.json
 12bc659c8e1792155222ecd9492d526f8e706138 assets/laterna/models/block/white_bulb_held.json
@@ -1129,6 +1132,7 @@ f9e52d77deb37230d8f7d6fea81bbafb7e1b5f16 assets/laterna/models/item/inverted_mag
 86b4ee7ce52da2e4f7fdd5ce894f3e6cea0d6eb9 assets/laterna/models/item/inverted_pink_lamp.json
 baf0fc16192567095828a608158274ded34d33ac assets/laterna/models/item/inverted_purple_lamp.json
 d7ef59af336aec71c0231faf4965487b75a4cd0c assets/laterna/models/item/inverted_red_lamp.json
+2f352cdc802cd1ffd487657605e8c3848654e714 assets/laterna/models/item/inverted_shade.json
 261ea19cb46f814b8f17f6277c47b170ab70313b assets/laterna/models/item/inverted_white_lamp.json
 14aba850a88f19eb85fff02260c6d3f0094e1742 assets/laterna/models/item/inverted_yellow_lamp.json
 d6955ae091dbb59848a50cdfc0ade07ad67cb8db assets/laterna/models/item/light_blue_bulb.json
@@ -1211,6 +1215,7 @@ ae805e9771dca07c7362de84b55e33c19cd11ba7 assets/laterna/models/item/red_fixture.
 c3611e7014eb637fa7420ed4bd1ea8ac46747d86 assets/laterna/models/item/red_spotlight.json
 072dc697da886eb790b9b155afca9499c95341c5 assets/laterna/models/item/red_vertical_lamp_panel.json
 3d030363005721fd2958cfb1d2b1241ccbd1a0aa assets/laterna/models/item/red_vertical_lamp_slab.json
+2f352cdc802cd1ffd487657605e8c3848654e714 assets/laterna/models/item/shade.json
 9d6634c5371e4c2d6b674cff6412f5ca471454d4 assets/laterna/models/item/white_bulb.json
 73584b0e7ece41e4185b2fe29727f42ac8ca8e42 assets/laterna/models/item/white_cased_lamp.json
 e7ad10cdae9fd87fc0cceb88dccf2c1bd16a974f assets/laterna/models/item/white_fixture.json

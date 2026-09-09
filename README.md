@@ -4,9 +4,9 @@ Lamps, in the sixteen dye colours, in several shapes.
 
 *Laterna* is Latin for a lantern.
 
-> **Status: every form there is going to be, each framed three ways — 368 blocks.** Nineteen game tests
-> cover what they claim, except where a test cannot reach: see the note under the
-> spotlight.
+> **Status: every lamp there is going to be, each framed three ways — 368 blocks — and one
+> block that is not a lamp.** Twenty-three game tests cover what they claim, except where a
+> test cannot reach: see the note under the spotlight.
 
 ## Target
 
@@ -75,6 +75,7 @@ and mixing the two kinds is what makes a scaffold stall.
 | **Fixture** | **16** | **Done.** A bar on a wall, a disc on a floor |
 | **Rod** | **16** | **Done.** A thin bar running the length of its cell |
 | **Cased lamp** | **16** | **Done.** An opaque core inside a clear case, filling its cell |
+| **Shade** | **2** | **Done.** Not a lamp: it takes light away. Redstone, normal + inverted |
 | ~~*Edge strip*~~ | — | **Not planned.** Asked for and turned down on 2026-08-29 |
 | ~~*Lamp post*~~ | — | **Not planned.** Same |
 
@@ -220,6 +221,58 @@ blockstate. A game test can assert the block faces up; it cannot assert the plat
 drawn on the floor rather than the ceiling. Invert the `getOpposite()` and every test
 still passes with every light on the wrong surface. That one is checked by looking.
 
+### The shade takes light away, and cannot do it by being a light
+
+**There is no such thing as a negative light source.** Brightness is an unsigned four-bit
+number — two layers of it, block and sky, stored as nibbles — and light spreads by each
+cell taking the brightest of its neighbours *less its own opacity*. The engine never adds
+and never subtracts; it takes a maximum. An emission of −15 is not darkness, it is read as
+`j > 0` failing and the block not being a light at all.
+
+So the levers are not symmetric: **a source can only add, and a cell can only subtract.**
+The one that takes light away is opacity, and the shade is a cell whose opacity is the
+whole fifteen while it is working. Everything a neighbour sends arrives at nought. A torch
+inside a room built of these lights its own cell and nothing else.
+
+**It is invisible, which is what makes it worth having.** One of these over an opening is a
+room that is dark at noon and still has a view; a cell filled with them is a dark room.
+Which you get is how it was built, not a setting on it — there is no radius anywhere in
+this, nothing is filled in at run time, and there is no block entity.
+
+⚠ **Opacity is kept per block state, and that is the whole reason this costs nothing.**
+The game caches one value per state and compares the two whenever a block changes, so
+flipping `LIT` relights the neighbourhood by itself. It also means the opposite: an opacity
+that read the level or the position would be computed once at startup against an empty
+world and then never asked again — it would compile, run, and do nothing. The test that
+switches a shade off and waits for the light to come back is the one that would catch it.
+
+⚠ **Sky light has a second path, and the two answers have to agree.** Blocking it is not
+only opacity: the game keeps a straight-down column of full daylight, gated on
+`propagatesSkylightDown`. A shade that reported one and not the other would stop light from
+the sides while daylight fell through it at full strength, which looks like nothing being
+wrong until you put one under the sky. The two flip together on `LIT`.
+
+**It is wired exactly as a lamp is, and it is not a lamp.** `ShadeBlock` is a `LampBlock`,
+so both wirings, being placed already in the right state and answering a neighbour change
+at once are inherited and none of it is written twice. What `LIT` means is "working". A
+normal one goes dark when a signal reaches it — the switch on the wall; an inverted one is
+dark until one does, which is the material you build a windowless room out of. ⚠ But how
+bright a block is and how it is wired had been the same question up to here, because every
+form was a light; read the old way, a working shade was the brightest thing in the room.
+That is `Shape.emits()`.
+
+⚠ **A block that is drawn as nothing still has to be findable.** Invisible with no outline,
+one cannot be broken by anyone who has forgotten where it is. The game's own light block
+appears while its item is in your hand, and so does this. Its block model is the empty one
+vanilla uses for the same purpose — no parent, no elements, a particle texture — and the
+picture it has is for the item alone.
+
+**Its recipe is the lamp's with the light taken out of it**: the same stone frame and the
+same redstone in the middle telling the two wirings apart, with an ink sac where the
+glowstone was. Nothing in the game absorbs light, so the material is the one that stands
+for darkening things — and a recipe sharing the lamp's own ingredients could not have been
+told from it on the bench.
+
 ### The frame
 
 A lamp's border is its own colour darkened, which is what keeps sixteen colours looking
@@ -298,7 +351,11 @@ gradlew runData           # regenerate models, textures, recipes and language
       that has a frame. It cost no new drawing — the master already mixes a pixel towards
       a second colour, which is how a spotlight's lens softens onto its ring, and a fixed
       frame is that same channel with the frame colour handed alongside
-- [ ] **6** — each shape checked by game tests as it lands, rather than by eye
+- [x] **6** — the shade: the first block here that is not a lamp, and the first form with
+      no colour in its name. Colour became a per-form axis to make room for it — a form is
+      asked which colours it comes in, exactly as it is already asked about frames and
+      wirings — and the light a block gives off stopped being read off its wiring
+- [ ] **7** — each shape checked by game tests as it lands, rather than by eye
 
 ## Related
 

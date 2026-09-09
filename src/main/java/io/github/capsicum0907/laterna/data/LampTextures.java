@@ -55,11 +55,11 @@ public class LampTextures implements DataProvider {
         List<String> names = new ArrayList<>();
         for (Shape shape : Shape.values()) {
             for (Masters.Layer layer : Masters.layers(shape)) {
+                if (!layer.tinted()) {
+                    names.add(name(shape, layer, Frame.OWN, Optional.empty(), true));
+                    continue;
+                }
                 for (boolean lit : states(shape)) {
-                    if (!layer.tinted()) {
-                        names.add(name(shape, layer, Frame.OWN, Optional.empty(), lit));
-                        continue;
-                    }
                     for (Frame frame : shape.frames()) {
                         for (Optional<DyeColor> colour : shape.colours()) {
                             names.add(name(shape, layer, frame, colour, lit));
@@ -89,13 +89,17 @@ public class LampTextures implements DataProvider {
         List<CompletableFuture<?>> writing = new ArrayList<>();
         for (Shape shape : Shape.values()) {
             for (Masters.Layer layer : Masters.layers(shape)) {
+                // ⚠ One file, drawn once, whatever states the form has. The name of an
+                // untinted layer says nothing about the colour or the switch, so asking
+                // for it per state writes the same bytes to the same path twice - and
+                // lists the name twice to everything that reads skins().
+                if (!layer.tinted()) {
+                    draw(output, writing, Masters.of(shape, layer, true, Frame.OWN),
+                            Masters.plainColour(), Masters.plainColour(),
+                            name(shape, layer, Frame.OWN, Optional.empty(), true));
+                    continue;
+                }
                 for (boolean lit : states(shape)) {
-                    if (!layer.tinted()) {
-                        draw(output, writing, Masters.of(shape, layer, lit, Frame.OWN),
-                                Masters.plainColour(), Masters.plainColour(),
-                                name(shape, layer, Frame.OWN, Optional.empty(), lit));
-                        continue;
-                    }
                     for (Frame frame : shape.frames()) {
                         Master master = Masters.of(shape, layer, lit, frame);
                         // ⚠ The second colour is what a pixel part way onto another

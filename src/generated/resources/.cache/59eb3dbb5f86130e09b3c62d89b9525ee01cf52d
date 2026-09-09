@@ -1,4 +1,4 @@
-// 1.21.1	2026-08-29T08:17:56.1534064	Loot Tables
+// 1.21.1	2026-09-10T02:20:32.341753	Loot Tables
 913470e9833919dd8651842043097d4202be4f52 data/laterna/loot_table/blocks/black_bulb.json
 e34ef27ff2f50204e80be92447b191c2b94f0b98 data/laterna/loot_table/blocks/black_cased_lamp.json
 8c3f516af3262b37a74b5f2edeb9fb5af13ce45e data/laterna/loot_table/blocks/black_fixture.json
@@ -169,6 +169,7 @@ ad1dd1eaa02e58812f5ebab4196840566b603496 data/laterna/loot_table/blocks/inverted
 42924fd2c7e9574bc5082114ffebb75b8264fbf8 data/laterna/loot_table/blocks/inverted_pink_lamp.json
 172f1bfea89900bb00e76d6ddf6ebb2714ced34a data/laterna/loot_table/blocks/inverted_purple_lamp.json
 06195a55693dfb9dbe619dfe28d51bce9933593a data/laterna/loot_table/blocks/inverted_red_lamp.json
+8567780c93d9f093a22671f27e85c8701d2094e5 data/laterna/loot_table/blocks/inverted_shade.json
 0d543085b8515c74e62d8679854cab083571eb91 data/laterna/loot_table/blocks/inverted_white_lamp.json
 b15cfc3370a00defb8f98cd59d5564557fb607f2 data/laterna/loot_table/blocks/inverted_yellow_lamp.json
 e85c213462efaec1ea02647c9c6ac46533733b4e data/laterna/loot_table/blocks/light_blue_bulb.json
@@ -251,6 +252,7 @@ dab0203d929a48a82778669a9a210850db6f7edb data/laterna/loot_table/blocks/red_lamp
 842d7310936b72a62dfd40df2752031a851d538b data/laterna/loot_table/blocks/red_spotlight.json
 d20ff36f24bfde4fd022a79c55b0da4c1d3ccfb2 data/laterna/loot_table/blocks/red_vertical_lamp_panel.json
 5d7d45515c2d602c29b5aec5a98adf138cb887a8 data/laterna/loot_table/blocks/red_vertical_lamp_slab.json
+fe2eb98212afa5b7225c7d6cf4ba82f47197d23a data/laterna/loot_table/blocks/shade.json
 37f61623728a83c6770ec1d2d036d61ebbafdc7e data/laterna/loot_table/blocks/white_bulb.json
 e43f702f8a86b9857ad4fa9bd606a2b0e6a588c2 data/laterna/loot_table/blocks/white_cased_lamp.json
 b6cd698810f481989422527cb8eecd22ec173adf data/laterna/loot_table/blocks/white_fixture.json

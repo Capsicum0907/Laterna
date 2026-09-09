@@ -87,6 +87,11 @@ public final class Masters {
      */
     public record Layer(String suffix, boolean tinted) {
         public static final Layer BODY = new Layer("", true);
+        /**
+         * The body of a form that has no colour to be drawn in, and so needs one file
+         * rather than sixteen. Named for the form, exactly as the ring is.
+         */
+        public static final Layer PLAIN = new Layer("", false);
         public static final Layer RING = new Layer("_ring", false);
         public static final Layer EDGE = new Layer("_edge", true);
         public static final Layer HALO = new Layer("_halo", true);
@@ -95,6 +100,7 @@ public final class Masters {
     public static List<Layer> layers(Shape shape) {
         return switch (shape) {
             case LAMP, ROD -> List.of(Layer.BODY);
+            case SHADE -> List.of(Layer.PLAIN);
             case CASED -> List.of(Layer.BODY, Layer.HALO);
             case BULB -> List.of(Layer.BODY, Layer.EDGE, Layer.HALO);
             case SPOTLIGHT -> List.of(Layer.BODY, Layer.RING);
@@ -123,6 +129,11 @@ public final class Masters {
         boolean fixed = frame.colour().isPresent();
         return switch (shape) {
             case LAMP -> face(lit, 1, fixed);
+            // ⚠ Drawn once, unlit, and never in a colour. Nothing of this is on a block
+            // in the world - a shade is invisible - so the whole of what this picture is
+            // for is the item in your hand, and there is one item whichever way it is
+            // wired. Asked for the lit state as well it would hand back the same file.
+            case SHADE -> face(false, 1, false);
             // ⚠ A flat colour, with none of the falloff the other faces have. The
             // bar's faces are two pixels by sixteen, and a glow drawn round on a square
             // texture comes out of that as a long white ellipse - which is what it looked

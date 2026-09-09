@@ -4,6 +4,7 @@ import io.github.capsicum0907.laterna.data.TestStructures;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import net.minecraft.core.BlockPos;
@@ -36,6 +37,10 @@ public final class LaternaTests {
             new Lamp(Shape.LAMP, Wiring.NORMAL, Frame.OWN, DyeColor.WHITE);
     private static final Lamp INVERTED =
             new Lamp(Shape.LAMP, Wiring.INVERTED, Frame.OWN, DyeColor.WHITE);
+    private static final Lamp SHADE =
+            new Lamp(Shape.SHADE, Wiring.NORMAL, Frame.OWN, Optional.empty());
+    private static final Lamp SHADE_INVERTED =
+            new Lamp(Shape.SHADE, Wiring.INVERTED, Frame.OWN, Optional.empty());
     /** Every form that clings to a face, which is every form the plate tests are about. */
     private static final Shape[] PLATES = { Shape.SPOTLIGHT, Shape.SLAB, Shape.VERTICAL_SLAB,
             Shape.PANEL, Shape.VERTICAL_PANEL, Shape.BULB, Shape.FIXTURE };
@@ -508,6 +513,90 @@ public final class LaternaTests {
             throw new GameTestAssertException(
                     "lamp at " + pos + " should be " + (expected ? "lit" : "dark"));
         }
+    }
+
+    /**
+     * The whole of what a shade is, in one assertion: a cell that the light next to it
+     * does not get into.
+     *
+     * <p>Glowstone beside it would put fourteen here. It puts nought, because the cell
+     * takes the brightest of its neighbours less its own opacity and the opacity is the
+     * whole fifteen. Nothing was filled and nothing ticks.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void aShadeSwallowsTheLightBesideIt(GameTestHelper helper) {
+        helper.setBlock(SOURCE, Blocks.GLOWSTONE);
+        helper.setBlock(WHERE, LaternaRegistry.block(SHADE_INVERTED).get());
+        helper.succeedWhen(() -> {
+            lit(helper, WHERE, true);
+            brightness(helper, WHERE, 0);
+        });
+    }
+
+    /**
+     * And switching it off hands the light back.
+     *
+     * <p>⚠ <b>This is the half that could have been written and never worked.</b> Opacity
+     * is kept per block state, so the game notices that the two states differ and relights
+     * the neighbourhood itself - but only because the answer depends on the state and on
+     * nothing else. An opacity that read the level or the position would be computed once
+     * against an empty world, and this test is what would have caught it.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void switchingAShadeOffGivesTheLightBack(GameTestHelper helper) {
+        helper.setBlock(SOURCE, Blocks.GLOWSTONE);
+        helper.setBlock(WHERE, LaternaRegistry.block(SHADE_INVERTED).get());
+        helper.startSequence()
+                .thenWaitUntil(() -> brightness(helper, WHERE, 0))
+                .thenExecute(() -> helper.setBlock(WHERE.south(), Blocks.REDSTONE_BLOCK))
+                .thenWaitUntil(() -> {
+                    lit(helper, WHERE, false);
+                    brightness(helper, WHERE, 14);
+                })
+                .thenSucceed();
+    }
+
+    /**
+     * The other wiring, which is the switch on the wall rather than the material: dark
+     * only while a signal reaches it.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void aNormalShadeTakesNothingUntilItIsPowered(GameTestHelper helper) {
+        helper.setBlock(SOURCE, Blocks.GLOWSTONE);
+        helper.setBlock(WHERE, LaternaRegistry.block(SHADE).get());
+        helper.startSequence()
+                .thenWaitUntil(() -> {
+                    lit(helper, WHERE, false);
+                    brightness(helper, WHERE, 14);
+                })
+                .thenExecute(() -> helper.setBlock(WHERE.south(), Blocks.REDSTONE_BLOCK))
+                .thenWaitUntil(() -> brightness(helper, WHERE, 0))
+                .thenSucceed();
+    }
+
+    /**
+     * A shade is switched and is not a lamp, which are two different questions.
+     *
+     * <p>The brightness a block gives off used to be read straight off its wiring, and
+     * every form there was gave off light. Read that way a working shade is the brightest
+     * thing in the room.
+     */
+    @GameTest(template = TestStructures.FLOOR)
+    public static void aShadeShinesInNeitherState(GameTestHelper helper) {
+        for (Lamp shade : List.of(SHADE, SHADE_INVERTED)) {
+            for (boolean working : new boolean[] { true, false }) {
+                BlockState state = LaternaRegistry.block(shade).get().defaultBlockState()
+                        .setValue(LampBlock.LIT, working);
+                helper.setBlock(WHERE, state);
+                int given = state.getLightEmission(
+                        helper.getLevel(), helper.absolutePos(WHERE));
+                if (given != 0) {
+                    throw new GameTestAssertException(shade.id() + " working=" + working
+                            + " gives off " + given);
+                }
+            }
+        }
+        helper.succeed();
     }
 
     private static void brightness(GameTestHelper helper, BlockPos pos, int expected) {

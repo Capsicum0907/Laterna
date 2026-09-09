@@ -3,6 +3,7 @@ package io.github.capsicum0907.laterna;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -12,6 +13,8 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -55,9 +58,13 @@ public final class LaternaRegistry {
         return switch (shape.mount()) {
             // ⚠ A cube that is always lit needs no LIT state and so no LampBlock -
             // there is nothing for redstone to flip.
-            case NONE -> shape.switched()
-                    ? properties -> new LampBlock(lamp.wiring(), properties)
-                    : Block::new;
+            // ⚠ And one switched cube is not a lamp: a shade wires up exactly as a lamp
+            // does and spends the state on opacity instead of on brightness.
+            case NONE -> shape == Shape.SHADE
+                    ? properties -> new ShadeBlock(lamp.wiring(), properties)
+                    : shape.switched()
+                            ? properties -> new LampBlock(lamp.wiring(), properties)
+                            : Block::new;
             case ANY -> properties -> new FacePlateBlock(shape, properties);
             case FLAT -> shape.stacks()
                     ? properties -> new StackingPlateBlock(shape, properties)
@@ -84,13 +91,19 @@ public final class LaternaRegistry {
                 .mapColor(lamp.colour().map(DyeColor::getMapColor).orElse(MapColor.NONE))
                 .strength(lamp.shape().strength())
                 .sound(lamp.shape().sound())
-                .lightLevel(lamp.switched()
-                        ? state -> state.getValue(LampBlock.LIT) ? 15 : 0
-                        : state -> 15);
+                .lightLevel(light(lamp));
         return switch (lamp.shape().mount()) {
             // ⚠ A case is see-through, so it must not be treated as a solid wall, but
             // it does fill its cell and is something to walk into.
-            case NONE -> lamp.shape() == Shape.CASED ? properties.noOcclusion() : properties;
+            // ⚠ A shade is neither: it is not a wall and it is not there to walk into.
+            // What stops the light is its opacity, which it answers for itself, so
+            // everything else about it has to say "empty cell" or it would be a pane of
+            // invisible glass in the way.
+            case NONE -> switch (lamp.shape()) {
+                case CASED -> properties.noOcclusion();
+                case SHADE -> properties.noOcclusion().noCollission();
+                default -> properties;
+            };
             // A plate is not a cube and must not hide the face behind it. Recessed also
             // means flush, so the spotlight is nothing to stand on - but a slab is a step
             // and is supposed to be. See PlateBlock.
@@ -108,6 +121,23 @@ public final class LaternaRegistry {
                     lamp.shape().stacks() ? properties : properties.noOcclusion();
             case AXIS -> properties.noOcclusion();
         };
+    }
+
+    /**
+     * How bright a form is, which is not the same question as how it is wired.
+     *
+     * <p>⚠ <b>A switched block is not necessarily a lamp.</b> This used to read the
+     * brightness straight off the wiring, because every form there was gave off light;
+     * a shade is switched and gives off none, and reading its state the old way would
+     * have made the block that takes light away the brightest thing in the room.
+     */
+    private static ToIntFunction<BlockState> light(Lamp lamp) {
+        if (!lamp.shape().emits()) {
+            return state -> 0;
+        }
+        return lamp.switched()
+                ? state -> state.getValue(LampBlock.LIT) ? LightEngine.MAX_LEVEL : 0
+                : state -> LightEngine.MAX_LEVEL;
     }
 
     /**

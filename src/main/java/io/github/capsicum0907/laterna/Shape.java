@@ -112,7 +112,33 @@ public enum Shape {
      * and the same nesting vanilla's beacon uses. Always lit, and the only cube here that
      * is not the plain one.
      */
-    CASED("cased_lamp", SoundType.GLASS, 0.3F, 16.0, 4.0, Mount.NONE, List.of(Wiring.ALWAYS));
+    CASED("cased_lamp", SoundType.GLASS, 0.3F, 16.0, 4.0, Mount.NONE, List.of(Wiring.ALWAYS)),
+
+    /**
+     * The one form that is not a lamp: it takes light out of the air around it rather
+     * than putting any in.
+     *
+     * <p><b>There is no such thing as a negative light source.</b> Brightness is an
+     * unsigned four-bit number and light spreads by each cell taking the brightest of its
+     * neighbours less its own opacity, so a source can only add and a cell can only
+     * subtract. The lever that takes light away is therefore opacity and never emission,
+     * and this form is a cell whose opacity is the whole fifteen while it is working:
+     * every neighbour's light arrives at nought, and a torch inside a room built of these
+     * lights its own cell and nothing else.
+     *
+     * <p><b>Invisible, and so it is glass to look through and a wall to light.</b> One
+     * of these over an opening is a room that is dark at noon and still has a view; a cell
+     * filled with them is a dark room. Which of the two you get is how it is built and not
+     * a setting on it.
+     *
+     * <p>⚠ <b>Opacity is cached per block state, which is what makes this cost nothing.</b>
+     * The game keeps one value per state and compares the two when a block changes, so
+     * flipping {@code LIT} relights the neighbourhood by itself - no block entity, no
+     * ticking, and nothing filling a radius. An opacity that varied by position instead
+     * would be read once at startup and quietly ignored.
+     */
+    SHADE("shade", SoundType.WOOL, 0.3F, 16.0, Mount.NONE,
+            List.of(Wiring.NORMAL, Wiring.INVERTED));
 
     /**
      * How a form meets the block it is put against, which decides what states it keeps
@@ -204,6 +230,7 @@ public enum Shape {
             // up would put a rod-shaped hole in whatever asked.
             case ROD -> throw new IllegalStateException("a rod sits against no face");
             case CASED -> throw new IllegalStateException("a cased lamp fills its cell");
+            case SHADE -> throw new IllegalStateException("a shade fills its cell");
         };
     }
 
@@ -246,7 +273,7 @@ public enum Shape {
         return switch (this) {
             case LAMP, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL ->
                     List.of(Frame.OWN, Frame.BLACK, Frame.WHITE);
-            case SPOTLIGHT, BULB, FIXTURE, ROD, CASED -> List.of(Frame.OWN);
+            case SPOTLIGHT, BULB, FIXTURE, ROD, CASED, SHADE -> List.of(Frame.OWN);
         };
     }
 
@@ -266,6 +293,8 @@ public enum Shape {
         return switch (this) {
             case LAMP, SPOTLIGHT, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL, BULB, FIXTURE,
                     ROD, CASED -> DYES;
+            // Invisible, so there is nothing for a colour to be.
+            case SHADE -> List.of(Optional.empty());
         };
     }
 
@@ -283,6 +312,7 @@ public enum Shape {
         return switch (this) {
             case LAMP, SPOTLIGHT, SLAB, VERTICAL_SLAB, PANEL, VERTICAL_PANEL, BULB, FIXTURE,
                     ROD, CASED -> Optional.of(DyeColor.WHITE);
+            case SHADE -> Optional.empty();
         };
     }
 
@@ -299,10 +329,22 @@ public enum Shape {
         throw new IllegalStateException(this + " comes in colours only");
     }
 
+    /**
+     * Whether this form is a light.
+     *
+     * <p>Every form was one until {@link #SHADE}, which is why the brightness a block
+     * gives off used to be read straight off its wiring. The two questions are not the
+     * same: a shade is switched, and what its switch turns on is the taking away.
+     */
+    public boolean emits() {
+        return this != SHADE;
+    }
+
     public boolean stacks() {
         return switch (this) {
             case SLAB, VERTICAL_SLAB -> true;
-            case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD, CASED -> false;
+            case LAMP, SPOTLIGHT, PANEL, VERTICAL_PANEL, BULB, FIXTURE, ROD, CASED, SHADE ->
+                    false;
         };
     }
 
@@ -316,7 +358,7 @@ public enum Shape {
      */
     public Optional<Shape> turned() {
         return switch (this) {
-            case LAMP, SPOTLIGHT, BULB, FIXTURE, ROD, CASED -> Optional.empty();
+            case LAMP, SPOTLIGHT, BULB, FIXTURE, ROD, CASED, SHADE -> Optional.empty();
             case SLAB -> Optional.of(VERTICAL_SLAB);
             case VERTICAL_SLAB -> Optional.of(SLAB);
             case PANEL -> Optional.of(VERTICAL_PANEL);

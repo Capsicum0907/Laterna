@@ -1,4 +1,4 @@
-// 1.21.1	2026-08-29T08:19:21.00512	Recipes
+// 1.21.1	2026-09-10T02:20:32.3547587	Recipes
 c18f4f9b6cc07c2c39326a69b24cd0c07cafa854 data/laterna/advancement/recipes/decorations/black_bulb.json
 73447cfceba04df1c42118c5e95c5ef5cb4737f4 data/laterna/advancement/recipes/decorations/black_cased_lamp.json
 6f3815cbf9d5c3dca63506e599c2fa8418f1d907 data/laterna/advancement/recipes/decorations/black_fixture.json
@@ -255,6 +255,7 @@ ea41730374f696ae9ea2ee5f6ba23ba89edef477 data/laterna/advancement/recipes/decora
 c4349d62661aad7e184fa41359b3324764a5c4ab data/laterna/advancement/recipes/decorations/inverted_pink_lamp.json
 26ff9f1550c46e1e9f657ef0e5b5459d2fb52f91 data/laterna/advancement/recipes/decorations/inverted_purple_lamp.json
 f6edeeffe52cc3df272c1098f56907dca7b85809 data/laterna/advancement/recipes/decorations/inverted_red_lamp.json
+dac3edb31f6b83a9162eb10067455fec7ba40095 data/laterna/advancement/recipes/decorations/inverted_shade.json
 3f24d7ea779f7413716333f806b9045530a9a7f5 data/laterna/advancement/recipes/decorations/inverted_white_lamp.json
 dbfcfb5eb8d75c96f2bf45e875584fb9beac1ddd data/laterna/advancement/recipes/decorations/inverted_yellow_lamp.json
 f54d5dc0bdf95dab71d9b771e9ba56acea0194d6 data/laterna/advancement/recipes/decorations/light_blue_bulb.json
@@ -369,6 +370,7 @@ d6cfad9d52c5a9058d563bc005bc244e3b2519c1 data/laterna/advancement/recipes/decora
 4c0e60c67b4f083af3291bd48f3f00607145abda data/laterna/advancement/recipes/decorations/red_vertical_lamp_panel_from_turning.json
 acd429304a84446077d986affa6bfb97a740c4e8 data/laterna/advancement/recipes/decorations/red_vertical_lamp_slab.json
 033d22d81f147366fbbeb3b6a3a79584a9d12af0 data/laterna/advancement/recipes/decorations/red_vertical_lamp_slab_from_turning.json
+fc7088089ea66562f0ce60d643c498a9747dffbc data/laterna/advancement/recipes/decorations/shade.json
 d01a0589f210bc3ec598a64cb66844cea6568a88 data/laterna/advancement/recipes/decorations/white_bulb.json
 0f725c85848dc2b378017eb47062c777d595968a data/laterna/advancement/recipes/decorations/white_cased_lamp.json
 4a377cfd70d60d1e94db05532cf0fc7be0a549a3 data/laterna/advancement/recipes/decorations/white_fixture.json
@@ -809,6 +811,7 @@ bd44cbee3dd39d0d7abd88fb3d2a25c1cc8a6bce data/laterna/recipe/inverted_orange_lam
 a969cddfcff425692fc84afb023e6906ee327dbd data/laterna/recipe/inverted_pink_lamp.json
 5b10f3d5f7fa5448dea0f873ab5957475bb0f605 data/laterna/recipe/inverted_purple_lamp.json
 019478948bc9a1eb03148d9c2c1825ee5f03494e data/laterna/recipe/inverted_red_lamp.json
+d43d5e00ca47ba6cf010fa049232e647d947a2fe data/laterna/recipe/inverted_shade.json
 983a1d0c22b0b3702660c139f9db003a9aa4975a data/laterna/recipe/inverted_white_lamp.json
 1ee8fc824afed165ca0e924c978895b9074f1923 data/laterna/recipe/inverted_yellow_lamp.json
 1ab6013f691079386a999f777a0f51993daf60ae data/laterna/recipe/light_blue_bulb.json
@@ -923,6 +926,7 @@ c093f9973c4d69a9bea54e6367f11cea6eacf8db data/laterna/recipe/red_vertical_lamp_p
 02b8b059d640490cdcec2530c04a36502182d2bd data/laterna/recipe/red_vertical_lamp_panel_from_turning.json
 01dcf82a636d464f778d178e37b68937fcce00a7 data/laterna/recipe/red_vertical_lamp_slab.json
 992bdc071a1a06fa0ba4ef6cd3445357ff603ecb data/laterna/recipe/red_vertical_lamp_slab_from_turning.json
+fa300d407a13a315363ed3769d3c1af9b73dd1a5 data/laterna/recipe/shade.json
 4bbdee30db7ba7c091d26cbdb7acdc40a1d25fb5 data/laterna/recipe/white_bulb.json
 5fafe437cb5d0da7e56761306bd585ad0e083579 data/laterna/recipe/white_cased_lamp.json
 ef38cba2598fa71a739dcc52beb1c3bd452c1a66 data/laterna/recipe/white_fixture.json
