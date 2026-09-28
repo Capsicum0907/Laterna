@@ -57,3 +57,17 @@ The same six seen from over the top. A fixed frame is the whole block's frame, s
 Panels above and slabs below, each in the three frames. Horizontal and vertical are separate blocks, and one crafts into the other.
 
 上がパネル、下がハーフブロック。それぞれ3種類の枠です。横向きと縦向きは別のブロックで、相互に変換できます。
+
+## 09-glowing-glass.png
+**Glowing glass**
+
+Framed on the left, frameless on the right. The frameless one has no border of its own, so a wall of it is one sheet rather than a grid.
+
+左が枠つき、右が枠なし。枠なしは縁が無いので、並べると格子ではなく1枚の面になります。
+
+## 10-the-shade.png
+**The shade**
+
+A torch at night with shades around it. Nothing is drawn where they are; the light simply does not reach past them.
+
+夜の松明の周りにシェードを置いたところ。シェードは何も描かれず、光がそこから先へ届かなくなります。
