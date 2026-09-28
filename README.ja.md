@@ -13,6 +13,13 @@
 - 色は染料の色なので、同じ名前の羊毛・コンクリート・テラコッタと並べても揃います。
 - 染料1個で同じ種類のランプ8個を染められます。
 
+## スクリーンショット
+
+![スポットライト・電球・照明器具・棒とケース入りランプ](branding/gallery/01-the-smaller-forms.png)
+
+他の絵は [branding/gallery](branding/gallery) にあります。説明は
+[captions.md](branding/gallery/captions.md) です。
+
 ## 対象
 
 | | |

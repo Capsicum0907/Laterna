@@ -17,6 +17,13 @@ light and one block that takes light away. Lit, they give off light level 15.
   concrete and terracotta of the same name.
 - One dye colours eight lamps of a kind at a time.
 
+## Screenshots
+
+![The smaller forms](branding/gallery/01-the-smaller-forms.png)
+
+The rest are in [branding/gallery](branding/gallery), with their captions in
+[captions.md](branding/gallery/captions.md).
+
 ## Target
 
 | | |
