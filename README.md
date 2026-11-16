@@ -35,13 +35,22 @@ The rest are in [branding/gallery](branding/gallery), with their captions in
 ## Build
 
 ```
-run.bat                   # compile and launch a dev client
-gradlew build             # produce the jar
-gradlew runGameTestServer # run every game test, headless, then exit
+run.bat                   # compile and launch a dev client for the active node
+gradlew build             # produce a jar for every node
+gradlew runGameTestServer # run every game test on every node, headless, then exit
 gradlew runData           # regenerate models, textures, recipes and language
 ```
 
-`JAVA_HOME` must point at a JDK 21, or `java` must be on `PATH`.
+Each Minecraft version and loader pair is a [Stonecutter](https://stonecutter.kikugie.dev/)
+node, listed in `settings.gradle.kts` and given its own folder under `versions/`. A node's jar
+is written to `versions/<node>/build/libs/`. The active node, named in `stonecutter.gradle.kts`,
+is the one `run.bat` launches and the one the source tree shows.
+
+`runData` runs on the 1.21.1 NeoForge node only. The other nodes convert its output to their
+own format when they build.
+
+`JAVA_HOME` must point at a JDK 21, or `java` must be on `PATH`. Gradle fetches the older JDKs
+the other nodes compile against.
 
 ## Design
 

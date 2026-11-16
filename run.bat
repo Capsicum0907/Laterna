@@ -2,7 +2,7 @@
 rem Compile the mod and launch a dev Minecraft client with it loaded.
 rem Safe to double-click: it runs from its own directory and pauses on failure.
 rem Extra arguments are passed straight to Gradle, e.g.  run.bat --info
-rem Versions and the mod id are not set here - they live in gradle.properties.
+rem Versions and the mod id are not set here - they live in settings.gradle.kts and the gradle.properties files.
 
 setlocal
 cd /d "%~dp0"
@@ -17,7 +17,8 @@ where java >nul 2>&1
 if errorlevel 1 goto :nojava
 
 :run
-call "%~dp0gradlew.bat" runClient %*
+for /f tokens^=2^ delims^=^" %%a in ('findstr /b /c:"stonecutter active" "%~dp0stonecutter.gradle.kts"') do set NODE=%%a
+call "%~dp0gradlew.bat" :%NODE%:runClient %*
 set EXITCODE=%ERRORLEVEL%
 if not "%EXITCODE%"=="0" goto :failed
 exit /b 0

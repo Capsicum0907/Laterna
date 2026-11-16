@@ -31,13 +31,22 @@
 ## ビルド
 
 ```
-run.bat                   # コンパイルして開発クライアントを起動
-gradlew build             # jar を作る
-gradlew runGameTestServer # ゲームテストを実行
+run.bat                   # コンパイルして、選択中のノードの開発クライアントを起動
+gradlew build             # すべてのノードの jar を作る
+gradlew runGameTestServer # すべてのノードでゲームテストを実行
 gradlew runData           # ブロックステート・モデル・テクスチャ・レシピ・言語ファイルを作り直す
 ```
 
-`JAVA_HOME` が JDK 21 を指しているか `java` が `PATH` にある必要があります。
+Minecraft のバージョンとローダーの組み合わせごとに、[Stonecutter](https://stonecutter.kikugie.dev/)
+のノードが1つあります。ノードの一覧は `settings.gradle.kts` にあり、それぞれ `versions/` の下に
+フォルダを持ちます。jar は `versions/<ノード>/build/libs/` にできます。選択中のノードは
+`stonecutter.gradle.kts` に書いてあり、`run.bat` が起動するのも、ソースに表示されるのもこのノードです。
+
+`runData` は 1.21.1 の NeoForge のノードでだけ動きます。他のノードは、ビルドのときにその出力を
+自分の形式に変換します。
+
+`JAVA_HOME` が JDK 21 を指しているか `java` が `PATH` にある必要があります。他のノードが使う
+古い JDK は Gradle が取ってきます。
 
 ## 設計
 
