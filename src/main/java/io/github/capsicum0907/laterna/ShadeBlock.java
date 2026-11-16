@@ -49,12 +49,12 @@ public class ShadeBlock extends LampBlock {
      * neighbourhood for us.
      */
     @Override
-    protected int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
+    public int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
         return state.getValue(LIT) ? LightEngine.MAX_LEVEL : 0;
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.INVISIBLE;
     }
 
@@ -67,7 +67,7 @@ public class ShadeBlock extends LampBlock {
      * they are gone; take one out of your pocket and the wall is there again.
      */
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos,
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos,
             CollisionContext context) {
         return context.isHoldingItem(asItem()) ? Shapes.block() : Shapes.empty();
     }

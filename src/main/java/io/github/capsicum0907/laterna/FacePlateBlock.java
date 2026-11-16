@@ -95,14 +95,14 @@ public class FacePlateBlock extends PlateBlock {
      * time.
      */
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         Direction against = against(facing(state));
         BlockPos support = pos.relative(against);
         return level.getBlockState(support).isFaceSturdy(level, support, against.getOpposite());
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbour,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbour,
             LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
         if (direction == against(facing(state)) && !canSurvive(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();
@@ -111,12 +111,12 @@ public class FacePlateBlock extends PlateBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         return state.setValue(FACING, mirror.mirror(state.getValue(FACING)));
     }
 }

@@ -78,12 +78,12 @@ public class FlatPlateBlock extends PlateBlock {
 
     /** Turning the world does not turn something that only knows up from down. */
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         return state;
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         return state;
     }
 }

@@ -56,14 +56,14 @@ public class UprightStackingPlateBlock extends UprightPlateBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos,
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos,
             CollisionContext context) {
         return whole(state) ? Shapes.block() : super.getShape(state, level, pos, context);
     }
 
     /** @see StackingPlateBlock the reason a stacked plate is the one that stops light */
     @Override
-    protected boolean useShapeForLightOcclusion(BlockState state) {
+    public boolean useShapeForLightOcclusion(BlockState state) {
         return !whole(state);
     }
 
@@ -78,7 +78,7 @@ public class UprightStackingPlateBlock extends UprightPlateBlock {
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
+    public boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
         ItemStack held = context.getItemInHand();
         if (whole(state) || !held.is(asItem())) {
             return false;

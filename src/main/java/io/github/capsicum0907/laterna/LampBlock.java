@@ -63,7 +63,7 @@ public class LampBlock extends Block {
      * {@link #lit} rather than around it.
      */
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbour,
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbour,
             BlockPos from, boolean moving) {
         if (level.isClientSide) {
             return;

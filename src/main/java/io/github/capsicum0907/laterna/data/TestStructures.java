@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import com.google.common.hash.Hashing;
 
 import io.github.capsicum0907.laterna.Laterna;
+import io.github.capsicum0907.laterna.LaternaTests;
 
 import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
@@ -34,9 +35,6 @@ import net.minecraft.resources.ResourceLocation;
  * to do with the lamp.
  */
 public class TestStructures implements DataProvider {
-    /** Referenced by {@code @GameTest(template = ...)}. */
-    public static final String FLOOR = "floor";
-
     private static final int WIDTH = 9;
     private static final int HEIGHT = 5;
     private static final String FLOOR_BLOCK = "minecraft:deepslate";
@@ -55,7 +53,7 @@ public class TestStructures implements DataProvider {
 
     @Override
     public CompletableFuture<?> run(CachedOutput output) {
-        Path target = path.file(ResourceLocation.fromNamespaceAndPath(Laterna.MODID, FLOOR), "nbt");
+        Path target = path.file(ResourceLocation.fromNamespaceAndPath(Laterna.MODID, LaternaTests.FLOOR), "nbt");
         return CompletableFuture.runAsync(() -> write(output, floor(), target),
                 Util.backgroundExecutor());
     }

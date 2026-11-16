@@ -1,6 +1,5 @@
 package io.github.capsicum0907.laterna;
 
-import io.github.capsicum0907.laterna.data.TestStructures;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,8 +19,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.VoxelShape;
+//? if neoforge {
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+//?} else {
+/*import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
+*///?}
 
 /**
  * What the two wirings are supposed to be, checked in a world rather than by reading.
@@ -31,6 +35,8 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder(Laterna.MODID)
 @PrefixGameTestTemplate(false)
 public final class LaternaTests {
+    public static final String FLOOR = "floor";
+
     private static final BlockPos WHERE = new BlockPos(4, 1, 4);
     private static final BlockPos SOURCE = WHERE.north();
 
@@ -52,7 +58,7 @@ public final class LaternaTests {
     }
 
     /** Put down with nothing near it, a normal lamp is dark and gives off nothing. */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void normalStartsDark(GameTestHelper helper) {
         helper.setBlock(WHERE, LaternaRegistry.block(NORMAL).get());
         helper.succeedWhen(() -> {
@@ -67,7 +73,7 @@ public final class LaternaTests {
      * <p>This is the whole of what the second block is for, and the reason it has to be a
      * second block rather than a state on the first.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void invertedStartsLit(GameTestHelper helper) {
         helper.setBlock(WHERE, LaternaRegistry.block(INVERTED).get());
         helper.succeedWhen(() -> {
@@ -77,7 +83,7 @@ public final class LaternaTests {
     }
 
     /** A signal lights a normal lamp. */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void powerLightsNormal(GameTestHelper helper) {
         helper.setBlock(WHERE, LaternaRegistry.block(NORMAL).get());
         helper.setBlock(SOURCE, Blocks.REDSTONE_BLOCK);
@@ -88,7 +94,7 @@ public final class LaternaTests {
     }
 
     /** The same signal puts an inverted one out, which is the only difference between them. */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void powerDarkensInverted(GameTestHelper helper) {
         helper.setBlock(WHERE, LaternaRegistry.block(INVERTED).get());
         helper.setBlock(SOURCE, Blocks.REDSTONE_BLOCK);
@@ -104,7 +110,7 @@ public final class LaternaTests {
      * the state went with the block, not with the item. That is why "inverted" is a
      * property of which block it is and cannot be a property of a lamp's state.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void breakingForgetsBeingSwitched(GameTestHelper helper) {
         helper.setBlock(WHERE, LaternaRegistry.block(INVERTED).get());
         helper.setBlock(SOURCE, Blocks.REDSTONE_BLOCK);
@@ -129,7 +135,7 @@ public final class LaternaTests {
      * already had, would show up here and nowhere else - the four tests above would pass
      * on white alone.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void everyColourLights(GameTestHelper helper) {
         for (DyeColor colour : DyeColor.values()) {
             BlockPos at = new BlockPos(colour.getId() % 8, 1 + colour.getId() / 8, 0);
@@ -157,7 +163,7 @@ public final class LaternaTests {
      * air around it: one is true the moment the block exists and the other takes a tick to
      * spread. That it spreads at all is {@link #aPlateLightsTheRoom}.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void platesLightInEveryDirectionTheyHave(GameTestHelper helper) {
         for (Shape shape : PLATES) {
             PlateBlock plate = plate(shape);
@@ -178,7 +184,7 @@ public final class LaternaTests {
     }
 
     /** And the light does reach the air, which the one above deliberately does not wait for. */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void aPlateLightsTheRoom(GameTestHelper helper) {
         put(helper, plate(Shape.SPOTLIGHT), Direction.UP);
         helper.succeedWhen(() -> brightness(helper, WHERE.above(), 14));
@@ -190,7 +196,7 @@ public final class LaternaTests {
      * two blocks rather than one, and it is what lets each be placed the way its own
      * shape is expected to be.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void eachFormIsMountedItsOwnWay(GameTestHelper helper) {
         for (Shape shape : PLATES) {
             Collection<Direction> facings = plate(shape).facings();
@@ -221,7 +227,7 @@ public final class LaternaTests {
      * shape now come from the same {@link PlateBlock#against}, so a mistake there moves
      * both together instead of pulling them apart.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void plateOutlinesAreWhereThePlatesAre(GameTestHelper helper) {
         for (Shape shape : PLATES) {
             PlateBlock plate = plate(shape);
@@ -254,7 +260,7 @@ public final class LaternaTests {
      * to stand on: recessed means flush, so the spotlight has no collision at all, while
      * a slab is a step and a bulb is something to bump into.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void onlyTheRecessedOneIsNotAStep(GameTestHelper helper) {
         BlockPos absolute = helper.absolutePos(WHERE);
         for (Shape shape : PLATES) {
@@ -274,7 +280,7 @@ public final class LaternaTests {
     }
 
     /** Placed in water they hold the water, rather than leaving a bubble in it. */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void platesHoldWater(GameTestHelper helper) {
         for (Shape shape : PLATES) {
             PlateBlock plate = plate(shape);
@@ -298,7 +304,7 @@ public final class LaternaTests {
      * is a thing in its own right, and pulling the block behind one is not a reason for it
      * to go.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void onlyTheRecessedOneFallsWithItsWall(GameTestHelper helper) {
         for (Shape shape : PLATES) {
             PlateBlock plate = plate(shape);
@@ -347,7 +353,7 @@ public final class LaternaTests {
      * gives back the pair - writing the ordinary one would quietly halve what a doubled
      * slab is worth.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void stackedSlabsFillTheirCell(GameTestHelper helper) {
         for (Shape shape : STACKING) {
             PlateBlock plate = plate(shape);
@@ -375,7 +381,7 @@ public final class LaternaTests {
      * looking at the far side: the number is the thing that decides it, and a probe in an
      * open room measures how light goes round a wall as much as through it.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void onlyAStackedSlabStopsLight(GameTestHelper helper) {
         BlockPos absolute = helper.absolutePos(WHERE);
         for (Shape shape : STACKING) {
@@ -401,7 +407,7 @@ public final class LaternaTests {
      * north and south, or east and west - and the model is chosen from the facing. Losing
      * the facing when the second one goes in would turn every stacked wall the same way.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void aStandingPairRemembersItsAxis(GameTestHelper helper) {
         PlateBlock plate = plate(Shape.VERTICAL_SLAB);
         for (Direction facing : plate.facings()) {
@@ -426,7 +432,7 @@ public final class LaternaTests {
      * of the whole sixteen, so that pointing anywhere near one caught it. Whether the
      * number is the right one is settled by looking, like the rotation table.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void anOutlineIsNoWiderThanItsLamp(GameTestHelper helper) {
         for (Shape shape : PLATES) {
             PlateBlock plate = plate(shape);
@@ -459,7 +465,7 @@ public final class LaternaTests {
      * than as one line - which is the only reason to have a strip light rather than more
      * fittings.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void aRodRunsTheLengthOfItsCell(GameTestHelper helper) {
         RodBlock rod = (RodBlock) LaternaRegistry.block(
                 new Lamp(Shape.ROD, Wiring.ALWAYS, Frame.OWN, DyeColor.WHITE)).get();
@@ -484,7 +490,7 @@ public final class LaternaTests {
     }
 
     /** ⚠ <b>And nothing takes a rod down</b>, because it was mounted on nothing. */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void aRodClingsToNothing(GameTestHelper helper) {
         helper.setBlock(WHERE.below(), Blocks.STONE);
         helper.setBlock(WHERE, LaternaRegistry.block(
@@ -526,7 +532,7 @@ public final class LaternaTests {
      * so a colourless variant that fell out of the product would leave the other sixteen
      * looking perfectly correct.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void everyGlassIsALight(GameTestHelper helper) {
         for (Frame frame : Shape.GLASS.frames()) {
             for (Optional<DyeColor> colour : Shape.GLASS.colours()) {
@@ -543,7 +549,7 @@ public final class LaternaTests {
     }
 
     /** And the light reaches the air, which the one above deliberately does not wait for. */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void glassLightsTheRoom(GameTestHelper helper) {
         helper.setBlock(WHERE, LaternaRegistry.block(CLEAR_GLASS).get());
         helper.succeedWhen(() -> brightness(helper, WHERE.above(), 14));
@@ -563,7 +569,7 @@ public final class LaternaTests {
      * a solid block that happens to be drawn see-through: you would suffocate in it, it
      * would carry a redstone signal, and it would black out the screen.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void glassAnswersEverythingTheGameOwnGlassAnswers(GameTestHelper helper) {
         BlockState ours = LaternaRegistry.block(CLEAR_GLASS).get().defaultBlockState();
         BlockState theirs = Blocks.GLASS.defaultBlockState();
@@ -604,7 +610,7 @@ public final class LaternaTests {
      * takes the brightest of its neighbours less its own opacity and the opacity is the
      * whole fifteen. Nothing was filled and nothing ticks.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void aShadeSwallowsTheLightBesideIt(GameTestHelper helper) {
         helper.setBlock(SOURCE, Blocks.GLOWSTONE);
         helper.setBlock(WHERE, LaternaRegistry.block(SHADE_INVERTED).get());
@@ -623,7 +629,7 @@ public final class LaternaTests {
      * nothing else. An opacity that read the level or the position would be computed once
      * against an empty world, and this test is what would have caught it.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void switchingAShadeOffGivesTheLightBack(GameTestHelper helper) {
         helper.setBlock(SOURCE, Blocks.GLOWSTONE);
         helper.setBlock(WHERE, LaternaRegistry.block(SHADE_INVERTED).get());
@@ -641,7 +647,7 @@ public final class LaternaTests {
      * The other wiring, which is the switch on the wall rather than the material: dark
      * only while a signal reaches it.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void aNormalShadeTakesNothingUntilItIsPowered(GameTestHelper helper) {
         helper.setBlock(SOURCE, Blocks.GLOWSTONE);
         helper.setBlock(WHERE, LaternaRegistry.block(SHADE).get());
@@ -662,7 +668,7 @@ public final class LaternaTests {
      * every form there was gave off light. Read that way a working shade is the brightest
      * thing in the room.
      */
-    @GameTest(template = TestStructures.FLOOR)
+    @GameTest(template = FLOOR)
     public static void aShadeShinesInNeitherState(GameTestHelper helper) {
         for (Lamp shade : List.of(SHADE, SHADE_INVERTED)) {
             for (boolean working : new boolean[] { true, false }) {

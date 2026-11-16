@@ -17,6 +17,7 @@ stonecutter {
             version("$minecraft-$loader", minecraft).buildscript = "build.$loader.gradle.kts"
         }
 
+        node("1.20.1", "forge")
         node("1.21.1", "neoforge")
 
         vcsVersion = "1.21.1-neoforge"

@@ -20,7 +20,7 @@ base {
     archivesName = "$modId-$loader-$minecraft"
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(Targets.java(minecraft))
 
 neoForge {
     version = property("neo_version") as String
@@ -92,7 +92,7 @@ val modMetadata = mapOf(
     "minecraft_version" to minecraft,
     "minecraft_version_range" to property("minecraft_version_range"),
     "neo_version" to property("neo_version"),
-    "neo_version_range" to property("neo_version_range"),
+    "loader_dependency_range" to property("loader_dependency_range"),
     "loader_version_range" to property("loader_version_range"),
     "mod_id" to modId,
     "mod_name" to property("mod_name"),
@@ -105,7 +105,7 @@ val modMetadata = mapOf(
 val generateModMetadata = tasks.register<ProcessResources>("generateModMetadata") {
     inputs.properties(modMetadata)
     expand(modMetadata)
-    from(rootProject.file("src/main/templates"))
+    from(rootProject.file("src/main/templates/$loader"))
     into("build/generated/sources/modMetadata")
 }
 sourceSets.main {

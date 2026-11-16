@@ -85,20 +85,25 @@ public class StackingPlateBlock extends PlateBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos,
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos,
             CollisionContext context) {
         return whole(state) ? Shapes.block() : super.getShape(state, level, pos, context);
     }
 
     /** @see StackingPlateBlock the reason this is the plate that stops light */
     @Override
-    protected boolean useShapeForLightOcclusion(BlockState state) {
+    public boolean useShapeForLightOcclusion(BlockState state) {
         return !whole(state);
     }
 
     @Override
-    protected boolean isPathfindable(BlockState state,
+    //? if >=1.20.5 {
+    public boolean isPathfindable(BlockState state,
             net.minecraft.world.level.pathfinder.PathComputationType path) {
+    //?} else {
+    /*public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos,
+            net.minecraft.world.level.pathfinder.PathComputationType path) {
+    *///?}
         return false;
     }
 
@@ -125,7 +130,7 @@ public class StackingPlateBlock extends PlateBlock {
      * nothing.
      */
     @Override
-    protected boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
+    public boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
         ItemStack held = context.getItemInHand();
         SlabType type = state.getValue(TYPE);
         if (type == SlabType.DOUBLE || !held.is(asItem())) {
@@ -136,12 +141,12 @@ public class StackingPlateBlock extends PlateBlock {
 
     /** Turning the world does not turn something that only knows up from down. */
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         return state;
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         return state;
     }
 }

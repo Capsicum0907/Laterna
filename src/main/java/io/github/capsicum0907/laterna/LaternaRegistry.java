@@ -3,6 +3,7 @@ package io.github.capsicum0907.laterna;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
 import net.minecraft.core.BlockPos;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -19,10 +21,10 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.level.material.MapColor;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
+//? if neoforge {
 import net.neoforged.neoforge.registries.DeferredRegister;
+//?} else
+/*import net.minecraftforge.registries.DeferredRegister;*/
 
 /**
  * Registration, one block and one item per entry in {@link Lamp#all()}.
@@ -32,20 +34,23 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * in the creative tab and in every generated file without anything else being edited.
  */
 public final class LaternaRegistry {
-    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Laterna.MODID);
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Laterna.MODID);
+    public static final DeferredRegister<Block> BLOCKS =
+            DeferredRegister.create(Registries.BLOCK, Laterna.MODID);
+    public static final DeferredRegister<Item> ITEMS =
+            DeferredRegister.create(Registries.ITEM, Laterna.MODID);
     public static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Laterna.MODID);
 
-    private static final Map<Lamp, DeferredBlock<Block>> BLOCK = new LinkedHashMap<>();
-    private static final Map<Lamp, DeferredItem<BlockItem>> ITEM = new LinkedHashMap<>();
+    private static final Map<Lamp, Supplier<Block>> BLOCK = new LinkedHashMap<>();
+    private static final Map<Lamp, Supplier<BlockItem>> ITEM = new LinkedHashMap<>();
 
     static {
         for (Lamp lamp : Lamp.all()) {
-            DeferredBlock<Block> block =
-                    BLOCKS.registerBlock(lamp.id(), built(lamp), properties(lamp));
+            Supplier<Block> block =
+                    BLOCKS.register(lamp.id(), () -> built(lamp).apply(properties(lamp)));
             BLOCK.put(lamp, block);
-            ITEM.put(lamp, ITEMS.registerSimpleBlockItem(block));
+            ITEM.put(lamp, ITEMS.register(lamp.id(),
+                    () -> new BlockItem(block.get(), new Item.Properties())));
         }
     }
 
@@ -175,10 +180,10 @@ public final class LaternaRegistry {
      * scatter each form sixteen apart, which is the one arrangement that stops the ramp
      * of colours reading as a ramp.
      */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB =
+    public static final Supplier<CreativeModeTab> TAB =
             TABS.register("laterna", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + Laterna.MODID))
-                    .icon(() -> new ItemStack(item(Lamp.all().getFirst()).get()))
+                    .icon(() -> new ItemStack(item(Lamp.all().get(0)).get()))
                     .displayItems((parameters, output) -> {
                         for (Lamp lamp : Lamp.all()) {
                             output.accept(item(lamp).get());
@@ -189,11 +194,11 @@ public final class LaternaRegistry {
     private LaternaRegistry() {
     }
 
-    public static DeferredBlock<Block> block(Lamp lamp) {
+    public static Supplier<Block> block(Lamp lamp) {
         return BLOCK.get(lamp);
     }
 
-    public static DeferredItem<BlockItem> item(Lamp lamp) {
+    public static Supplier<BlockItem> item(Lamp lamp) {
         return ITEM.get(lamp);
     }
 }
