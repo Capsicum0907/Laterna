@@ -24,7 +24,7 @@ import net.minecraft.world.level.material.MapColor;
 //? if neoforge {
 import net.neoforged.neoforge.registries.DeferredRegister;
 //?} else
-/*import net.minecraftforge.registries.DeferredRegister;*/
+//import net.minecraftforge.registries.DeferredRegister;
 
 /**
  * Registration, one block and one item per entry in {@link Lamp#all()}.
