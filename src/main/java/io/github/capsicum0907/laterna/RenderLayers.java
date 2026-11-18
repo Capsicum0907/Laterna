@@ -32,7 +32,10 @@ public final class RenderLayers implements ClientModInitializer {
         if (layers.size() != 1) {
             throw new IllegalStateException(id + " needs " + layers.size() + " layers");
         }
-        Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id));
+        //? if >=1.21 {
+        /^Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id));
+        ^///?} else
+        /^Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(id));^/
         BlockRenderLayerMap.INSTANCE.putBlock(block, layers.get(0));
     }
 *///?} else if forge && <1.19 {

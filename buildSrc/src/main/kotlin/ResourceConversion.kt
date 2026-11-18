@@ -16,6 +16,8 @@ class ResourceConversion(
     private val itemPredicateIsSingle = !Targets.atLeast(minecraft, "1.17")
     private val forgeNames = loader == "forge"
     private val oneLayerPerBlock = loader == "fabric"
+    private val fabricLegacyTags = loader == "fabric" && !Targets.atLeast(minecraft, "1.21")
+    private val hasDeepslate = Targets.atLeast(minecraft, "1.17")
     val renderTypesInCode = !(loader == "neoforge" || (loader == "forge" && Targets.atLeast(minecraft, "1.19")))
 
     fun path(path: String): String {
@@ -35,10 +37,11 @@ class ResourceConversion(
         if (parts[0] == "data" && folder == "advancement" && itemPredicateIsList) itemPredicates(root)
         if (parts[0] == "assets" && folder == "models" && renderTypesInCode) modelLayers(root.asJsonObject)
         if (parts[0] == "assets" && folder == "blockstates" && oneLayerPerBlock) splitComposites(root.asJsonObject)
+        val tagged = if (parts[0] == "data" && folder == "recipe" && fabricLegacyTags) fabricTags(root) else root
         val converted = when {
-            forgeNames -> forgeIds(root)
-            oneLayerPerBlock -> withoutKeys(root, NEOFORGE_KEYS)
-            else -> root
+            forgeNames -> forgeIds(tagged)
+            oneLayerPerBlock -> withoutKeys(tagged, NEOFORGE_KEYS)
+            else -> tagged
         }
         return GSON.toJson(converted)
     }
@@ -223,6 +226,32 @@ class ResourceConversion(
         }
     }
 
+    private fun fabricTags(element: JsonElement): JsonElement = when (element) {
+        is JsonObject -> {
+            val tag = (element.get("tag") as? JsonPrimitive)?.asString
+            val items = tag?.let { FABRIC_LEGACY_ITEMS[it] }
+            when {
+                tag != null && element.size() == 1 && items != null -> JsonArray().also { out ->
+                    items.filter { hasDeepslate || it !in DEEPSLATE_ERA }
+                        .forEach { item -> out.add(JsonObject().apply { addProperty("item", item) }) }
+                }
+                tag != null && element.size() == 1 && tag in FABRIC_LEGACY_IDS ->
+                    JsonObject().apply { addProperty("tag", FABRIC_LEGACY_IDS.getValue(tag)) }
+                else -> JsonObject().also { out ->
+                    for ((key, value) in element.entrySet()) out.add(key, fabricTags(value))
+                }
+            }
+        }
+        is JsonArray -> JsonArray().also { out ->
+            for (value in element) {
+                val converted = fabricTags(value)
+                check(!(converted is JsonArray && value is JsonObject)) { "A tag inside a list cannot become a list of items" }
+                out.add(converted)
+            }
+        }
+        else -> element
+    }
+
     private fun withoutKeys(element: JsonElement, keys: Set<String>): JsonElement = when (element) {
         is JsonObject -> JsonObject().also { out ->
             for ((key, value) in element.entrySet()) if (key !in keys) out.add(key, withoutKeys(value, keys))
@@ -259,6 +288,24 @@ class ResourceConversion(
             "block" to "blocks",
             "item" to "items",
         )
+
+        private val FABRIC_LEGACY_IDS = mapOf(
+            "c:dusts/redstone" to "c:redstone_dusts",
+        )
+
+        private val FABRIC_LEGACY_ITEMS = mapOf(
+            "c:nuggets/iron" to listOf("minecraft:iron_nugget"),
+            "c:stones" to listOf(
+                "minecraft:andesite",
+                "minecraft:diorite",
+                "minecraft:granite",
+                "minecraft:stone",
+                "minecraft:deepslate",
+                "minecraft:tuff",
+            ),
+        )
+
+        private val DEEPSLATE_ERA = setOf("minecraft:deepslate", "minecraft:tuff")
 
         private val FORGE_KEYS = mapOf(
             "neoforge_data" to "forge_data",

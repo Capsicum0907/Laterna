@@ -40,7 +40,11 @@ public final class Registrar<T> {
         @SuppressWarnings("unchecked")
         private <T> void register(net.minecraft.core.Registry<T> registry, String id) {
             value = factory.get();
-            net.minecraft.core.Registry.register(registry, ResourceLocation.fromNamespaceAndPath(Laterna.MODID, id), (T) value);
+            //? if >=1.21 {
+            /^ResourceLocation name = ResourceLocation.fromNamespaceAndPath(Laterna.MODID, id);
+            ^///?} else
+            /^ResourceLocation name = new ResourceLocation(Laterna.MODID, id);^/
+            net.minecraft.core.Registry.register(registry, name, (T) value);
         }
 
         @Override

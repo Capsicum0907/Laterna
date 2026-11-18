@@ -48,6 +48,7 @@ val convertResources = tasks.register<ConvertResources>("convertResources") {
 sourceSets.main {
     java {
         exclude("**/laterna/data/**")
+        exclude("**/laterna/LaternaTags.java")
     }
     resources.srcDir(convertResources)
 }
