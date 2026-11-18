@@ -35,6 +35,7 @@ public class Laterna {
     *///?}
         LaternaRegistry.BLOCKS.register(modEventBus);
         LaternaRegistry.ITEMS.register(modEventBus);
+        //? if >=1.19.3
         LaternaRegistry.TABS.register(modEventBus);
 
         LOGGER.info("Laterna {} loaded, {} lamps.", modContainer.getModInfo().getVersion(),

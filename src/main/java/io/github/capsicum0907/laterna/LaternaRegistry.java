@@ -20,7 +20,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LightEngine;
+//? if >=1.20 {
 import net.minecraft.world.level.material.MapColor;
+//?} else {
+/*import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
+*///?}
 //? if neoforge {
 import net.neoforged.neoforge.registries.DeferredRegister;
 //?} else
@@ -38,8 +43,10 @@ public final class LaternaRegistry {
             DeferredRegister.create(Registries.BLOCK, Laterna.MODID);
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(Registries.ITEM, Laterna.MODID);
+    //? if >=1.19.3 {
     public static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Laterna.MODID);
+    //?}
 
     private static final Map<Lamp, Supplier<Block>> BLOCK = new LinkedHashMap<>();
     private static final Map<Lamp, Supplier<BlockItem>> ITEM = new LinkedHashMap<>();
@@ -50,7 +57,10 @@ public final class LaternaRegistry {
                     BLOCKS.register(lamp.id(), () -> built(lamp).apply(properties(lamp)));
             BLOCK.put(lamp, block);
             ITEM.put(lamp, ITEMS.register(lamp.id(),
-                    () -> new BlockItem(block.get(), new Item.Properties())));
+                    () -> new BlockItem(block.get(), new Item.Properties()
+                            //? if <1.19.3
+                            //.tab(LaternaRegistry.TAB)
+                    )));
         }
     }
 
@@ -95,10 +105,15 @@ public final class LaternaRegistry {
      * read off the state, which is what keeps this a plain block.
      */
     private static BlockBehaviour.Properties properties(Lamp lamp) {
+        // A form with no colour in its name has none on a map either, which is what the
+        // game already says about glass.
+        //? if >=1.20 {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
-                // A form with no colour in its name has none on a map either, which is
-                // what the game already says about glass.
                 .mapColor(lamp.colour().map(DyeColor::getMapColor).orElse(MapColor.NONE))
+        //?} else {
+        /*BlockBehaviour.Properties properties = BlockBehaviour.Properties.of(Material.BUILDABLE_GLASS,
+                        lamp.colour().map(DyeColor::getMaterialColor).orElse(MaterialColor.NONE))
+        *///?}
                 .strength(lamp.shape().strength())
                 .sound(lamp.shape().sound())
                 .lightLevel(light(lamp));
@@ -180,6 +195,7 @@ public final class LaternaRegistry {
      * scatter each form sixteen apart, which is the one arrangement that stops the ramp
      * of colours reading as a ramp.
      */
+    //? if >=1.19.3 {
     public static final Supplier<CreativeModeTab> TAB =
             TABS.register("laterna", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + Laterna.MODID))
@@ -190,6 +206,14 @@ public final class LaternaRegistry {
                         }
                     })
                     .build());
+    //?} else {
+    /*public static final CreativeModeTab TAB = new CreativeModeTab(Laterna.MODID) {
+        @Override
+        public ItemStack makeIcon() {
+            return new ItemStack(item(Lamp.all().get(0)).get());
+        }
+    };
+    *///?}
 
     private LaternaRegistry() {
     }

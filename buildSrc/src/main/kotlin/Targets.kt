@@ -6,15 +6,17 @@ object Targets {
         else -> 8
     }
 
-    fun packFormat(minecraft: String): Int = PACK_FORMATS[minecraft]
+    fun resourcePackFormat(minecraft: String): Int = packFormats(minecraft).first
+
+    fun dataPackFormat(minecraft: String): Int = packFormats(minecraft).second
+
+    private fun packFormats(minecraft: String): Pair<Int, Int> = PACK_FORMATS[minecraft]
         ?: error("No pack format recorded for Minecraft $minecraft")
 
     private val PACK_FORMATS = mapOf(
-        "1.16.5" to 6,
-        "1.18.2" to 8,
-        "1.19.2" to 9,
-        "1.20.1" to 15,
-        "1.21.1" to 34,
+        "1.19.2" to (9 to 10),
+        "1.20.1" to (15 to 15),
+        "1.21.1" to (34 to 48),
     )
 
     fun atLeast(version: String, floor: String): Boolean {

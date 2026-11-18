@@ -84,7 +84,8 @@ val modMetadata = mapOf(
     "mod_version" to property("mod_version"),
     "mod_authors" to property("mod_authors"),
     "mod_description" to property("mod_description"),
-    "pack_format" to Targets.packFormat(minecraft),
+    "resource_pack_format" to Targets.resourcePackFormat(minecraft),
+    "data_pack_format" to Targets.dataPackFormat(minecraft),
 )
 
 val generateModMetadata = tasks.register<ProcessResources>("generateModMetadata") {
