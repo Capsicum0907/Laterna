@@ -56,6 +56,14 @@ abstract class ConvertResources : DefaultTask() {
                 snbt.writeText(Snbt.fromNbt(file))
             }
         }
+        if (conversion.itemLayersInCode) {
+            conversion.itemLayers().entries
+                .groupBy { it.key.substringBefore(':') }
+                .forEach { (namespace, entries) ->
+                    val target = to.resolve("assets/$namespace/item_layers.json")
+                    target.writeText(conversion.layerTable(entries.associate { it.key to it.value }))
+                }
+        }
         if (conversion.renderTypesInCode) {
             conversion.renderLayers(blockstates, models).entries
                 .groupBy { it.key.substringBefore(':') }

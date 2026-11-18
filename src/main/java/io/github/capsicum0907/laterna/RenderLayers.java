@@ -25,6 +25,8 @@ public final class RenderLayers implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         apply();
+        //? if <1.19.4
+        /^ItemLayers.register();^/
     }
 
     private static void set(String id, List<RenderType> layers) {

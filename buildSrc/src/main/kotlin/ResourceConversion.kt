@@ -20,6 +20,7 @@ class ResourceConversion(
     private val hasDeepslate = Targets.atLeast(minecraft, "1.17")
     private val fabricHasNoCommonTags = loader == "fabric" && !Targets.atLeast(minecraft, "1.17")
     private val fabricTabKeys = loader == "fabric" && !Targets.atLeast(minecraft, "1.19.3")
+    val itemLayersInCode = loader == "fabric" && !Targets.atLeast(minecraft, "1.19.4")
     val testStructuresAsSnbt = loader == "fabric" && !Targets.atLeast(minecraft, "1.20")
     val renderTypesInCode = !(loader == "neoforge" || (loader == "forge" && Targets.atLeast(minecraft, "1.19")))
 
@@ -38,6 +39,9 @@ class ResourceConversion(
         val folder = if (parts.size > 2) parts[2] else ""
         if (parts[0] == "data" && folder == "recipe" && recipeResultIsItem) recipeResult(root)
         if (parts[0] == "data" && folder == "advancement" && itemPredicateIsList) itemPredicates(root)
+        if (parts[0] == "assets" && folder == "models" && itemLayersInCode && parts.getOrNull(3) == "item") {
+            builtinItem(root.asJsonObject)
+        }
         if (parts[0] == "assets" && folder == "models" && renderTypesInCode) modelLayers(root.asJsonObject)
         if (parts[0] == "assets" && folder == "blockstates" && oneLayerPerBlock) splitComposites(root.asJsonObject)
         if (parts[0] == "assets" && folder == "lang" && fabricTabKeys) fabricTabNames(root.asJsonObject)
@@ -161,6 +165,37 @@ class ResourceConversion(
         return children.map { child -> apply.deepCopy().apply { addProperty("model", child) } }
     }
 
+    private fun builtinItem(item: JsonObject) {
+        val parent = item.get("parent")?.asString ?: return
+        val composite = model(parent) ?: return
+        if (composite.get("loader")?.asString != COMPOSITE) return
+        check(item.keySet() == setOf("parent")) { "An item on a composite model carries more than its parent" }
+        item.addProperty("parent", BUILTIN_ENTITY)
+        item.addProperty("gui_light", "side")
+        composite.getAsJsonObject("textures")?.get("particle")?.let { particle ->
+            item.add("textures", JsonObject().apply { add("particle", particle) })
+        }
+        item.add("display", JsonParser.parseString(BLOCK_DISPLAY))
+    }
+
+    fun itemLayers(): Map<String, List<List<String>>> {
+        val table = sortedMapOf<String, List<List<String>>>()
+        for ((path, text) in models) {
+            val parts = path.split('/')
+            if (parts.size != 5 || parts[0] != "assets" || parts[2] != "models" || parts[3] != "item") continue
+            val parent = JsonParser.parseString(text).asJsonObject.get("parent")?.asString ?: continue
+            val composite = model(parent) ?: continue
+            if (composite.get("loader")?.asString != COMPOSITE) continue
+            val children = composite.getAsJsonObject("children")
+            val order = composite.getAsJsonArray("item_render_order")?.map { it.asString } ?: children.keySet().toList()
+            table[parts[1] + ":" + parts[4].removeSuffix(".json")] = order.map { name ->
+                val child = children.getAsJsonObject(name)
+                listOf(child.get("parent").asString, layerName(child.get("render_type")?.asString))
+            }
+        }
+        return table
+    }
+
     fun renderLayers(blockstates: Map<String, String>, models: Map<String, String>): Map<String, List<String>> {
         val table = sortedMapOf<String, List<String>>()
         for ((path, text) in blockstates) {
@@ -204,7 +239,7 @@ class ResourceConversion(
         return name
     }
 
-    fun layerTable(table: Map<String, List<String>>): String = GSON.toJson(table)
+    fun layerTable(table: Map<String, Any>): String = GSON.toJson(table)
 
     private fun recipeResult(root: JsonElement) {
         val result = root.asJsonObject.get("result") as? JsonObject ?: return
@@ -290,6 +325,17 @@ class ResourceConversion(
         private const val COMPOSITE = "neoforge:composite"
 
         private const val BLOCK_PARENT = "minecraft:block/block"
+
+        private const val BUILTIN_ENTITY = "minecraft:builtin/entity"
+
+        private const val BLOCK_DISPLAY = """{
+            "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [0.625, 0.625, 0.625]},
+            "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.25, 0.25, 0.25]},
+            "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.5, 0.5, 0.5]},
+            "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [0.375, 0.375, 0.375]},
+            "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [0.4, 0.4, 0.4]},
+            "firstperson_lefthand": {"rotation": [0, 225, 0], "translation": [0, 0, 0], "scale": [0.4, 0.4, 0.4]}
+        }"""
 
         private val NEOFORGE_KEYS = setOf("neoforge_data")
 
