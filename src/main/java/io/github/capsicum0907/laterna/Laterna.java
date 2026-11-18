@@ -49,7 +49,7 @@ public class Laterna {
         //? if >=1.19.3
         LaternaRegistry.TABS.register();
         LOGGER.info("Laterna {} loaded, {} lamps.", FabricLoader.getInstance().getModContainer(MODID)
-                .orElseThrow().getMetadata().getVersion().getFriendlyString(), Lamp.all().size());
+                .orElseThrow(IllegalStateException::new).getMetadata().getVersion().getFriendlyString(), Lamp.all().size());
     }
     *///?} else {
     //? if neoforge {

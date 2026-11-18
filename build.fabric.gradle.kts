@@ -49,11 +49,14 @@ sourceSets.main {
     java {
         exclude("**/laterna/data/**")
         exclude("**/laterna/LaternaTags.java")
+        if (!Targets.atLeast(minecraft, "1.17")) exclude("**/laterna/LaternaTests.java")
     }
     resources.srcDir(convertResources)
 }
 
-loom {
+val hasGameTests = Targets.atLeast(minecraft, "1.17")
+
+if (hasGameTests) loom {
     runs {
         register("gameTestServer") {
             server()
@@ -68,6 +71,7 @@ loom {
 val modMetadata = mapOf(
     "minecraft_version_range" to property("minecraft_version_range"),
     "loader_dependency_range" to property("loader_dependency_range"),
+    "fabric_api_mod_id" to property("fabric_api_mod_id"),
     "loader_version_range" to property("loader_version_range"),
     "java_version" to Targets.java(minecraft),
     "mod_id" to modId,
@@ -76,6 +80,11 @@ val modMetadata = mapOf(
     "mod_version" to property("mod_version"),
     "mod_authors" to JsonOutput.toJson(property("mod_authors")),
     "mod_description" to JsonOutput.toJson(property("mod_description")),
+    "entrypoints" to JsonOutput.toJson(buildMap {
+        put("main", listOf("io.github.capsicum0907.laterna.Laterna"))
+        put("client", listOf("io.github.capsicum0907.laterna.RenderLayers"))
+        if (hasGameTests) put("fabric-gametest", listOf("io.github.capsicum0907.laterna.LaternaTests"))
+    }),
 )
 
 val generateModMetadata = tasks.register<ProcessResources>("generateModMetadata") {

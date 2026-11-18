@@ -7,14 +7,10 @@
   "authors": [${mod_authors}],
   "license": "${mod_license}",
   "environment": "*",
-  "entrypoints": {
-    "main": ["io.github.capsicum0907.laterna.Laterna"],
-    "client": ["io.github.capsicum0907.laterna.RenderLayers"],
-    "fabric-gametest": ["io.github.capsicum0907.laterna.LaternaTests"]
-  },
+  "entrypoints": ${entrypoints},
   "depends": {
     "fabricloader": "${loader_version_range}",
-    "fabric-api": "${loader_dependency_range}",
+    "${fabric_api_mod_id}": "${loader_dependency_range}",
     "minecraft": "${minecraft_version_range}",
     "java": ">=${java_version}"
   }

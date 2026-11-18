@@ -18,6 +18,7 @@ class ResourceConversion(
     private val oneLayerPerBlock = loader == "fabric"
     private val fabricLegacyTags = loader == "fabric" && !Targets.atLeast(minecraft, "1.21")
     private val hasDeepslate = Targets.atLeast(minecraft, "1.17")
+    private val fabricHasNoCommonTags = loader == "fabric" && !Targets.atLeast(minecraft, "1.17")
     private val fabricTabKeys = loader == "fabric" && !Targets.atLeast(minecraft, "1.19.3")
     val testStructuresAsSnbt = loader == "fabric" && !Targets.atLeast(minecraft, "1.20")
     val renderTypesInCode = !(loader == "neoforge" || (loader == "forge" && Targets.atLeast(minecraft, "1.19")))
@@ -41,6 +42,9 @@ class ResourceConversion(
         if (parts[0] == "assets" && folder == "blockstates" && oneLayerPerBlock) splitComposites(root.asJsonObject)
         if (parts[0] == "assets" && folder == "lang" && fabricTabKeys) fabricTabNames(root.asJsonObject)
         val tagged = if (parts[0] == "data" && folder == "recipe" && fabricLegacyTags) fabricTags(root) else root
+        if (parts[0] == "data" && folder == "recipe" && fabricHasNoCommonTags) check(!tagged.toString().contains("\"c:")) {
+            "$path still names a c: tag, which nothing defines on Fabric $minecraft"
+        }
         val converted = when {
             forgeNames -> forgeIds(tagged)
             oneLayerPerBlock -> withoutKeys(tagged, NEOFORGE_KEYS)
@@ -232,7 +236,7 @@ class ResourceConversion(
     private fun fabricTags(element: JsonElement): JsonElement = when (element) {
         is JsonObject -> {
             val tag = (element.get("tag") as? JsonPrimitive)?.asString
-            val items = tag?.let { FABRIC_LEGACY_ITEMS[it] }
+            val items = tag?.let { FABRIC_LEGACY_ITEMS[it] ?: if (fabricHasNoCommonTags) FABRIC_UNTAGGED_ITEMS[it] else null }
             when {
                 tag != null && element.size() == 1 && items != null -> JsonArray().also { out ->
                     items.filter { hasDeepslate || it !in DEEPSLATE_ERA }
@@ -314,6 +318,17 @@ class ResourceConversion(
                 "minecraft:deepslate",
                 "minecraft:tuff",
             ),
+        )
+
+        private val DYES = listOf(
+            "white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+            "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black",
+        )
+
+        private val FABRIC_UNTAGGED_ITEMS = mapOf(
+            "c:glass_blocks" to listOf("minecraft:glass") + DYES.map { "minecraft:${it}_stained_glass" },
+            "c:glass_panes" to listOf("minecraft:glass_pane") + DYES.map { "minecraft:${it}_stained_glass_pane" },
+            "c:dusts/redstone" to listOf("minecraft:redstone"),
         )
 
         private val DEEPSLATE_ERA = setOf("minecraft:deepslate", "minecraft:tuff")
