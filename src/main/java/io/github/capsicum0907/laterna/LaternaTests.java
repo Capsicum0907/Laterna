@@ -12,7 +12,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+//? if >=1.20.2
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -695,6 +700,33 @@ public final class LaternaTests {
                             + " gives off " + given);
                 }
             }
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = FLOOR)
+    public static void everyIngredientMatchesSomething(GameTestHelper helper) {
+        int recipes = 0;
+        //? if >=1.20.2 {
+        for (RecipeHolder<?> holder : helper.getLevel().getRecipeManager().getRecipes()) {
+            ResourceLocation id = holder.id();
+            Recipe<?> recipe = holder.value();
+        //?} else {
+        /*for (Recipe<?> recipe : helper.getLevel().getRecipeManager().getRecipes()) {
+            ResourceLocation id = recipe.getId();
+        *///?}
+            if (!id.getNamespace().equals(Laterna.MODID)) {
+                continue;
+            }
+            recipes++;
+            for (Ingredient ingredient : recipe.getIngredients()) {
+                if (!ingredient.isEmpty() && ingredient.getItems().length == 0) {
+                    throw new GameTestAssertException(id + " has an ingredient that nothing matches");
+                }
+            }
+        }
+        if (recipes == 0) {
+            throw new GameTestAssertException("no recipes of " + Laterna.MODID + " are loaded");
         }
         helper.succeed();
     }
