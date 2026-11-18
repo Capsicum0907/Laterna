@@ -22,7 +22,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 //? if neoforge {
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
-//?} else {
+//?} else if !fabric {
 /*import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 *///?}
@@ -32,9 +32,14 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  *
  * <p>Run with {@code gradlew runGameTestServer}.
  */
+//? if !fabric {
 @GameTestHolder(Laterna.MODID)
 @PrefixGameTestTemplate(false)
+//?}
 public final class LaternaTests {
+    //? if fabric {
+    /*public static final String FLOOR = Laterna.MODID + ":floor";
+    *///?} else
     public static final String FLOOR = "floor";
 
     private static final BlockPos WHERE = new BlockPos(4, 1, 4);
@@ -54,7 +59,17 @@ public final class LaternaTests {
     private static final Shape[] PLATES = { Shape.SPOTLIGHT, Shape.SLAB, Shape.VERTICAL_SLAB,
             Shape.PANEL, Shape.VERTICAL_PANEL, Shape.BULB, Shape.FIXTURE };
 
+    //? if fabric {
+    /*public LaternaTests() {
+    *///?} else
     private LaternaTests() {
+    }
+
+    private static int emission(GameTestHelper helper, BlockState state) {
+        //? if fabric {
+        /*return state.getLightEmission();
+        *///?} else
+        return state.getLightEmission(helper.getLevel(), helper.absolutePos(WHERE));
     }
 
     /** Put down with nothing near it, a normal lamp is dark and gives off nothing. */
@@ -172,7 +187,7 @@ public final class LaternaTests {
                 if (plate.facing(state) != facing) {
                     throw new GameTestAssertException(shape + " facing " + facing + " turned");
                 }
-                int given = state.getLightEmission(helper.getLevel(), helper.absolutePos(WHERE));
+                int given = emission(helper, state);
                 if (given != 15) {
                     throw new GameTestAssertException(shape + " facing " + facing
                             + " gives off " + given);
@@ -473,7 +488,7 @@ public final class LaternaTests {
         for (Direction.Axis along : Direction.Axis.values()) {
             helper.setBlock(WHERE, rod.defaultBlockState().setValue(RodBlock.AXIS, along));
             BlockState state = helper.getBlockState(WHERE);
-            if (state.getLightEmission(helper.getLevel(), helper.absolutePos(WHERE)) != 15) {
+            if (emission(helper, state) != 15) {
                 throw new GameTestAssertException("a rod along " + along + " gives no light");
             }
             VoxelShape outline = state.getShape(helper.getLevel(), helper.absolutePos(WHERE));
@@ -538,8 +553,7 @@ public final class LaternaTests {
             for (Optional<DyeColor> colour : Shape.GLASS.colours()) {
                 Lamp glass = new Lamp(Shape.GLASS, Wiring.ALWAYS, frame, colour);
                 helper.setBlock(WHERE, LaternaRegistry.block(glass).get());
-                int given = helper.getBlockState(WHERE)
-                        .getLightEmission(helper.getLevel(), helper.absolutePos(WHERE));
+                int given = emission(helper, helper.getBlockState(WHERE));
                 if (given != 15) {
                     throw new GameTestAssertException(glass.id() + " gives off " + given);
                 }
@@ -675,8 +689,7 @@ public final class LaternaTests {
                 BlockState state = LaternaRegistry.block(shade).get().defaultBlockState()
                         .setValue(LampBlock.LIT, working);
                 helper.setBlock(WHERE, state);
-                int given = state.getLightEmission(
-                        helper.getLevel(), helper.absolutePos(WHERE));
+                int given = emission(helper, state);
                 if (given != 0) {
                     throw new GameTestAssertException(shade.id() + " working=" + working
                             + " gives off " + given);

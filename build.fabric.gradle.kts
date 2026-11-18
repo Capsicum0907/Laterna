@@ -48,9 +48,20 @@ val convertResources = tasks.register<ConvertResources>("convertResources") {
 sourceSets.main {
     java {
         exclude("**/laterna/data/**")
-        exclude("**/laterna/LaternaTests.java")
     }
     resources.srcDir(convertResources)
+}
+
+loom {
+    runs {
+        register("gameTestServer") {
+            server()
+            name("Game Test Server")
+            property("fabric-api.gametest")
+            property("fabric-api.gametest.report-file", layout.buildDirectory.file("gametest/report.xml").get().asFile.absolutePath)
+            runDir("build/gametest")
+        }
+    }
 }
 
 val modMetadata = mapOf(

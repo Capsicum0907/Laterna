@@ -9,7 +9,8 @@
   "environment": "*",
   "entrypoints": {
     "main": ["io.github.capsicum0907.laterna.Laterna"],
-    "client": ["io.github.capsicum0907.laterna.RenderLayers"]
+    "client": ["io.github.capsicum0907.laterna.RenderLayers"],
+    "fabric-gametest": ["io.github.capsicum0907.laterna.LaternaTests"]
   },
   "depends": {
     "fabricloader": "${loader_version_range}",
