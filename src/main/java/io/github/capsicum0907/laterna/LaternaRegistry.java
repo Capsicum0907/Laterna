@@ -27,9 +27,12 @@ import net.minecraft.world.level.material.MaterialColor;
 *///?}
 //? if neoforge {
 import net.neoforged.neoforge.registries.DeferredRegister;
-//?} else if fabric {
+//?} else if fabric && >=1.19.3 {
 /*import net.minecraft.core.registries.BuiltInRegistries;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+*///?} else if fabric {
+/*import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.minecraft.resources.ResourceLocation;
 *///?} else
 //import net.minecraftforge.registries.DeferredRegister;
 
@@ -41,11 +44,14 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
  * in the creative tab and in every generated file without anything else being edited.
  */
 public final class LaternaRegistry {
-    //? if fabric {
+    //? if fabric && >=1.19.3 {
     /*public static final Registrar<Block> BLOCKS = new Registrar<>(BuiltInRegistries.BLOCK);
     public static final Registrar<Item> ITEMS = new Registrar<>(BuiltInRegistries.ITEM);
     public static final Registrar<CreativeModeTab> TABS =
             new Registrar<>(BuiltInRegistries.CREATIVE_MODE_TAB);
+    *///?} else if fabric {
+    /*public static final Registrar<Block> BLOCKS = new Registrar<>(Registry.BLOCK);
+    public static final Registrar<Item> ITEMS = new Registrar<>(Registry.ITEM);
     *///?} else if >=1.17 {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(Registries.BLOCK, Laterna.MODID);
@@ -223,7 +229,11 @@ public final class LaternaRegistry {
                         }
                     })
                     .build());
-    //?} else {
+    //?} else if fabric {
+    /*public static final CreativeModeTab TAB = FabricItemGroupBuilder.build(
+            new ResourceLocation(Laterna.MODID, Laterna.MODID),
+            () -> new ItemStack(item(Lamp.all().get(0)).get()));
+    *///?} else {
     /*public static final CreativeModeTab TAB = new CreativeModeTab(Laterna.MODID) {
         @Override
         public ItemStack makeIcon() {

@@ -18,6 +18,8 @@ class ResourceConversion(
     private val oneLayerPerBlock = loader == "fabric"
     private val fabricLegacyTags = loader == "fabric" && !Targets.atLeast(minecraft, "1.21")
     private val hasDeepslate = Targets.atLeast(minecraft, "1.17")
+    private val fabricTabKeys = loader == "fabric" && !Targets.atLeast(minecraft, "1.19.3")
+    val testStructuresAsSnbt = loader == "fabric" && !Targets.atLeast(minecraft, "1.20")
     val renderTypesInCode = !(loader == "neoforge" || (loader == "forge" && Targets.atLeast(minecraft, "1.19")))
 
     fun path(path: String): String {
@@ -37,6 +39,7 @@ class ResourceConversion(
         if (parts[0] == "data" && folder == "advancement" && itemPredicateIsList) itemPredicates(root)
         if (parts[0] == "assets" && folder == "models" && renderTypesInCode) modelLayers(root.asJsonObject)
         if (parts[0] == "assets" && folder == "blockstates" && oneLayerPerBlock) splitComposites(root.asJsonObject)
+        if (parts[0] == "assets" && folder == "lang" && fabricTabKeys) fabricTabNames(root.asJsonObject)
         val tagged = if (parts[0] == "data" && folder == "recipe" && fabricLegacyTags) fabricTags(root) else root
         val converted = when {
             forgeNames -> forgeIds(tagged)
@@ -250,6 +253,14 @@ class ResourceConversion(
             }
         }
         else -> element
+    }
+
+    private fun fabricTabNames(lang: JsonObject) {
+        val tabs = lang.entrySet().filter { (key, _) -> key.startsWith("itemGroup.") && key.count { it == '.' } == 1 }
+        for ((key, value) in tabs) {
+            val name = key.substringAfter('.')
+            lang.add("itemGroup.$name.$name", value)
+        }
     }
 
     private fun withoutKeys(element: JsonElement, keys: Set<String>): JsonElement = when (element) {

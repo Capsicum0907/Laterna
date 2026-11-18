@@ -20,7 +20,6 @@ import net.minecraft.world.level.block.Block;
 //? if fabric {
 /*import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.minecraft.core.registries.BuiltInRegistries;
 
 public final class RenderLayers implements ClientModInitializer {
     @Override
@@ -33,9 +32,11 @@ public final class RenderLayers implements ClientModInitializer {
             throw new IllegalStateException(id + " needs " + layers.size() + " layers");
         }
         //? if >=1.21 {
-        /^Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id));
+        /^Block block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id));
+        ^///?} else if >=1.19.3 {
+        /^Block block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(new ResourceLocation(id));
         ^///?} else
-        /^Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(id));^/
+        /^Block block = net.minecraft.core.Registry.BLOCK.get(new ResourceLocation(id));^/
         BlockRenderLayerMap.INSTANCE.putBlock(block, layers.get(0));
     }
 *///?} else if forge && <1.19 {

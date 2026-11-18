@@ -49,6 +49,12 @@ abstract class ConvertResources : DefaultTask() {
             } else {
                 file.copyTo(target, overwrite = true)
             }
+            val parts = relative.split('/')
+            if (conversion.testStructuresAsSnbt && parts.size == 4 && parts[0] == "data" && parts[2] == "structure" && file.extension == "nbt") {
+                val snbt = to.resolve("data/${parts[1]}/gametest/structures/${file.nameWithoutExtension}.snbt")
+                snbt.parentFile.mkdirs()
+                snbt.writeText(Snbt.fromNbt(file))
+            }
         }
         if (conversion.renderTypesInCode) {
             conversion.renderLayers(blockstates, models).entries

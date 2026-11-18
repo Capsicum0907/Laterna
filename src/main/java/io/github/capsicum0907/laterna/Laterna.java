@@ -46,6 +46,7 @@ public class Laterna {
     public void onInitialize() {
         LaternaRegistry.BLOCKS.register();
         LaternaRegistry.ITEMS.register();
+        //? if >=1.19.3
         LaternaRegistry.TABS.register();
         LOGGER.info("Laterna {} loaded, {} lamps.", FabricLoader.getInstance().getModContainer(MODID)
                 .orElseThrow().getMetadata().getVersion().getFriendlyString(), Lamp.all().size());
