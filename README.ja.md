@@ -43,6 +43,8 @@ Minecraft のバージョンとローダーの組み合わせごとに、[Stonec
 `stonecutter.gradle.kts` に書いてあり、`run.bat` が起動するのも、ソースに表示されるのもこのノードです。
 
 Minecraft 1.16.5 にはゲームテストの仕組みが無いので、そのノードは開発クライアントでだけ確かめます。
+この開発クライアントは `versions/1.16.5-forge/devfix/` も読み込みます。Architectury Loom が名前を
+変換し損ねる `BlockMath` の2か所の呼び出しを直すコアモッドで、jar には入りません。
 
 `runData` は 1.21.1 の NeoForge のノードでだけ動きます。他のノードは、ビルドのときにその出力を
 自分の形式に変換します。

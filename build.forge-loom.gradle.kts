@@ -50,6 +50,20 @@ sourceSets.main {
     resources.srcDir(convertResources)
 }
 
+val devFix = sourceSets.create("devFix") {
+    resources.srcDir(layout.projectDirectory.dir("devfix"))
+}
+
+loom {
+    mods {
+        maybeCreate("main").sourceSet(devFix)
+    }
+}
+
+tasks.withType<net.fabricmc.loom.task.AbstractRunTask>().configureEach {
+    dependsOn(devFix.processResourcesTaskName)
+}
+
 val modMetadata = mapOf(
     "minecraft_version" to minecraft,
     "minecraft_version_range" to property("minecraft_version_range"),

@@ -47,6 +47,8 @@ is written to `versions/<node>/build/libs/`. The active node, named in `stonecut
 is the one `run.bat` launches and the one the source tree shows.
 
 Minecraft 1.16.5 has no game test framework, so its node is checked in a dev client only.
+Its dev client also loads `versions/1.16.5-forge/devfix/`, a coremod that renames two calls in
+`BlockMath` that Architectury Loom leaves unmapped. It is not part of the jar.
 
 `runData` runs on the 1.21.1 NeoForge node only. The other nodes convert its output to their
 own format when they build.
