@@ -12,9 +12,11 @@ stonecutter parameters {
         replace("(Registries.ITEM,", "(Registry.ITEM_REGISTRY,")
     }
 
-    replacements.string(eval(node.metadata.version, "<1.20")) {
-        replace("import net.minecraft.world.level.lighting.LightEngine;", "import net.minecraft.world.level.lighting.LevelLightEngine;")
-        replace("LightEngine.MAX_LEVEL", "LevelLightEngine.MAX_SOURCE_LEVEL")
+    replacements.string(eval(node.metadata.version, "<1.17")) {
+        replace("List.of(", "com.google.common.collect.ImmutableList.of(")
+        replace("List.copyOf(", "com.google.common.collect.ImmutableList.copyOf(")
+        replace("Map.copyOf(", "com.google.common.collect.ImmutableMap.copyOf(")
+        replace(".toList()", ".collect(com.google.common.collect.ImmutableList.toImmutableList())")
     }
 }
 

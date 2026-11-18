@@ -107,7 +107,10 @@ public class RodBlock extends Block implements SimpleWaterloggedBlock {
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighbour,
             LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
         if (state.getValue(WATERLOGGED)) {
+            //? if >=1.18 {
             level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+            //?} else
+            //level.getLiquidTicks().scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         return super.updateShape(state, direction, neighbour, level, pos, neighbourPos);
     }

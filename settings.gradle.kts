@@ -3,6 +3,9 @@ pluginManagement {
         mavenLocal()
         gradlePluginPortal()
         maven("https://maven.neoforged.net/releases")
+        maven("https://maven.architectury.dev/")
+        maven("https://maven.fabricmc.net/")
+        maven("https://maven.minecraftforge.net/")
     }
 }
 
@@ -13,10 +16,11 @@ plugins {
 
 stonecutter {
     create(rootProject) {
-        fun node(minecraft: String, loader: String) {
-            version("$minecraft-$loader", minecraft).buildscript = "build.$loader.gradle.kts"
+        fun node(minecraft: String, loader: String, toolchain: String = loader) {
+            version("$minecraft-$loader", minecraft).buildscript = "build.$toolchain.gradle.kts"
         }
 
+        node("1.16.5", "forge", toolchain = "forge-loom")
         node("1.18.2", "forge")
         node("1.19.2", "forge")
         node("1.20.1", "forge")

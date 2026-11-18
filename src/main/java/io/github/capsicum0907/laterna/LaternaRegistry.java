@@ -19,7 +19,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.lighting.LightEngine;
 //? if >=1.20 {
 import net.minecraft.world.level.material.MapColor;
 //?} else {
@@ -39,10 +38,17 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * in the creative tab and in every generated file without anything else being edited.
  */
 public final class LaternaRegistry {
+    //? if >=1.17 {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(Registries.BLOCK, Laterna.MODID);
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(Registries.ITEM, Laterna.MODID);
+    //?} else {
+    /*public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(
+            net.minecraftforge.registries.ForgeRegistries.BLOCKS, Laterna.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(
+            net.minecraftforge.registries.ForgeRegistries.ITEMS, Laterna.MODID);
+    *///?}
     //? if >=1.19.3 {
     public static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Laterna.MODID);
@@ -182,8 +188,8 @@ public final class LaternaRegistry {
             return state -> 0;
         }
         return lamp.switched()
-                ? state -> state.getValue(LampBlock.LIT) ? LightEngine.MAX_LEVEL : 0
-                : state -> LightEngine.MAX_LEVEL;
+                ? state -> state.getValue(LampBlock.LIT) ? LampBlock.BRIGHTEST : 0
+                : state -> LampBlock.BRIGHTEST;
     }
 
     /**

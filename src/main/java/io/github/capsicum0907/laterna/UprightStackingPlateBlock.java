@@ -80,7 +80,7 @@ public class UprightStackingPlateBlock extends UprightPlateBlock {
     @Override
     public boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
         ItemStack held = context.getItemInHand();
-        if (whole(state) || !held.is(asItem())) {
+        if (whole(state) || held.getItem() != asItem()) {
             return false;
         }
         Direction against = against(facing(state));

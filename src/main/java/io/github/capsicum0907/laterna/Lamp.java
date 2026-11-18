@@ -16,6 +16,8 @@ import net.minecraft.world.item.DyeColor;
  * colour names once per form; none of that is here, because none of it is a decision -
  * it is the product, spelled out by hand.
  */
+//? if <1.17
+//@com.github.bsideup.jabel.Desugar
 public record Lamp(Shape shape, Wiring wiring, Frame frame, Optional<DyeColor> colour) {
     private static final List<Lamp> ALL = product();
 
@@ -128,7 +130,7 @@ public record Lamp(Shape shape, Wiring wiring, Frame frame, Optional<DyeColor> c
     public static String titleCase(String underscored) {
         StringBuilder name = new StringBuilder();
         for (String word : underscored.split("_")) {
-            if (!name.isEmpty()) {
+            if (name.length() != 0) {
                 name.append(' ');
             }
             name.append(Character.toUpperCase(word.charAt(0))).append(word, 1, word.length());

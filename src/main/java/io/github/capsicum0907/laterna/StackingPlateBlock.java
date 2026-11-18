@@ -133,7 +133,7 @@ public class StackingPlateBlock extends PlateBlock {
     public boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
         ItemStack held = context.getItemInHand();
         SlabType type = state.getValue(TYPE);
-        if (type == SlabType.DOUBLE || !held.is(asItem())) {
+        if (type == SlabType.DOUBLE || held.getItem() != asItem()) {
             return false;
         }
         return stacksInto(context, Direction.Axis.Y, type == SlabType.BOTTOM);

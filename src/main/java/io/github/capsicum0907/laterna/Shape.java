@@ -266,6 +266,8 @@ public enum Shape {
      * @param tall up the face; the same as {@code wide} on a floor or a ceiling
      * @param deep out of the face
      */
+    //? if <1.17
+    //@com.github.bsideup.jabel.Desugar
     public record Fit(double wide, double tall, double deep) {
     }
 

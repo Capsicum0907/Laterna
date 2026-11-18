@@ -9,6 +9,7 @@ class ResourceConversion(private val minecraft: String, private val loader: Stri
     private val pluralFolders = !Targets.atLeast(minecraft, "1.21")
     private val recipeResultIsItem = !Targets.atLeast(minecraft, "1.20.5")
     private val itemPredicateIsList = !Targets.atLeast(minecraft, "1.20.5")
+    private val itemPredicateIsSingle = !Targets.atLeast(minecraft, "1.17")
     private val forgeNames = loader == "forge"
     val renderTypesInCode = !(loader == "neoforge" || (loader == "forge" && Targets.atLeast(minecraft, "1.19")))
 
@@ -111,6 +112,9 @@ class ResourceConversion(private val minecraft: String, private val loader: Stri
                 if (id.startsWith("#")) {
                     obj.remove("items")
                     obj.addProperty("tag", id.substring(1))
+                } else if (itemPredicateIsSingle) {
+                    obj.remove("items")
+                    obj.addProperty("item", id)
                 } else {
                     obj.add("items", JsonArray().apply { add(id) })
                 }

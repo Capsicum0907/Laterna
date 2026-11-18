@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -50,7 +49,7 @@ public class ShadeBlock extends LampBlock {
      */
     @Override
     public int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
-        return state.getValue(LIT) ? LightEngine.MAX_LEVEL : 0;
+        return state.getValue(LIT) ? LampBlock.BRIGHTEST : 0;
     }
 
     @Override

@@ -65,6 +65,10 @@ jobs:
           if grep -rq "@GameTestHolder" src/main/java; then
             for dir in versions/*/; do
               node=$(basename "$dir")
+              if ! bash gradlew -q ":$node:tasks" --all | grep -q "^runGameTestServer"; then
+                echo "::warning::$node has no game test server - nothing was verified on it beyond compiling."
+                continue
+              fi
               bash gradlew ":$node:runGameTestServer" | tee "gametest-$node.log"
               # The server exits zero when the mod fails to construct, so the task
               # goes green having run nothing at all. Only the summary line proves

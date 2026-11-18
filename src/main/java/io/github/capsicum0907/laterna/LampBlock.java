@@ -28,6 +28,14 @@ import org.jetbrains.annotations.Nullable;
 public class LampBlock extends Block {
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
+    //? if >=1.20 {
+    public static final int BRIGHTEST = net.minecraft.world.level.lighting.LightEngine.MAX_LEVEL;
+    //?} else if >=1.17 {
+    /*public static final int BRIGHTEST = net.minecraft.world.level.lighting.LevelLightEngine.MAX_SOURCE_LEVEL;
+    *///?} else {
+    /*public static final int BRIGHTEST = 15;
+    *///?}
+
     private final Wiring wiring;
 
     public LampBlock(Wiring wiring, Properties properties) {
@@ -70,7 +78,10 @@ public class LampBlock extends Block {
         }
         boolean lit = lit(level, pos);
         if (state.getValue(LIT) != lit) {
+            //? if >=1.17 {
             level.setBlock(pos, state.setValue(LIT, lit), Block.UPDATE_CLIENTS);
+            //?} else
+            //level.setBlock(pos, state.setValue(LIT, lit), 2);
         }
     }
 

@@ -1,7 +1,7 @@
 package io.github.capsicum0907.laterna;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -55,7 +55,7 @@ public class FacePlateBlock extends PlateBlock {
 
     @Override
     public Collection<Direction> facings() {
-        return List.of(Direction.values());
+        return Arrays.asList(Direction.values());
     }
 
     /**

@@ -51,7 +51,7 @@ public final class RenderLayers {
                 throw new IllegalStateException("Missing " + TABLE);
             }
             try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-                return JsonParser.parseReader(reader).getAsJsonObject();
+                return new JsonParser().parse(reader).getAsJsonObject();
             }
         } catch (java.io.IOException e) {
             throw new java.io.UncheckedIOException(e);

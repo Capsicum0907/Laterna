@@ -1,6 +1,5 @@
 package io.github.capsicum0907.laterna;
 
-import com.mojang.logging.LogUtils;
 
 //? if neoforge {
 import net.neoforged.bus.api.IEventBus;
@@ -14,7 +13,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 *///?}
 
+//? if >=1.18 {
+import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
+//?} else {
+/*import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+*///?}
 
 /**
  * Entry point. {@link #MODID} must match {@code mod_id} in gradle.properties,
@@ -24,7 +29,10 @@ import org.slf4j.Logger;
 public class Laterna {
     public static final String MODID = "laterna";
 
+    //? if >=1.18 {
     private static final Logger LOGGER = LogUtils.getLogger();
+    //?} else
+    //private static final Logger LOGGER = LogManager.getLogger();
 
     //? if neoforge {
     public Laterna(IEventBus modEventBus, ModContainer modContainer) {
