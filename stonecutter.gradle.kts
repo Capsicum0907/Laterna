@@ -8,8 +8,8 @@ stonecutter parameters {
 
     replacements.string(eval(node.metadata.version, "<1.19.3")) {
         replace("import net.minecraft.core.registries.Registries;", "import net.minecraft.core.Registry;")
-        replace("Registries.BLOCK", "Registry.BLOCK_REGISTRY")
-        replace("Registries.ITEM", "Registry.ITEM_REGISTRY")
+        replace("(Registries.BLOCK,", "(Registry.BLOCK_REGISTRY,")
+        replace("(Registries.ITEM,", "(Registry.ITEM_REGISTRY,")
     }
 
     replacements.string(eval(node.metadata.version, "<1.20")) {

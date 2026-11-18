@@ -28,9 +28,16 @@ abstract class ConvertResources : DefaultTask() {
         val from = source.get().asFile
         val to = output.get().asFile
         to.deleteRecursively()
+        val blockstates = mutableMapOf<String, String>()
+        val models = mutableMapOf<String, String>()
         from.walkTopDown().filter { it.isFile }.forEach { file ->
             val relative = file.relativeTo(from).invariantSeparatorsPath
             if (relative.startsWith(".cache/")) return@forEach
+            val parts = relative.split('/')
+            if (parts.size > 3 && parts[0] == "assets" && file.extension == "json") {
+                if (parts[2] == "blockstates") blockstates[relative] = file.readText()
+                if (parts[2] == "models") models[relative] = file.readText()
+            }
             val target = to.resolve(conversion.path(relative))
             target.parentFile.mkdirs()
             if (file.extension == "json") {
@@ -38,6 +45,14 @@ abstract class ConvertResources : DefaultTask() {
             } else {
                 file.copyTo(target, overwrite = true)
             }
+        }
+        if (conversion.renderTypesInCode) {
+            conversion.renderLayers(blockstates, models).entries
+                .groupBy { it.key.substringBefore(':') }
+                .forEach { (namespace, entries) ->
+                    val target = to.resolve("assets/$namespace/render_layers.json")
+                    target.writeText(conversion.layerTable(entries.associate { it.key to it.value }))
+                }
         }
     }
 }

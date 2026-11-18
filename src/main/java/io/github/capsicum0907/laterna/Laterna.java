@@ -35,6 +35,11 @@ public class Laterna {
     *///?}
         LaternaRegistry.BLOCKS.register(modEventBus);
         LaternaRegistry.ITEMS.register(modEventBus);
+        //? if forge && <1.19 {
+        /*if (net.minecraftforge.fml.loading.FMLEnvironment.dist == net.minecraftforge.api.distmarker.Dist.CLIENT) {
+            RenderLayers.register(modEventBus);
+        }
+        *///?}
         //? if >=1.19.3
         LaternaRegistry.TABS.register(modEventBus);
 

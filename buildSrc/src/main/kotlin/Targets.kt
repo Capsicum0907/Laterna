@@ -14,6 +14,7 @@ object Targets {
         ?: error("No pack format recorded for Minecraft $minecraft")
 
     private val PACK_FORMATS = mapOf(
+        "1.18.2" to (8 to 9),
         "1.19.2" to (9 to 10),
         "1.20.1" to (15 to 15),
         "1.21.1" to (34 to 48),

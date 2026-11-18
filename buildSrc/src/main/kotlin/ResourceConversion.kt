@@ -10,6 +10,7 @@ class ResourceConversion(private val minecraft: String, private val loader: Stri
     private val recipeResultIsItem = !Targets.atLeast(minecraft, "1.20.5")
     private val itemPredicateIsList = !Targets.atLeast(minecraft, "1.20.5")
     private val forgeNames = loader == "forge"
+    val renderTypesInCode = !(loader == "neoforge" || (loader == "forge" && Targets.atLeast(minecraft, "1.19")))
 
     fun path(path: String): String {
         if (!pluralFolders) return path
@@ -26,9 +27,72 @@ class ResourceConversion(private val minecraft: String, private val loader: Stri
         val folder = if (parts.size > 2) parts[2] else ""
         if (parts[0] == "data" && folder == "recipe" && recipeResultIsItem) recipeResult(root)
         if (parts[0] == "data" && folder == "advancement" && itemPredicateIsList) itemPredicates(root)
+        if (parts[0] == "assets" && folder == "models" && renderTypesInCode) modelLayers(root.asJsonObject)
         val converted = if (forgeNames) forgeIds(root) else root
         return GSON.toJson(converted)
     }
+
+    private fun modelLayers(model: JsonObject) {
+        if (model.get("loader")?.asString != COMPOSITE) {
+            model.remove("render_type")
+            return
+        }
+        val layers = JsonObject()
+        for ((_, child) in model.remove("children").asJsonObject.entrySet()) {
+            val part = child.asJsonObject
+            val layer = layerName(part.remove("render_type")?.asString)
+            check(!layers.has(layer)) { "Two parts of one composite model share the $layer layer" }
+            layers.add(layer, part)
+        }
+        model.remove("item_render_order")
+        model.addProperty("loader", "forge:multi-layer")
+        model.add("layers", layers)
+    }
+
+    fun renderLayers(blockstates: Map<String, String>, models: Map<String, String>): Map<String, List<String>> {
+        val table = sortedMapOf<String, List<String>>()
+        for ((path, text) in blockstates) {
+            val parts = path.split('/')
+            val block = parts[1] + ":" + parts.last().removeSuffix(".json")
+            val used = mutableSetOf<String>()
+            for (model in modelsOf(JsonParser.parseString(text).asJsonObject)) used += layersOf(model, models)
+            val ordered = LAYERS.filter { it in used }
+            if (ordered != listOf("solid")) table[block] = ordered
+        }
+        return table
+    }
+
+    private fun modelsOf(blockstate: JsonObject): List<String> {
+        val found = mutableListOf<String>()
+        fun take(element: JsonElement) {
+            if (element is JsonArray) element.forEach(::take)
+            else element.asJsonObject.get("model")?.let { found += it.asString }
+        }
+        blockstate.getAsJsonObject("variants")?.entrySet()?.forEach { take(it.value) }
+        blockstate.getAsJsonArray("multipart")?.forEach { take(it.asJsonObject.get("apply")) }
+        return found
+    }
+
+    private fun layersOf(id: String, models: Map<String, String>): List<String> {
+        val namespace = id.substringBefore(':')
+        val text = models["assets/$namespace/models/${id.substringAfter(':')}.json"] ?: return listOf("solid")
+        val model = JsonParser.parseString(text).asJsonObject
+        if (model.get("loader")?.asString == COMPOSITE) {
+            return model.getAsJsonObject("children").entrySet()
+                .map { layerName(it.value.asJsonObject.get("render_type")?.asString) }
+        }
+        model.get("render_type")?.let { return listOf(layerName(it.asString)) }
+        val parent = model.get("parent")?.asString ?: return listOf("solid")
+        return layersOf(if (':' in parent) parent else "minecraft:$parent", models)
+    }
+
+    private fun layerName(renderType: String?): String {
+        val name = renderType?.substringAfter(':') ?: "solid"
+        check(name in LAYERS) { "Unknown render type $renderType" }
+        return name
+    }
+
+    fun layerTable(table: Map<String, List<String>>): String = GSON.toJson(table)
 
     private fun recipeResult(root: JsonElement) {
         val result = root.asJsonObject.get("result") as? JsonObject ?: return
@@ -65,6 +129,10 @@ class ResourceConversion(private val minecraft: String, private val loader: Stri
 
     companion object {
         private val GSON = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
+
+        private const val COMPOSITE = "neoforge:composite"
+
+        private val LAYERS = listOf("solid", "cutout_mipped", "cutout", "translucent")
 
         private val SINGULAR_TO_PLURAL = mapOf(
             "recipe" to "recipes",
