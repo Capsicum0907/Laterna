@@ -27,7 +27,10 @@ import net.minecraft.world.level.material.MaterialColor;
 *///?}
 //? if neoforge {
 import net.neoforged.neoforge.registries.DeferredRegister;
-//?} else
+//?} else if fabric {
+/*import net.minecraft.core.registries.BuiltInRegistries;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+*///?} else
 //import net.minecraftforge.registries.DeferredRegister;
 
 /**
@@ -38,7 +41,12 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * in the creative tab and in every generated file without anything else being edited.
  */
 public final class LaternaRegistry {
-    //? if >=1.17 {
+    //? if fabric {
+    /*public static final Registrar<Block> BLOCKS = new Registrar<>(BuiltInRegistries.BLOCK);
+    public static final Registrar<Item> ITEMS = new Registrar<>(BuiltInRegistries.ITEM);
+    public static final Registrar<CreativeModeTab> TABS =
+            new Registrar<>(BuiltInRegistries.CREATIVE_MODE_TAB);
+    *///?} else if >=1.17 {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(Registries.BLOCK, Laterna.MODID);
     public static final DeferredRegister<Item> ITEMS =
@@ -49,7 +57,7 @@ public final class LaternaRegistry {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(
             net.minecraftforge.registries.ForgeRegistries.ITEMS, Laterna.MODID);
     *///?}
-    //? if >=1.19.3 {
+    //? if >=1.19.3 && !fabric {
     public static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Laterna.MODID);
     //?}
@@ -203,6 +211,9 @@ public final class LaternaRegistry {
      */
     //? if >=1.19.3 {
     public static final Supplier<CreativeModeTab> TAB =
+            //? if fabric {
+            /*TABS.register("laterna", () -> FabricItemGroup.builder()
+            *///?} else
             TABS.register("laterna", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + Laterna.MODID))
                     .icon(() -> new ItemStack(item(Lamp.all().get(0)).get()))

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": ${mod_description},
+  "authors": [${mod_authors}],
+  "license": "${mod_license}",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["io.github.capsicum0907.laterna.Laterna"],
+    "client": ["io.github.capsicum0907.laterna.RenderLayers"]
+  },
+  "depends": {
+    "fabricloader": "${loader_version_range}",
+    "fabric-api": "${loader_dependency_range}",
+    "minecraft": "${minecraft_version_range}",
+    "java": ">=${java_version}"
+  }
+}

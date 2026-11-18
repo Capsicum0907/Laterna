@@ -24,20 +24,24 @@ abstract class ConvertResources : DefaultTask() {
 
     @TaskAction
     fun convert() {
-        val conversion = ResourceConversion(minecraftVersion.get(), loaderName.get())
         val from = source.get().asFile
         val to = output.get().asFile
         to.deleteRecursively()
         val blockstates = mutableMapOf<String, String>()
         val models = mutableMapOf<String, String>()
-        from.walkTopDown().filter { it.isFile }.forEach { file ->
-            val relative = file.relativeTo(from).invariantSeparatorsPath
-            if (relative.startsWith(".cache/")) return@forEach
+        val files = from.walkTopDown().filter { it.isFile }
+            .map { it to it.relativeTo(from).invariantSeparatorsPath }
+            .filterNot { it.second.startsWith(".cache/") }
+            .toList()
+        for ((file, relative) in files) {
             val parts = relative.split('/')
             if (parts.size > 3 && parts[0] == "assets" && file.extension == "json") {
                 if (parts[2] == "blockstates") blockstates[relative] = file.readText()
                 if (parts[2] == "models") models[relative] = file.readText()
             }
+        }
+        val conversion = ResourceConversion(minecraftVersion.get(), loaderName.get(), models)
+        for ((file, relative) in files) {
             val target = to.resolve(conversion.path(relative))
             target.parentFile.mkdirs()
             if (file.extension == "json") {

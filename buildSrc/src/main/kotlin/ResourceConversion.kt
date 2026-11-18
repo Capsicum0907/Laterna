@@ -5,12 +5,17 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
 
-class ResourceConversion(private val minecraft: String, private val loader: String) {
+class ResourceConversion(
+    private val minecraft: String,
+    private val loader: String,
+    private val models: Map<String, String> = emptyMap(),
+) {
     private val pluralFolders = !Targets.atLeast(minecraft, "1.21")
     private val recipeResultIsItem = !Targets.atLeast(minecraft, "1.20.5")
     private val itemPredicateIsList = !Targets.atLeast(minecraft, "1.20.5")
     private val itemPredicateIsSingle = !Targets.atLeast(minecraft, "1.17")
     private val forgeNames = loader == "forge"
+    private val oneLayerPerBlock = loader == "fabric"
     val renderTypesInCode = !(loader == "neoforge" || (loader == "forge" && Targets.atLeast(minecraft, "1.19")))
 
     fun path(path: String): String {
@@ -29,13 +34,22 @@ class ResourceConversion(private val minecraft: String, private val loader: Stri
         if (parts[0] == "data" && folder == "recipe" && recipeResultIsItem) recipeResult(root)
         if (parts[0] == "data" && folder == "advancement" && itemPredicateIsList) itemPredicates(root)
         if (parts[0] == "assets" && folder == "models" && renderTypesInCode) modelLayers(root.asJsonObject)
-        val converted = if (forgeNames) forgeIds(root) else root
+        if (parts[0] == "assets" && folder == "blockstates" && oneLayerPerBlock) splitComposites(root.asJsonObject)
+        val converted = when {
+            forgeNames -> forgeIds(root)
+            oneLayerPerBlock -> withoutKeys(root, NEOFORGE_KEYS)
+            else -> root
+        }
         return GSON.toJson(converted)
     }
 
     private fun modelLayers(model: JsonObject) {
         if (model.get("loader")?.asString != COMPOSITE) {
             model.remove("render_type")
+            return
+        }
+        if (oneLayerPerBlock) {
+            flatten(model)
             return
         }
         val layers = JsonObject()
@@ -50,6 +64,93 @@ class ResourceConversion(private val minecraft: String, private val loader: Stri
         model.add("layers", layers)
     }
 
+    private fun flatten(model: JsonObject) {
+        val textures = model.remove("textures")?.asJsonObject ?: JsonObject()
+        val elements = JsonArray()
+        for ((name, child) in model.remove("children").asJsonObject.entrySet()) {
+            val reference = child.asJsonObject
+            check(reference.keySet() - setOf("parent", "render_type") == emptySet<String>()) {
+                "A composite child carries more than a parent and a render type"
+            }
+            val part = model(reference.get("parent").asString) ?: error("Missing model ${reference.get("parent")}")
+            check(part.get("parent")?.asString == BLOCK_PARENT) { "A composite child does not sit on $BLOCK_PARENT" }
+            for ((key, value) in part.getAsJsonObject("textures").entrySet()) {
+                val renamed = value.asString.let { if (it.startsWith("#")) "#${name}_${it.substring(1)}" else it }
+                textures.addProperty("${name}_$key", renamed)
+            }
+            for (element in part.getAsJsonArray("elements")) {
+                val copy = element.deepCopy().asJsonObject
+                for ((_, face) in copy.getAsJsonObject("faces").entrySet()) {
+                    val texture = face.asJsonObject.get("texture").asString
+                    check(texture.startsWith("#")) { "A composite child names a texture directly" }
+                    face.asJsonObject.addProperty("texture", "#${name}_${texture.substring(1)}")
+                }
+                elements.add(copy)
+            }
+        }
+        model.remove("item_render_order")
+        model.remove("loader")
+        model.add("textures", textures)
+        model.add("elements", elements)
+    }
+
+    private fun model(id: String): JsonObject? {
+        if (':' !in id) return null
+        val path = "assets/${id.substringBefore(':')}/models/${id.substringAfter(':')}.json"
+        return JsonParser.parseString(models[path] ?: return null).asJsonObject
+    }
+
+    private fun childrenOf(id: String): List<String>? {
+        val model = model(id) ?: return null
+        if (model.get("loader")?.asString != COMPOSITE) return null
+        return model.getAsJsonObject("children").entrySet().map { it.value.asJsonObject.get("parent").asString }
+    }
+
+    private fun splitComposites(blockstate: JsonObject) {
+        val variants = blockstate.getAsJsonObject("variants")
+        if (variants != null) {
+            val composite = variants.entrySet().any { (_, value) ->
+                value is JsonObject && childrenOf(value.get("model").asString) != null
+            }
+            if (!composite) return
+            val multipart = JsonArray()
+            for ((key, value) in variants.entrySet()) {
+                check(value is JsonObject) { "A weighted variant cannot be split into parts" }
+                val condition = JsonObject()
+                for (pair in key.split(',').filter { it.isNotEmpty() }) {
+                    condition.addProperty(pair.substringBefore('='), pair.substringAfter('='))
+                }
+                for (apply in parts(value)) {
+                    multipart.add(JsonObject().apply {
+                        if (condition.size() > 0) add("when", condition.deepCopy())
+                        add("apply", apply)
+                    })
+                }
+            }
+            blockstate.remove("variants")
+            blockstate.add("multipart", multipart)
+            return
+        }
+        val multipart = blockstate.getAsJsonArray("multipart") ?: return
+        val split = JsonArray()
+        for (entry in multipart) {
+            val apply = entry.asJsonObject.get("apply")
+            if (apply !is JsonObject) {
+                split.add(entry)
+                continue
+            }
+            for (part in parts(apply)) {
+                split.add(entry.deepCopy().asJsonObject.apply { add("apply", part) })
+            }
+        }
+        blockstate.add("multipart", split)
+    }
+
+    private fun parts(apply: JsonObject): List<JsonObject> {
+        val children = childrenOf(apply.get("model").asString) ?: return listOf(apply)
+        return children.map { child -> apply.deepCopy().apply { addProperty("model", child) } }
+    }
+
     fun renderLayers(blockstates: Map<String, String>, models: Map<String, String>): Map<String, List<String>> {
         val table = sortedMapOf<String, List<String>>()
         for ((path, text) in blockstates) {
@@ -57,7 +158,7 @@ class ResourceConversion(private val minecraft: String, private val loader: Stri
             val block = parts[1] + ":" + parts.last().removeSuffix(".json")
             val used = mutableSetOf<String>()
             for (model in modelsOf(JsonParser.parseString(text).asJsonObject)) used += layersOf(model, models)
-            val ordered = LAYERS.filter { it in used }
+            val ordered = LAYERS.filter { it in used }.let { if (oneLayerPerBlock) listOf(it.last()) else it }
             if (ordered != listOf("solid")) table[block] = ordered
         }
         return table
@@ -122,6 +223,14 @@ class ResourceConversion(private val minecraft: String, private val loader: Stri
         }
     }
 
+    private fun withoutKeys(element: JsonElement, keys: Set<String>): JsonElement = when (element) {
+        is JsonObject -> JsonObject().also { out ->
+            for ((key, value) in element.entrySet()) if (key !in keys) out.add(key, withoutKeys(value, keys))
+        }
+        is JsonArray -> JsonArray().also { out -> element.forEach { out.add(withoutKeys(it, keys)) } }
+        else -> element
+    }
+
     private fun forgeIds(element: JsonElement): JsonElement = when {
         element is JsonObject -> JsonObject().also { out ->
             for ((key, value) in element.entrySet()) out.add(FORGE_KEYS[key] ?: key, forgeIds(value))
@@ -135,6 +244,10 @@ class ResourceConversion(private val minecraft: String, private val loader: Stri
         private val GSON = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
 
         private const val COMPOSITE = "neoforge:composite"
+
+        private const val BLOCK_PARENT = "minecraft:block/block"
+
+        private val NEOFORGE_KEYS = setOf("neoforge_data")
 
         private val LAYERS = listOf("solid", "cutout_mipped", "cutout", "translucent")
 

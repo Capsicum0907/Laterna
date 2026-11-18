@@ -1,29 +1,47 @@
 package io.github.capsicum0907.laterna;
 
-//? if forge && <1.19 {
+//? if (forge && <1.19) || fabric {
 /*import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+*///?}
+//? if fabric {
+/*import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.minecraft.core.registries.BuiltInRegistries;
+
+public final class RenderLayers implements ClientModInitializer {
+    @Override
+    public void onInitializeClient() {
+        apply();
+    }
+
+    private static void set(String id, List<RenderType> layers) {
+        if (layers.size() != 1) {
+            throw new IllegalStateException(id + " needs " + layers.size() + " layers");
+        }
+        Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id));
+        BlockRenderLayerMap.INSTANCE.putBlock(block, layers.get(0));
+    }
+*///?} else if forge && <1.19 {
+/*import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public final class RenderLayers {
-    private static final String TABLE = "/assets/" + Laterna.MODID + "/render_layers.json";
-
     private RenderLayers() {
     }
 
@@ -32,17 +50,26 @@ public final class RenderLayers {
     }
 
     private static void setup(FMLClientSetupEvent event) {
-        JsonObject table = read();
-        event.enqueueWork(() -> {
-            for (Map.Entry<String, JsonElement> entry : table.entrySet()) {
-                Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(entry.getKey()));
-                Set<RenderType> layers = new HashSet<>();
-                for (JsonElement layer : entry.getValue().getAsJsonArray()) {
-                    layers.add(layer(layer.getAsString()));
-                }
-                ItemBlockRenderTypes.setRenderLayer(block, layers::contains);
+        event.enqueueWork(RenderLayers::apply);
+    }
+
+    private static void set(String id, List<RenderType> layers) {
+        Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id));
+        ItemBlockRenderTypes.setRenderLayer(block, layers::contains);
+    }
+*///?}
+//? if (forge && <1.19) || fabric {
+
+    /*private static final String TABLE = "/assets/" + Laterna.MODID + "/render_layers.json";
+
+    private static void apply() {
+        for (Map.Entry<String, JsonElement> entry : read().entrySet()) {
+            List<RenderType> layers = new ArrayList<>();
+            for (JsonElement layer : entry.getValue().getAsJsonArray()) {
+                layers.add(layer(layer.getAsString()));
             }
-        });
+            set(entry.getKey(), layers);
+        }
     }
 
     private static JsonObject read() {
