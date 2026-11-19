@@ -26,11 +26,24 @@ The rest are in [branding/gallery](branding/gallery), with their captions in
 
 ## Target
 
-| | |
-|---|---|
-| Minecraft | 1.21.1 |
-| Loader | NeoForge 21.1.248 |
-| Java | 21 |
+| Minecraft | Loader | Also needs | Java |
+|---|---|---|---|
+| 1.21.1 | NeoForge 21.1 | | 21 |
+| 1.21.1 | Fabric Loader 0.16 or later | Fabric API 0.116 or later | 21 |
+| 1.20.1 | Forge 47 or later | | 17 |
+| 1.20.1 | Fabric Loader 0.15 or later | Fabric API 0.92 or later | 17 |
+| 1.19.2 | Forge 43 or later | | 17 |
+| 1.19.2 | Fabric Loader 0.14 or later | Fabric API 0.77 or later | 17 |
+| 1.18.2 | Forge 40 or later | | 17 |
+| 1.18.2 | Fabric Loader 0.14 or later | Fabric API 0.77 or later | 17 |
+| 1.16.5 | Forge 36 or later | | 8 |
+| 1.16.5 | Fabric Loader 0.11 or later | Fabric API 0.42 or later | 8 |
+
+Each pair has its own jar, named `laterna-<loader>-<minecraft>-<version>.jar`.
+
+The spotlight's lit face is drawn at full brightness on NeoForge 1.21.1 and Forge 1.20.1 only.
+The other loaders have no way for a model to say so, and there it takes the light around it
+like any other face.
 
 ## Build
 

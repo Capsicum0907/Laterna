@@ -22,11 +22,23 @@
 
 ## 対象
 
-| | |
-|---|---|
-| Minecraft | 1.21.1 |
-| ローダー | NeoForge 21.1.248 |
-| Java | 21 |
+| Minecraft | ローダー | ほかに必要なもの | Java |
+|---|---|---|---|
+| 1.21.1 | NeoForge 21.1 | | 21 |
+| 1.21.1 | Fabric Loader 0.16 以降 | Fabric API 0.116 以降 | 21 |
+| 1.20.1 | Forge 47 以降 | | 17 |
+| 1.20.1 | Fabric Loader 0.15 以降 | Fabric API 0.92 以降 | 17 |
+| 1.19.2 | Forge 43 以降 | | 17 |
+| 1.19.2 | Fabric Loader 0.14 以降 | Fabric API 0.77 以降 | 17 |
+| 1.18.2 | Forge 40 以降 | | 17 |
+| 1.18.2 | Fabric Loader 0.14 以降 | Fabric API 0.77 以降 | 17 |
+| 1.16.5 | Forge 36 以降 | | 8 |
+| 1.16.5 | Fabric Loader 0.11 以降 | Fabric API 0.42 以降 | 8 |
+
+組み合わせごとに jar が分かれていて、名前は `laterna-<ローダー>-<Minecraft>-<バージョン>.jar` です。
+
+スポットライトの光る面が最大の明るさで描かれるのは、NeoForge 1.21.1 と Forge 1.20.1 だけです。
+ほかのローダーにはモデルからそれを指定する仕組みが無いので、ほかの面と同じく周りの明るさで描かれます。
 
 ## ビルド
 

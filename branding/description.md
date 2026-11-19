@@ -59,7 +59,7 @@ The shade is four at a time, from stone, ink sacs and redstone dust.
 
 ## Requirements
 
-NeoForge on Minecraft 1.21.1. No other dependencies. MIT licensed.
+Minecraft 1.21.1 on NeoForge or Fabric; 1.20.1, 1.19.2, 1.18.2 and 1.16.5 on Forge or Fabric. On Fabric it needs Fabric API; nothing else is needed. MIT licensed.
 
 ---
 
@@ -112,4 +112,4 @@ Laterna は染料16色の光源を、10種類の形で追加します。どの�
 
 ## 動作環境
 
-Minecraft 1.21.1 の NeoForge。他に必要な Mod はありません。MIT ライセンス。
+Minecraft 1.21.1 の NeoForge と Fabric、1.20.1・1.19.2・1.18.2・1.16.5 の Forge と Fabric。Fabric では Fabric API が必要です。ほかに必要な Mod はありません。MIT ライセンス。
